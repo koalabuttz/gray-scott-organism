@@ -157,15 +157,19 @@ test.describe('presentation purity and startup', () => {
 
     const before = await hook<LabSnapshotShape>(page, 'labSnapshot');
     expect(before.activation).toContain('not activated');
+    // §2.3: audio exists but is suspended before the gesture (truthfully reported, not faked).
+    expect(before.audio.status).toBe('suspended');
+    expect(before.audio.unlocked).toBe(false);
+    expect(before.audio.available).toBe(true);
 
     await page.locator('#stage').click();
     await page.waitForTimeout(1200);
     const after = await hook<LabSnapshotShape>(page, 'labSnapshot');
     console.info(`[smoke] activation status: ${after.activation}`);
-    // Whatever the browser decided, the report must be explicit and must not claim audio that
-    // does not exist in Phase 1.
-    expect(after.activation).toContain('audio: none in Phase 1');
+    // Whatever the browser decided, the report must be explicit and must name the real audio state.
+    expect(after.activation).toContain('audio: ');
     expect(after.activation.length).toBeGreaterThan(20);
+    expect(['running', 'suspended', 'unavailable', 'unlocked']).toContain(after.audio.status);
 
     await page.keyboard.press('Escape');
     await page.waitForTimeout(400);

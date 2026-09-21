@@ -114,6 +114,14 @@ export interface LabSnapshot {
   event: EventState;
   /** §3.4 the bounded retained event log. */
   eventLog: EventState[];
+  /** §8 audio: truthful status plus the live silence acknowledgement (`satisfied`/`terminalZeroAt`). */
+  audio: {
+    status: string;
+    unlocked: boolean;
+    muted: boolean;
+    available: boolean;
+    silence: { satisfied: boolean; terminalZeroAt: number | null };
+  };
 }
 
 export interface CaptureResult {
@@ -158,6 +166,8 @@ export class Lab {
   private chemistryText: TextHandle | null = null;
   private presentationText: TextHandle | null = null;
   private eventsText: TextHandle | null = null;
+  /** §8 audio status/silence readout (updated each frame while the panel is open). */
+  private audioText: TextHandle | null = null;
   /** §10 diagnostic overlay canvas (created with the panel, removed with it). */
   private overlayCanvas: HTMLCanvasElement | null = null;
   /** Transcription of the last import attempt, so a rejected import stays visible. */
@@ -249,6 +259,19 @@ export class Lab {
     );
     this.tempo = createText(transport, 'lab-tempo');
     this.refreshTempo(snapshot.speed);
+
+    // --- audio (§8) ------------------------------------------------------
+    const audio = createSection(host, 'audio');
+    createToggle(audio, 'mute', snapshot.audio.muted, (value) => {
+      this.api.dispatch({ type: 'mute', value });
+    });
+    createHelp(
+      audio,
+      'click the canvas or press Enter once to unlock audio; mute silences the master path ' +
+        '(pause and a hidden tab mute too, and resume without a backlog)',
+    );
+    this.audioText = createText(audio, 'lab-audio');
+    this.refreshAudio();
 
     // --- exploration (§10 bounded exploration mode) -----------------------
     const exploration = createSection(host, 'exploration mode');
@@ -417,6 +440,7 @@ export class Lab {
     this.chemistryText = null;
     this.presentationText = null;
     this.eventsText = null;
+    this.audioText = null;
     this.overlayCanvas = null;
     this.sliders.clear();
     this.open = false;
@@ -504,6 +528,7 @@ export class Lab {
   /** Refresh the composition readouts from the live snapshot (movement/arc, trajectory, chemistry). */
   private refreshComposition(): void {
     const snapshot = this.api.snapshot();
+    this.refreshAudio();
     const phase = snapshot.phase;
     this.movementText?.set(
       `movement ${phase.movement} · arc ${phase.arc} · progress ${(phase.progress * 100).toFixed(1)}% · ` +
@@ -543,6 +568,18 @@ export class Lab {
 
   dispose(): void {
     this.close();
+  }
+
+  /** §8 audio readout: truthful context status plus the live silence acknowledgement. */
+  private refreshAudio(): void {
+    if (!this.audioText) return;
+    const engine = this.api.snapshot().audio;
+    const silence = engine.silence;
+    this.audioText.set(
+      `status ${engine.status} · ${engine.muted ? 'muted' : 'unmuted'} · ` +
+        `silence ${silence.satisfied ? 'satisfied' : 'live'}` +
+        (silence.terminalZeroAt !== null ? ` @ ${silence.terminalZeroAt.toFixed(1)}s` : ''),
+    );
   }
 
   private emitParameterOverride(): void {
@@ -617,6 +654,11 @@ export class Lab {
         : 'invalid',
       event: `serial ${snapshot.event.serial} ${snapshot.event.kind}` +
         (snapshot.event.kind === 'none' ? '' : ` (${snapshot.event.strength.toFixed(2)})`),
+      audio: `${snapshot.audio.status}${snapshot.audio.muted ? ' muted' : ''} · silence ` +
+        `${snapshot.audio.silence.satisfied ? 'satisfied' : 'live'}` +
+        (snapshot.audio.silence.terminalZeroAt !== null
+          ? ` @ ${snapshot.audio.silence.terminalZeroAt.toFixed(1)}s`
+          : ''),
     };
     if (diagnostics) {
       this.readout.set(formatDiagnostics(diagnostics, snapshot.resourceCounts, extra));

@@ -3,12 +3,20 @@
  *
  * Screenshots read the renderer's final composite in the same task as the draw, so no
  * `preserveDrawingBuffer` is required. Recording uses `canvas.captureStream` with
- * `MediaRecorder.isTypeSupported` to choose a codec, and is silent until audio exists.
+ * `MediaRecorder.isTypeSupported` to choose a codec; when the §8 audio system supplies tracks from
+ * its MediaStream destination they are muxed in, so a recording is A/V rather than video-only.
  */
 
 const DEFAULT_WEBM_TYPES = [
   'video/webm;codecs=vp9',
   'video/webm;codecs=vp8',
+  'video/webm',
+] as const;
+
+/** When audio is muxed in, prefer an explicit audio codec so the container is unambiguous. */
+const AUDIO_WEBM_TYPES = [
+  'video/webm;codecs=vp9,opus',
+  'video/webm;codecs=vp8,opus',
   'video/webm',
 ] as const;
 
@@ -66,6 +74,11 @@ export interface RecordingOptions {
   fps?: number;
   bitrate?: number;
   mimeTypes?: readonly string[];
+  /**
+   * §8.3/§10 audio tracks (usually from the audio system's MediaStream destination) to mux into the
+   * recording. They are added to the canvas capture stream; the recorder then produces A/V WebM.
+   */
+  audioTracks?: readonly MediaStreamTrack[];
 }
 
 export function startCanvasRecording(
@@ -75,11 +88,15 @@ export function startCanvasRecording(
   if (typeof MediaRecorder === 'undefined') {
     throw new Error('MediaRecorder is unavailable in this browser');
   }
-  const mimeType = pickRecordingMimeType(options.mimeTypes ?? DEFAULT_WEBM_TYPES);
+  const audioTracks = options.audioTracks ?? [];
+  const candidates =
+    options.mimeTypes ?? (audioTracks.length > 0 ? AUDIO_WEBM_TYPES : DEFAULT_WEBM_TYPES);
+  const mimeType = pickRecordingMimeType(candidates);
   if (!mimeType) {
     throw new Error('no supported WebM recording codec reported by MediaRecorder.isTypeSupported');
   }
   const stream = canvas.captureStream(options.fps ?? 30);
+  for (const track of audioTracks) stream.addTrack(track);
   const track = stream.getVideoTracks()[0];
   if (!track) throw new Error('captureStream produced no video track');
 

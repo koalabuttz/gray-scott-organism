@@ -1865,3 +1865,176 @@ deviations must be recorded here. Each entry states what differs, why, and what 
 
 53. **Round-A analysis review (Phase 3) fixes: presentation-envelope normalization, artifact birth gating, and worker-recovery association.** Three correctness fixes to the tier-2 presentation path, each with a deterministic fixture, plus a stale-evidence correction. (a) **Envelope attenuation (MAJOR 1).** The tier-2 pack now divides its envelope-weighted block sums by the constant block texel count instead of the summed weight (see the amendment to deviation 46 and `reduce-presentation.frag`), so peripheral chemistry in the §5.4 0.65–1.0 fade annulus is genuinely attenuated rather than normalized back to full strength; `tests/browser/analysis-reduction.spec.ts` adds "identical raw chemistry is attenuated monotonically by the support envelope" (translated seeds at increasing radius, tier-1 invariant / tier-2 monotone, plus an annulus-only multi-sample suppression check). (b) **Artifact birth gating (MAJOR 2).** `TopologyAnalyzer` strips sub-`minComponentPixels` middle-threshold components before cross-sample tracking (a filtered 1-px artifact can no longer become a persistent component), and `EventRecognizer` gates `birth` on `topologyConfidence ≥ EVENTS.minTopologyConfidence`; new fixtures in `tests/topology.test.ts` and `tests/events.test.ts`. (c) **Worker-recovery association (MAJOR 3).** `PresentationWorker` stamps every wired worker with a generation, detaches old handlers before terminating, and accepts a reply only when generation + sequence + epoch + echoed stamp + returned buffer size match the tracked request (unsolicited/duplicate/mismatched replies and synchronous `postMessage` failures are quarantined as `ignored` without touching slot ownership); new fixtures in `tests/worker-protocol.test.ts`. (d) **Stale rescue evidence (MINOR 5).** The deviation-48 trend refinement makes the retuned presentation arc rescue-free, so `tests/browser/nucleation-rescue.spec.ts` (RESCUE=1) is repurposed to assert no spurious rescue while the tuned field rises and to preserve a deliberate dead fixture that still fires its one bounded rescue; the `arcs/arc-tuned/summary.json` narrative and the shared `ARCS_SUMMARY_NARRATIVE` are corrected to match their `rescueCount: 0` data. The three legacy 1× arcs are preserved, not re-run.
 
+54. **Round-B (Phase 3) generative ambient audio.** The sound system of §8 was added with four modules
+    under `src/audio/` and five new/extended test surfaces. Recorded here are the real choices that
+    differ from a literal reading of §8.2.
+    (a) **The master gain is the final gain before the destinations** (`mix bus → high-pass 25 Hz →
+    compressor → master gain → mute gain → audio + MediaStream destinations`), superseding §8.2's
+    `master → compressor` order. Offline measurement showed that a master gain *before* the compressor
+    leaves a −94 dBFS residual (`≈2.1e-5`) for ~6 ms after the deadline, because Chromium's
+    `DynamicsCompressorNode` has a look-ahead delay that smears the last pre-deadline samples past the
+    `setValueAtTime(0, deadline)` assignment. §8.3's binding requirement is that "after which samples
+    must be **digitally zero** in the offline test", so the master is moved last; the signal path and
+    the safety compressor are otherwise identical, and `browser/audio-offline.spec.ts` now asserts
+    `postDeadlinePeak === 0` exactly (measured 0 for the general gate and the stillness override).
+    (b) **A dedicated `muteGain` after the master** keeps pause/hidden-tab/laboratory mute from fighting
+    the §8.3 silence state machine over one `AudioParam`; `silenceStatus()` derives the locked/muted/
+    unavailable bypass from explicit `unlocked/muted/paused` flags, not from the master value.
+    (c) **`AudioEngine` is context-agnostic and timer-free; `AudioSystem` is the live driver.**
+    §3.3's `AudioSystem` owns the `AudioContext`, the 50 ms `setInterval` scheduler and the lifecycle,
+    while the §8.1 mappings, §8.2 graph and §8.3 state machine live in an engine that accepts any
+    `BaseAudioContext` and is driven by explicit `tick(now)` calls. This is what the Test Strategy's
+    "audio graph factory usable with both `AudioContext` and `OfflineAudioContext`" requires; the
+    engine's `prepareSilence(now?)` also takes an optional time because an `OfflineAudioContext` never
+    advances `currentTime` while the offline driver ticks.
+    (d) **Granular layer is windowed `AudioBufferSourceNode` slices of one reusable 2 s noise buffer**
+    through the shared high/band-pass → texture gain bus (0–3 grains/s, ≤12 live, 0.15–0.8 s), with a
+    5 s dark decaying stereo convolver IR; no AudioWorklet and no per-cell oscillator (§8.2). One-shot
+    sources are reaped **by time** in `reap(now)` rather than by `onended`, so the live-node bound is
+    verifiable without rendering (the offline boundedness case asserts `created === stopped + live`
+    over a 180 s synthetic run).
+    (e) **Calibration defaults.** `src/config.ts` gains an `AUDIO` block: §8.2/§8.3 fix the graph, the
+    38–82 Hz band, the just ratios `[1, 3/2, 2, 3]`, the granular bounds and the 8 s-off / 3 s-wake /
+    8 s-fade silence policy; the descriptor reference scales, off/wake thresholds and level ceilings
+    are calibration values for the Phase-4 tune. The six mappings are normalized so that tune is a
+    scale change, not a redesign. *(Superseded in part by deviation 56: the generated-buffer seeds are
+    now the §4.4 `sound` substream of the recorded root seed — the fixed `noiseSeed`/`irSeed` are
+    fallbacks only — and `lookaheadMs` is now implemented by the granular scheduler.)*
+    (f) **Activation / mute / recording surface.** `activate()` reports `audio: <status>` truthfully
+    (suspended / unlocked / running / unavailable) instead of "none in Phase 1"; the hidden laboratory
+    gains an `audio` section whose mute toggle finally wires the previously no-op `mute` command, plus
+    a live status/silence readout; `startCanvasRecording` muxes the audio system's
+    `MediaStreamAudioDestinationNode` tracks so a recording is A/V WebM. `browser/smoke.spec.ts` now
+    asserts the pre-gesture `suspended` truth and the post-gesture status instead of "none in Phase 1".
+    The Phase-1 gate artifact line "no audio system exists in Phase 1" is historical Phase-1 evidence
+    and is left unchanged, as are `idea.md` and `artifacts/phase1-gate/`. Files added beyond §3.1:
+    `src/audio/buffers.ts`, `src/audio/voices.ts`, `src/audio/audio.ts`, `src/audio/offline.ts` (the
+    deterministic offline scenario driver; imported by the in-page verification hook and therefore
+    present in the bundle, alongside the existing laboratory-only code).
+
+55. **New Phase-3B tests.** `tests/mapping.test.ts` (unit, 18 cases: the six §8.1 mappings bounded and
+    monotone where specified, plus the §8.2 scheduler/bound constants, the joint `deriveAudioControls`
+    bundle over a synthetic arc and the invalid/dead-field boundaries); `tests/browser/audio-offline.spec.ts` (AC.12: finite output,
+    `peak ≤ −6 dBFS`, voice bound ≤ 4, digital zero after the silence deadline, hidden-periphery field
+    inaudible, event serial/refractory/obsolete skipping, no one-shot node accumulation, the stillness
+    override reaching terminal zero, and the episode-scoped re-arm); `tests/browser/audio-lifecycle.spec.ts`
+    (§2.3/§8.3: suspended-before-gesture, gesture unlock truthfully reported, pause/resume mute with no
+    backlog, the mute command, and the recorder's audio track); and the upgraded
+    `tests/browser/stillness-hold.spec.ts` (STILLNESS=1) which now drives the **real** `silenceStatus()`
+    — unlock, `prepareSilence()` on `kill-wait` entry, a reached terminal zero, the curator's
+    acknowledgement (`timeline.audioZeroAt` non-null and ≤ `blackHoldStartedAt`), the ≥ 20 performance-
+    second hold at near-black luminance with the instrumented master gain at exact digital zero, and the
+    post-rebirth re-arm (`satisfied` false again) — instead of the deviation-40 bypass. All new browser
+    specs skip-with-diagnostic when no audio device can start; the offline suite is device-independent.
+    **Amendment (round-B review, MAJOR 1–4 + MINOR 5).** `tests/audio.test.ts` (14 unit cases) plus
+    `tests/support/fake-audio.ts` (a recording Web-Audio fake: scheduled `AudioParam` automation,
+    one-shot `start()` times, and filter type/Q/frequency) add unit coverage for the five findings, and
+    the two live/offline browser specs gain three cases (a `rootSeed`-keyed substream-determinism render,
+    a restart that reseeds the §4.4 substream deterministically, and a restart during a `kill-wait` fade).
+    Counts after the fixes: **290 unit (was 276) / 57 browser (was 54)** + the same **12 gated skips**.
+
+56. **Round-B (Phase 3B) audio review fixes: a fresh-performance abort, activation from zero, the §4.4
+    sound substream, the §8.2 lookahead scheduler, and the three-ratio event subgraph.** Five reviewer
+    findings (MAJOR 1–4, MINOR 5) on the deviation-54 audio system, each fixed at the boundary the plan
+    names and covered by tests. A later review then added two master-envelope fixes — the offline
+    terminal-fade collapse and the restart hard cut — recorded as sub-items (g)/(h) below.
+    `npx tsc --noEmit` is clean; `npm test` is 293/293; the default browser suite is 58 passed / 12
+    gated skips; `STILLNESS=1` passes.
+    (a) **MAJOR 1 — restart/resolution during a `kill-wait` fade no longer inherits the old terminal
+    fade.** `AudioEngine.resetPerformance(now?, reseedTo?)` (surfaced as `AudioSystem.resetPerformance`)
+    is an explicit fresh-performance/episode-abort at the audio boundary: it **synchronously cancels the
+    stale master automation** (the abandoned `setValueAtTime(0, deadline)` can no longer silence the new
+    performance), resets the stillness episode state and every counter (`phase`, `fadeDeadline`,
+    `terminalZeroAt`, `armed`, quiet/wake seconds, `lastStillness`, event refractory/obsolete counters),
+    drops the granular scheduling debt, and establishes the intended new master transition — a **de-click**
+    (hold the computed live level, ramp to zero over `AUDIO.declickSeconds`, then the bounded fade up) for
+    an audible graph, or a stay-silent anchor when locked (see (h)). `restart()` and `applyResolution()`
+    call it (with the new/retained root seed) and synchronise the app-side edge (`lastStillnessState =
+    'none'`), so the next `kill-wait` entry issues exactly one fresh `prepareSilence()`. **Decision:**
+    a `load-trajectory` that replaces the document with a **different id** aborts too (the composition
+    has been replaced); the silent bootstrap that fetches the **same** bundled document does **not**
+    abort, so the intended same-document crossfade is undisturbed. `tests/audio.test.ts` covers the
+    abort before the first tick and mid-fade (old deadline gone, `armed` false, fresh fade on the next
+    episode), and `audio-lifecycle.spec.ts` restarts mid-fade and asserts the living field returns to a
+    non-silent master.
+    (b) **MAJOR 2 — activation fades from exactly zero and does not replay pre-activation events.** The
+    graph's master now initialises at **0** (it was 0.9). The locked→running edge in `setUnlocked()` is a
+    lifecycle transition: it baselines `lastEventSerial` to the latest **published** serial (a retained
+    pre-activation event does not fire on the first tick), resets the scheduling time/debt, and — only
+    if the state permits sound (not stillness-armed or already silent) — anchors the master at exact 0
+    and ramps up over the bounded `AUDIO.activationFadeSeconds` = 4 s. A graph constructed already
+    unlocked (the offline driver) is anchored at the live level, so no offline render is attenuated.
+    Covered by `tests/audio.test.ts` (fade anchored at 0, retained serial silent, next serial fires once;
+    a still-armed activation stays silent).
+    (c) **MAJOR 3 — the audio material is the recorded `sound` substream.** New `src/audio/substream.ts`
+    derives three seeds (`noise`, `ir`, `grains`) from `substream(rootSeed, SUBSTREAM_IDS.sound)`, so the
+    noise buffer, the convolver IR and the grain scheduler are a pure function of the recorded root seed
+    (§4.4). `AudioSystem({ rootSeed })` takes the app's root seed at construction and `restart()` /
+    `applyResolution()` reseed it (`AudioGraph.reseedSound`, which rebuilds the buffer + IR and reseeds
+    the grain RNG). **Click-free swap:** the abort **de-clicks the live master to zero first** (hold the
+    computed live level, ramp to zero over `AUDIO.declickSeconds` — MAJOR 2, see (h)), and the buffer/IR
+    swap is **deferred to that zero instant** (applied on the first tick at or after it, via `pendingReseed`)
+    with the fade-up starting from zero — so the live buffer/IR swap is inaudible without an extra crossfade
+    node; existing grain sources keep the buffer they started with and are reaped by time. `AUDIO.noiseSeed`
+    / `irSeed` are retained only as fallbacks when no root seed is supplied. Covered by unit tests
+    (deterministic seeds; identical noise/IR/grain material for the same root, different for another) and
+    by a browser render that is identical for the same `rootSeed` (material checksum + grain count; the
+    rendered peak agrees only to DSP precision) and different for another, plus a restart-determinism
+    signature test.
+    (d) **MAJOR 4 — `AUDIO.lookaheadMs` is implemented.** The engine keeps a granular scheduling cursor
+    (`grainCursor`, the context time of the next due grain) and on each tick emits grains only while the
+    cursor is inside the §8.2 window `[now, now + lookaheadMs]`, so a stalled or batched tick spreads its
+    grains over 150 ms instead of stacking them at `now`. The cursor is resynced to `now` (dropping
+    overdue debt rather than replaying it) on a material stall (`> AUDIO.stallSeconds`), on activation,
+    and on transport resume — and it is pinned while silent/paused/muted so no debt accumulates. The
+    ≤ 12 concurrent-grain cap is enforced on every spawn. Covered by unit tests (regular ticks never
+    schedule beyond the horizon; a multi-second stall and a pause/resume release no batch and leave no
+    debt; the cap holds).
+    (e) **MINOR 5 — the event subgraph uses three resonances at f/2f/3f.** `spawnEvent` now iterates the
+    explicit `AUDIO.eventRatios = [1, 2, 3]` (exported as `EVENT_RATIOS`) instead of all four drone
+    `voiceRatios` (which produced f/1.5f/2f/3f), matching §8.2's "3 resonant band-pass filters"; each is
+    a `bandpass` at Q = 8, summed 1/3. Covered by a unit test that counts exactly three band-passes at
+    50/100/150 Hz for a 50 Hz fundamental.
+    (f) **Offline measurements after the fixes** (`audio-offline.spec.ts`, all ≤ the −6 dBFS = 0.5012
+    ceiling): active peak 0.3678 / rms 0.0978 / voices 3 / grains 9; quiet-fade peak 0.2496, fade start
+    12 s, `silentAt` 20 s, `terminalZeroAt` 20 s (the true deadline, not the fade start — see (g)),
+    fade-window peak 0.0980, post-deadline peak **exactly 0** over ≈ 576 k samples; hidden-periphery peak 0;
+    event-refractory fired 2 / skipped 40; long-run created 460 = stopped 452 + live 8, `maxLiveNodes` 3,
+    grains 191; the stillness override (issued at 2 s) `fadeStartedAt` 2 s, `silentAt` 10 s,
+    `terminalZeroAt` 10 s, post-deadline peak 0, `satisfied` true; re-arm `satisfied` false; the `restart`
+    scenario peak 0.3021, `maxInterSampleStep` 0.0081 (≪ the 0.02 continuity bound), phase `live`,
+    `terminalZeroAt` null (the abandoned deadline never fires — see (h)); the substream render root 2024
+    checksum 2.1941 vs root 2025 checksum 1.9071. `STILLNESS=1` (`stillness-hold.spec.ts`): `audioZeroAt`
+    ≈ 18.2 performance s (a live-timing measurement), a 20.01 s black-hold at darkest composite max = 0 /
+    mean 0.000 (the instrumented master gain is exactly 0), and the post-rebirth re-arm reads `satisfied`
+    false.
+    (g) **Offline terminal fade no longer collapses to an instant cut (later review MAJOR 1).** The graph
+    inferred the scheduled master level from `AudioParam.value`, but that is the **intrinsic** value:
+    scheduling (`setValueAtTime`/`linearRampToValueAtTime`/`setTargetAtTime`) never updates it. The offline
+    driver queues every tick/fade against explicit future times **before** `startRendering()`, so the
+    context clock has not advanced and `param.value` is stale (0); `beginTerminalFade` then took its
+    immediate-zero branch and recorded `terminalZeroAt` at the fade *start* (56(f)'s `silentAt` 12 s / 2 s
+    figures were fade starts; with `fadeSeconds` = 8 the deadline is 20 s / 10 s). The graph now maintains a
+    plain-JS **master-envelope mirror** (`MasterSegment`: anchor level + linear/target legs sampled by
+    `masterLevelAt(t)`), updated at every scheduling point; `beginTerminalFade` starts from
+    `masterLevelAt(now)` (never `param.value`) and always schedules ramp → terminal `setValueAtTime(0,
+    deadline)`, and `terminalZeroAt` is recorded only when the deadline is observed. The live path uses the
+    same mirror, so both are identical. The recording fake is now faithful (scheduling leaves `value`
+    untouched), so the collapse is unit-reproducible; `tests/audio.test.ts` adds a case and
+    `audio-offline.spec.ts` asserts the exact figures above (no permissive windows).
+    (h) **Restart/reseed de-clicks the live master instead of hard-cutting it (later review MAJOR 2).**
+    `resetPerformance()` called `cancelMasterAutomation(at)`, an immediate `setValueAtTime(0, at)`
+    regardless of the live level, then faded up — an instantaneous nonzero→zero discontinuity (a click;
+    56(c)'s old "click-free" note protected only the IR/buffer swap, not this cut). `cancelMasterAutomation`
+    now **holds** the computed live level, and the new `AudioGraph.declickMaster(now, declick, fade)` holds
+    the live level, ramps to exactly zero over `AUDIO.declickSeconds` = 0.1 s, then ramps up to the live
+    level over `AUDIO.activationFadeSeconds`. The §4.4 sound-substream swap is **deferred to the de-click's
+    zero instant** (`pendingReseed`, applied on the first tick at/after it) so it happens while the master is
+    at zero, and the abandoned terminal deadline is still cancelled outright so it can never fire. Unit
+    tests assert the envelope is continuous across a restart from steady output and from mid-activation-fade
+    (max 1 ms step ≪ 0.02, zero exactly at the de-click end, back to the live level) and that the reseed
+    lands only once the master is at zero; the `restart` offline scenario renders a mid-fade restart and
+    measures a bounded `maxInterSampleStep` = 0.0081 with a null `terminalZeroAt`; and the lifecycle fixture
+    samples `masterGain` around the transition and asserts the restart held a nonzero live level
+    (`masterHeldAtRestart` ≈ 0.073).
+

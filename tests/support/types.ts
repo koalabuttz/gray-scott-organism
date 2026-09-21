@@ -257,6 +257,85 @@ export interface HorizonShape {
   moments: number;
 }
 
+/** §8 audio status (`audioStatus()`). */
+export interface AudioStatusShape {
+  status: string;
+  unlocked: boolean;
+  muted: boolean;
+  available: boolean;
+}
+
+/** §8.3 the live silence acknowledgement (`silenceStatus()`). */
+export interface SilenceStatusShape {
+  satisfied: boolean;
+  terminalZeroAt: number | null;
+}
+
+/** §8.2 graph instrumentation + silence state machine (`audioStats()`). */
+export interface AudioStatsShape {
+  nodes: {
+    nodeCreated: number;
+    nodeStopped: number;
+    liveNodes: number;
+    grainsStarted: number;
+    eventsFired: number;
+    maxLiveNodes: number;
+  };
+  phase: string;
+  quietSeconds: number;
+  eventsSkipped: number;
+  terminalZeroAt: number | null;
+  /** §8.3 (MAJOR 1) the context time the current terminal fade began, or null. */
+  fadeStartedAt: number | null;
+  /** §8.3 (MAJOR 2) the live master level a restart held from before its de-click, or null. */
+  masterHeldAtRestart: number | null;
+  armed: boolean;
+  masterGain: number;
+}
+
+/** §12.3 AC.12 offline audio measurements (`audioOfflineProbe`). */
+export interface OfflineAudioShape {
+  scenario: string;
+  durationSeconds: number;
+  sampleRate: number;
+  peak: number;
+  rms: number;
+  finite: boolean;
+  silentAt: number | null;
+  /** §8.3 (MAJOR 1) audio-context time the terminal fade began, or null. */
+  fadeStartedAt: number | null;
+  /** §8.3 (MAJOR 1) max |sample| inside the fade window (proves the fade is a ramp, not a cut). */
+  fadeWindowPeak: number;
+  /** §8.3 (MAJOR 2) largest inter-sample step across the render (envelope-continuity bound). */
+  maxInterSampleStep: number;
+  postDeadlinePeak: number;
+  postDeadlineSamples: number;
+  maxVoices: number;
+  maxLiveNodes: number;
+  nodeCreated: number;
+  nodeStopped: number;
+  liveNodes: number;
+  grainsStarted: number;
+  eventsFired: number;
+  eventsSkipped: number;
+  silencePhase: string;
+  satisfied: boolean;
+  terminalZeroAt: number | null;
+  /** §4.4 recorded root seed whose `sound` substream was rendered (null when omitted). */
+  rootSeed: number | null;
+  /** §4.4 deterministic fingerprint of the live noise/IR material. */
+  soundChecksum: number;
+}
+
+/** §4.4 the live sound substream (`audioSoundSignature()`), for restart-determinism checks. */
+export interface SoundSignatureShape {
+  root: number;
+  noise: number;
+  ir: number;
+  grains: number;
+  checksum: number;
+}
+
 /** §7.1/§9.1 coarse full-domain occupancy (`coarseOccupancy()`). */
 export interface CoarseOccupancyShape {
   size: number;
@@ -315,4 +394,12 @@ export interface LabSnapshotShape {
   presentation: PresentationShape;
   event: EventShape;
   eventLog: EventShape[];
+  /** §8 audio: truthful status plus the live silence acknowledgement. */
+  audio: {
+    status: string;
+    unlocked: boolean;
+    muted: boolean;
+    available: boolean;
+    silence: { satisfied: boolean; terminalZeroAt: number | null };
+  };
 }

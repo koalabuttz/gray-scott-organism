@@ -2,8 +2,8 @@
  * Laboratory capture helpers: PNG screenshot and WebM recording controls (§10).
  *
  * Screenshots are captured from the renderer's final composite frame; the returned blob is
- * offered as a download. Recording uses `canvas.captureStream` + `MediaRecorder` and is silent
- * until an audio system exists.
+ * offered as a download. Recording uses `canvas.captureStream` + `MediaRecorder` and muxes in the
+ * §8 audio system's MediaStream destination, so the WebM carries the generative soundtrack too.
  */
 import { blobToBase64, downloadBlob } from '../visual/capture.ts';
 import { createButton, createReadout } from './controls.ts';

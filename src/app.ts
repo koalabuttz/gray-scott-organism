@@ -64,6 +64,8 @@ import type { ClippingReport } from './simulation/simulation.ts';
 import { pickRecordingMimeType, blobToBase64, startCanvasRecording } from './visual/capture.ts';
 import type { CanvasRecording } from './visual/capture.ts';
 import { Renderer } from './visual/renderer.ts';
+import { AudioSystem } from './audio/audio.ts';
+import { renderOfflineScenario, type OfflineMeasurements, type OfflineScenarioName } from './audio/offline.ts';
 
 export interface AppOptions {
   canvas: HTMLCanvasElement;
@@ -225,6 +227,55 @@ export interface ArtworkTestHook {
   events(): EventState;
   /** §3.4 the bounded retained event log. */
   eventLog(): EventState[];
+  /** §8 the truthful audio status (suspended/unlocked/running/unavailable) and mute state. */
+  audioStatus(): { status: string; unlocked: boolean; muted: boolean; available: boolean };
+  /** §8.3 the live silence acknowledgement the curator reads each tick. */
+  silenceStatus(): { satisfied: boolean; terminalZeroAt: number | null };
+  /** §8.3 verification-only: issue the stillness silence override directly. */
+  prepareSilence(): void;
+  /** §10 verification-only: drive the mute command surface directly. */
+  setMuted(value: boolean): void;
+  /** §2.3 verification-only: unlock audio without requesting fullscreen. */
+  audioUnlock(): Promise<void>;
+  /** §8.3/§10 verification-only: how many audio tracks the recorder's MediaStream destination carries. */
+  audioRecordingTrackCount(): number;
+  /**
+   * §4.4 verification-only: the live sound substream (root seed, noise/IR/grain seeds and a material
+   * checksum) so a restart's deterministic reseed can be asserted.
+   */
+  audioSoundSignature(): {
+    root: number;
+    noise: number;
+    ir: number;
+    grains: number;
+    checksum: number;
+  } | null;
+  /** §8.2 graph instrumentation (bounded node/voice counts) + the silence state machine. */
+  audioStats(): {
+    nodes: {
+      nodeCreated: number;
+      nodeStopped: number;
+      liveNodes: number;
+      grainsStarted: number;
+      eventsFired: number;
+      maxLiveNodes: number;
+    };
+    phase: string;
+    quietSeconds: number;
+    eventsSkipped: number;
+    terminalZeroAt: number | null;
+    armed: boolean;
+    masterGain: number;
+  } | null;
+  /** §12.3 AC.12: render a deterministic offline scenario and return its measurements. */
+  audioOfflineProbe(options: {
+    scenario: OfflineScenarioName;
+    seconds?: number;
+    tickHz?: number;
+    render?: boolean;
+    /** §4.4 recorded root seed whose `sound` substream to render (MAJOR 3 determinism). */
+    rootSeed?: number;
+  }): Promise<OfflineMeasurements>;
   /** §9.2 the director's horizon state machine (state / usedThisArc / moments). */
   horizonState(): { state: 'idle' | 'engaged' | 'returned'; usedThisArc: boolean; moments: number };
   /** §7.1 presentation-worker client statistics (pool, statuses, terminations, skips). */
@@ -507,6 +558,10 @@ export class App {
   private cursorTimer = 0;
   private activationStatus = 'not activated (click or press Enter for fullscreen)';
   private recording: CanvasRecording | null = null;
+  /** §3.3/§8 the generative ambient audio system (constructed suspended; unlocked by a gesture). */
+  private readonly audio: AudioSystem;
+  /** §6.4/§8.3: the previous stillness state, so `prepareSilence()` fires exactly once per episode. */
+  private lastStillnessState: PhaseState['stillnessState'] = 'none';
   private diagnosticsView: LabSnapshot['diagnosticsView'] = 'none';
   // §10 laboratory-only diagnostic overlay state (never on the presentation path).
   private readonly diagnosticBuffer = new Uint8Array(PRESENTATION.width * PRESENTATION.height * 4);
@@ -590,6 +645,12 @@ export class App {
     this.rootSeed = randomRootSeed();
     this.performanceSeed = this.rootSeed;
     this.rng = new Rng(this.rootSeed);
+    // §2.3/§8: the audio system is constructed suspended (before the gesture) so the laboratory can
+    // report its state truthfully; `activate()` resumes it. A machine without an `AudioContext` or an
+    // output device degrades to a truthful `unavailable` state rather than failing the artwork. The
+    // recorded root seed is passed here so the §4.4 `sound` substream is derived from the performance's
+    // seed (MAJOR 3); `restart()`/`applyResolution()` reseed it.
+    this.audio = new AudioSystem({ rootSeed: this.rootSeed });
     // §12.2/§6.4: the active composition document and its curator are built once the root seed
     // exists, so the curator's movement RNG is derived from the same seed.
     this.trajectory = validateTrajectoryDocument(bundledTrajectory);
@@ -619,7 +680,7 @@ export class App {
       parameters: this.baseParams,
       analysis: this.neutralAnalysis,
       event: this.events,
-      health: { qualityTier: 0, overload: false, audioUnlocked: false },
+      health: { qualityTier: 0, overload: false, audioUnlocked: this.audio.audioUnlocked() },
       visualTargets: { camera: this.camera, light: this.light, material: this.material },
     });
     this.lab = new Lab(this.labApi());
@@ -707,6 +768,8 @@ export class App {
     this.analyzer.dispose();
     // §3.3: terminate the presentation worker (its pooled buffers go with it).
     this.presenter.dispose();
+    // §8: stop the audio scheduler, tear down the graph and close the context.
+    this.audio.dispose();
     // Only remove the verification hook if this instance installed it: a throwaway instance used
     // by the resource-lifecycle check must not uninstall the live page's hook.
     const scope = window as unknown as { __artwork?: ArtworkTestHook };
@@ -728,10 +791,13 @@ export class App {
     } catch (error) {
       note = `fullscreen request denied (${String(error)})`;
     }
-    // Phase 1 has no audio system yet: the gesture is recorded truthfully rather than faked.
-    this.activationStatus = fullscreen
-      ? `activated; fullscreen granted; audio: none in Phase 1${note ? ` (${note})` : ''}`
-      : `activated; fullscreen not granted: ${note}; audio: none in Phase 1`;
+    // §2.3/§8.3: the same gesture unlocks audio. The status is reported truthfully — including when
+    // the context cannot run on this machine — rather than claiming sound that does not exist.
+    await this.audio.unlock();
+    const audio = this.audio.status();
+    this.activationStatus =
+      `${fullscreen ? 'activated; fullscreen granted' : `activated; fullscreen not granted: ${note}`}; ` +
+      `audio: ${audio}${audio === 'running' ? '' : ' (click again after granting audio permission)'}`;
     this.applyCanvasSize();
   }
 
@@ -762,6 +828,8 @@ export class App {
       case 'pause':
         this.userPaused = command.value;
         this.clock.setPaused(command.value);
+        // §8.3: pause smoothly mutes audio (and resume brings it back without a backlog).
+        this.audio.setTransport(this.userPaused || document.hidden);
         break;
       case 'speed':
         this.clock.setSpeed(command.value);
@@ -788,7 +856,8 @@ export class App {
         this.diagnosticImageCache = null; // a view change invalidates the throttled overlay image
         break;
       case 'mute':
-        // No audio system exists in Phase 1.
+        // §8.3/§10: the laboratory mute — a smooth mute of the master path.
+        this.audio.setMuted(command.value);
         break;
       default:
         break;
@@ -810,7 +879,13 @@ export class App {
 
   async startRecording(): Promise<{ mimeType: string }> {
     if (this.recording) return { mimeType: this.recording.mimeType };
-    this.recording = startCanvasRecording(this.canvas, { fps: 30 });
+    // §8.3/§10: mux the audio system's MediaStream destination into the canvas recording, so the
+    // recorded WebM carries the generative soundtrack alongside the image. Only a *running* context
+    // contributes a track; a suspended/unavailable one leaves the recording video-only.
+    const audioTracks = this.audio.audioUnlocked()
+      ? this.audio.recordingStream()?.getAudioTracks() ?? []
+      : [];
+    this.recording = startCanvasRecording(this.canvas, { fps: 30, audioTracks });
     return { mimeType: this.recording.mimeType };
   }
 
@@ -851,6 +926,7 @@ export class App {
     const simMs = performance.now() - simStart;
 
     this.advanceBlend(realDelta);
+    this.updateAudio();
     if (this.autoSeedEnabled) {
       // §7.1/§9.1: the tier-1 analysis and the camera/light director are part of the automatic
       // Phase-2 composition. With automatic composition disabled (the Phase-1 laboratory path, which
@@ -965,13 +1041,32 @@ export class App {
   }
 
   /**
-   * §3.3/§6.4: until Phase 3 audio exists there is no `AudioSystem.silenceStatus()`, and the plan is
-   * explicit that locked/unavailable audio counts as satisfied — so the stillness gate may proceed on
-   * chemistry alone, with no terminal-zero timestamp. This is the whole of the Phase-2 silence
-   * interface (deviation 40).
+   * §3.3/§6.4/§8.3 audio handshake, once per frame.
+   *
+   * Stores the live world snapshot (with the current stillness state) for the scheduler, and issues
+   * `AudioSystem.prepareSilence()` **exactly once** on entry to `kill-wait`, so the terminally bounded
+   * fade starts on the entry rather than on the general 8 s chemistry threshold. The episode-scoped
+   * re-arm lives inside the audio engine (it clears its acknowledgement when it observes `none`).
+   */
+  private updateAudio(): void {
+    // Consume the live clock (not the 2 Hz published one) so the audio's performance-time mapping is
+    // as fresh as the frame, and the current stillness state so the engine can re-arm.
+    this.audio.consume({ ...this.curatorWorldView(), clock: this.clock.state(), phase: this.phase });
+    const stillness = this.phase.stillnessState;
+    if (stillness === 'kill-wait' && this.lastStillnessState !== 'kill-wait') {
+      this.audio.prepareSilence();
+    }
+    this.lastStillnessState = stillness;
+  }
+
+  /**
+   * §3.3/§6.4/§8.3: the live silence acknowledgement. `AudioSystem.silenceStatus()` is sampled into
+   * `CuratorEnvironment.silence` on every tick, so the black-hold gate is driven by the **real**
+   * terminal-zero state: `satisfied` only once the master has reached digital zero (or the audio is
+   * locked/muted/unavailable, which the plan defines as satisfied with no timestamp).
    */
   private curatorEnvironment(): CuratorEnvironment {
-    return { silence: { satisfied: true, terminalZeroAt: null } };
+    return { silence: this.audio.silenceStatus() };
   }
 
   /**
@@ -1073,7 +1168,7 @@ export class App {
       },
       performanceSeed: this.performanceSeed,
       arc: this.phase.arc,
-      health: { qualityTier: 0, overload: this.overloaded, audioUnlocked: false },
+      health: { qualityTier: 0, overload: this.overloaded, audioUnlocked: this.audio.audioUnlocked() },
     });
     this.camera = targets.camera;
     this.light = targets.light;
@@ -1224,6 +1319,13 @@ export class App {
     // not enough — a restart returns to arc 0, which `derive`'s `arc !== arcSeen` guard treats as
     // already-seen, so without this the new seed would keep the previous performance's light target.
     this.director.restartPerformance(this.performanceSeed, this.phase.arc);
+    // §8.3 (MAJOR 1/3): abort the previous audio episode at the audio boundary and reseed the §4.4
+    // sound substream from the new root seed. A restart that lands during a `kill-wait` fade can no
+    // longer be silenced by the abandoned episode's terminal deadline, and the fresh field's stochastic
+    // material is the new seed's. Synchronise the app-side stillness edge too, so the next `kill-wait`
+    // entry issues exactly one fresh `prepareSilence()`.
+    this.audio.resetPerformance(this.rootSeed);
+    this.lastStillnessState = 'none';
     this.resetCadence();
     this.resetAnalysis(this.simulation.epoch);
     this.publish();
@@ -1234,14 +1336,25 @@ export class App {
    * crossfades from the current parameters rather than jumping), and the app keeps the document so
    * the laboratory can export it. This is *not* a restart: it changes the composition without
    * replacing the field, so the arc and the chemistry continue (use `restart()` for a fresh arc).
+   *
+   * §8.3 (MAJOR 1): a `load-trajectory` that replaces the active document with a **different id**
+   * aborts the audio episode (as `restart()` does) — the composition has been replaced, so an
+   * abandoned episode's terminal fade must not be inherited by the new document's performance. The
+   * silent bootstrap that fetches the *same* bundled document (`document.id === this.trajectory.id`)
+   * is the intended crossfade and does **not** abort, so the first frames are not disturbed.
    */
   applyTrajectory(document: TrajectoryDocument, source: TrajectorySource): void {
+    const replaced = document.id !== this.trajectory.id;
     this.curator.command({ type: 'load-trajectory', document });
     this.trajectory = document;
     this.trajectorySource = source;
     this.trajectoryError = null;
     this.curatorParameters = this.curator.parameters;
     this.phase = neutralPhaseState();
+    if (replaced) {
+      this.audio.resetPerformance();
+      this.lastStillnessState = 'none';
+    }
   }
 
   /** §3.3 `AppControl.exportTrajectory`. */
@@ -1328,6 +1441,11 @@ export class App {
     // MAJOR 2: the same explicit director re-arm as `restart()`, with the *retained* root seed (a grid
     // change is not a new performance) and arc 0.
     this.director.restartPerformance(this.performanceSeed, this.phase.arc);
+    // §8.3 (MAJOR 1/3): the resolution switch also restarts the organism, so abort the audio episode and
+    // reseed the sound substream from the *retained* root seed (a grid change keeps the performance).
+    // The still field starts fresh, so synchronise the app-side stillness edge as in `restart()`.
+    this.audio.resetPerformance(this.performanceSeed);
+    this.lastStillnessState = 'none';
     this.resetCadence();
     this.resetAnalysis(this.simulation.epoch);
     this.publish();
@@ -1342,7 +1460,7 @@ export class App {
       parameters: this.effectiveParameters(),
       analysis: this.analysisState(),
       event: this.events,
-      health: { qualityTier: 0, overload: this.overloaded, audioUnlocked: false },
+      health: { qualityTier: 0, overload: this.overloaded, audioUnlocked: this.audio.audioUnlocked() },
       visualTargets: { camera: this.camera, light: this.light, material: this.material },
     };
     this.worldState = this.store.publish(input);
@@ -1362,7 +1480,7 @@ export class App {
       camera: this.camera,
       light: this.light,
       material: this.material,
-      health: { qualityTier: 0, overload: false, audioUnlocked: false },
+      health: { qualityTier: 0, overload: false, audioUnlocked: this.audio.audioUnlocked() },
     };
   }
 
@@ -1467,8 +1585,11 @@ export class App {
     if (document.hidden) {
       this.userPaused = this.clock.paused;
       this.clock.setPaused(true);
+      // §8.3: a hidden tab smoothly mutes audio; the visual loop is free to continue.
+      this.audio.setTransport(true);
     } else {
       this.clock.setPaused(this.userPaused);
+      this.audio.setTransport(this.userPaused);
       this.lastTime = 0; // no catch-up burst after a suspended tab
     }
   };
@@ -1575,6 +1696,14 @@ export class App {
         presentation: this.analysisState().presentation,
         event: { ...this.events },
         eventLog: this.eventLog.map((entry) => ({ ...entry })),
+        // §8 audio: the truthful status plus the live silence acknowledgement the curator reads.
+        audio: {
+          status: this.audio.status(),
+          unlocked: this.audio.audioUnlocked(),
+          muted: this.audio.isMuted(),
+          available: this.audio.available(),
+          silence: this.audio.silenceStatus(),
+        },
       }),
     };
   }
@@ -1733,6 +1862,27 @@ export class App {
       presentationAnalysis: () => this.analysisState().presentation,
       events: () => ({ ...this.events }),
       eventLog: () => this.eventLog.map((entry) => ({ ...entry })),
+      audioStatus: () => ({
+        status: this.audio.status(),
+        unlocked: this.audio.audioUnlocked(),
+        muted: this.audio.isMuted(),
+        available: this.audio.available(),
+      }),
+      silenceStatus: () => this.audio.silenceStatus(),
+      prepareSilence: () => this.audio.prepareSilence(),
+      setMuted: (value) => this.audio.setMuted(value),
+      audioUnlock: () => this.audio.unlock(),
+      audioRecordingTrackCount: () => this.audio.recordingStream()?.getAudioTracks().length ?? 0,
+      audioSoundSignature: () => this.audio.soundSignature(),
+      audioStats: () => this.audio.stats(),
+      audioOfflineProbe: (options) =>
+        renderOfflineScenario({
+          scenario: options.scenario,
+          seconds: options.seconds,
+          tickHz: options.tickHz,
+          render: options.render,
+          rootSeed: options.rootSeed,
+        }),
       horizonState: () => this.director.horizon,
       presenterStats: () => this.presenter.stats(),
       coarseOccupancy: () =>

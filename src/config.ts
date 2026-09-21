@@ -299,6 +299,108 @@ export const EVENTS = {
 } as const;
 
 /**
+ * §8 generative ambient audio (Phase 3).
+ *
+ * Every value here is either fixed by §8.2/§8.3 (the graph, the fundamental range, the voice
+ * ratios, the granular bounds, the wet-send fraction, the scheduler cadence, the 8 s off / 3 s
+ * wake / 8–15 s fade silence policy) or a clearly-labelled calibration default for the six
+ * descriptor mappings. Levels stay conservative on purpose: the compressor is a safety net, not a
+ * loudness effect (§8.2), and the offline render asserts peaks ≤ −6 dBFS.
+ */
+export const AUDIO = {
+  /** §8.2 drone voice ratios (just intervals): unison, perfect fifth, octave, twelfth. */
+  voiceRatios: [1, 1.5, 2, 3] as const,
+  /**
+   * §8.2 event excitation resonances: exactly three band-passes derived from the current fundamental
+   * (f, 2f, 3f), distinct from the four drone ratios. MINOR 5: `spawnEvent` previously looped all four
+   * `voiceRatios` (f/1.5f/2f/3f), which §8.2 does not specify.
+   */
+  eventRatios: [1, 2, 3] as const,
+  /** Per-voice relative weight so the upper partials never dominate the fundamental. */
+  voiceWeights: [1, 0.72, 0.6, 0.45] as const,
+  /** §8.2 fundamental maps logarithmically into this range (deep resonant tones). */
+  fundamentalMinHz: 38,
+  fundamentalMaxHz: 82,
+  maxVoices: 4,
+  /** §8.2 granular layer bounds: 0–3 grains/s, ≤ 12 concurrent, 0.15–0.8 s windows. */
+  maxGrainsPerSecond: 3,
+  maxConcurrentGrains: 12,
+  grainMinSeconds: 0.15,
+  grainMaxSeconds: 0.8,
+  /** §8.2 shared send: the wet (convolver) path sits at ≈ .12–.2 of the bus. */
+  wetMin: 0.12,
+  wetMax: 0.2,
+  /** §8.3 smoothing time constants (seconds): descriptors 3–8, frequency glides 8–20, harmonics 10–30. */
+  levelTau: 5,
+  frequencyTau: 12,
+  harmonicTau: 16,
+  detuneTau: 6,
+  textureTau: 5,
+  wetTau: 10,
+  /** §8.2/§8.3 silence gate: below the off thresholds for 8 s → terminally bounded fade to 0. */
+  offOccupancy: 0.01,
+  offActivity: 0.001,
+  offSeconds: 8,
+  /** Ramp length (8–15 s) and the higher thresholds that wake it back after 3 s. */
+  fadeSeconds: 8,
+  wakeOccupancy: 0.03,
+  wakeActivity: 0.004,
+  wakeSeconds: 3,
+  /** §8.2 at least 15 s between resonant events. */
+  eventRefractorySeconds: 15,
+  /** Non-just detuning ceiling (cents) at zero coherence; coherence tightens it toward the ratios. */
+  maxDetuneCents: 18,
+  /** Conservative levels (linear, pre-compressor). */
+  masterLevel: 0.9,
+  voiceLevelMax: 0.085,
+  textureLevelMax: 0.06,
+  eventLevelMax: 0.12,
+  /** Descriptor reference scales for the six normalized mappings (calibration defaults). */
+  intensityOccupancyRef: 0.3,
+  intensityActivityRef: 0.02,
+  edgeDensityRef: 0.15,
+  /** Granular band-pass centre maps from 400 Hz (coarse) to 3200 Hz (fine detail). */
+  grainFilterMinHz: 400,
+  grainFilterMaxHz: 3200,
+  /**
+   * §8.2 scheduler: a 50 ms tick with a 150 ms lookahead. Each tick schedules every *due* grain with a
+   * start time spread across `[now, now + lookaheadMs]` (MAJOR 4) rather than batching them all at
+   * `now`; the granular cursor is resynced to `now` after a stall longer than `stallSeconds` so overdue
+   * debt can never release a burst.
+   */
+  tickMs: 50,
+  lookaheadMs: 150,
+  /** Gap between ticks beyond which the granular cursor drops its overdue debt instead of replaying it. */
+  stallSeconds: 1,
+  /**
+   * §8.3/§2.3 activation fade: the master is anchored at exactly 0 while locked and ramps up over this
+   * bounded window on the locked→running edge (only when the current state permits sound), so
+   * activation fades from zero and never plays a catch-up burst.
+   */
+  activationFadeSeconds: 4,
+  /**
+   * §8.3 fresh-performance de-click: a restart/reseed **holds the computed live master level** at the
+   * abort instant, ramps linearly to zero over this bounded window (80–150 ms), performs the buffer/IR
+   * swap while the master is at zero, and only then fades back up. Without it a restart would step a
+   * live master to zero (an instantaneous nonzero→zero discontinuity = a click).
+   */
+  declickSeconds: 0.1,
+  /**
+   * Generated buffers (§8.2): a deterministic 2 s noise buffer and a 5 s dark stereo IR. The seeds are
+   * **fallbacks only** — the live system and the offline driver derive the §4.4 `sound` substream from
+   * the recorded root seed (MAJOR 3); these constants are used when no root seed is supplied.
+   */
+  noiseSeconds: 2,
+  irSeconds: 5,
+  noiseSeed: 0x51ce5eed,
+  irSeed: 0x1a2b3c4d,
+  /** §8.2 safety compressor (a limiter is not assumed; peaks are verified, not trusted). */
+  compressor: { thresholdDb: -18, kneeDb: 6, ratio: 4, attackSeconds: 0.01, releaseSeconds: 0.25 },
+  /** §8.2 fixed high-pass at 25 Hz before the master gain. */
+  highpassHz: 25,
+} as const;
+
+/**
  * §9.2 rare horizon eligibility (director-owned). Eligibility requires arc ≥ 1, ≥ 8 minutes of
  * performance time in the arc, a persistent high-confidence connection (merge) event, sustained
  * occupied/coherent structure, valid presentation-tier analysis, and a seeded per-arc Bernoulli
