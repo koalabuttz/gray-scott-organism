@@ -1,8 +1,8 @@
 {
   "grid": 256,
   "steps": 10000,
-  "elapsedSeconds": 2.112,
-  "cellUpdatesPerSecond": 310303030.3030303,
+  "elapsedSeconds": 2.072,
+  "cellUpdatesPerSecond": 316293436.2934363,
   "stats": {
     "meanU": 0.9323370297179281,
     "meanV": 0.02209655772609094,

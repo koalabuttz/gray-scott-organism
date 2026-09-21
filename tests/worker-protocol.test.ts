@@ -370,4 +370,24 @@ describe('AC.11 worker recovery association (MAJOR 3)', () => {
     expect(client.poll()?.status).toBe('stale');
     expect(client.stats().stale).toBe(1);
   });
+
+  it('recycles the reserved slot when postMessage throws synchronously', () => {
+    const worker: WorkerLike = {
+      onmessage: null,
+      onerror: null,
+      postMessage() {
+        throw new Error('clone failed');
+      },
+      terminate() {
+        /* no-op */
+      },
+    };
+    const client = makeClient(() => worker);
+    const buffer = client.acquire()!;
+    expect(client.submit(stamp(0, 1), buffer)).toBe(false);
+    expect(client.busy, 'the failed post leaves no request in flight').toBe(false);
+    // The reserved buffer returned to the pool rather than being stranded in the 'worker' state.
+    expect(client.acquire(), 'the slot is available again').not.toBeNull();
+    expect(client.stats().ignored).toBeGreaterThanOrEqual(1);
+  });
 });

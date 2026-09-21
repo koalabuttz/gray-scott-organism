@@ -4,8 +4,7 @@
       "/home/david/.nvm/versions/node/v22.23.2/bin/node",
       "/home/david/projects/vibe2/node_modules/.bin/playwright",
       "test",
-      "--project=headless-gpu",
-      "nucleation-rescue.spec.ts"
+      "--project=headless-gpu"
     ],
     "configFile": "/home/david/projects/vibe2/playwright.config.ts",
     "rootDir": "/home/david/projects/vibe2/tests/browser",
@@ -104,6 +103,1500 @@
   },
   "suites": [
     {
+      "title": "analysis-reduction.spec.ts",
+      "file": "analysis-reduction.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "§7.1 reduction contract (AC.10)",
+          "file": "analysis-reduction.spec.ts",
+          "line": 30,
+          "column": 6,
+          "specs": [
+            {
+              "title": "center-only activity is strong in tier 2; hidden-periphery activity is invisible to tier 2",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3916,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[reduction] center: tier1 occ=1.00000 flux=0.01916 | tier2 occ=0.5995 meanV=0.1458\n"
+                        },
+                        {
+                          "text": "[reduction] hidden: tier1 occ=2.15e-4 | tier2 occ=0.00000 meanV=0.00e+0\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:43.626Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1979a82873f0834b532a-5068d1d40f5a715a629a",
+              "file": "analysis-reduction.spec.ts",
+              "line": 31,
+              "column": 3
+            },
+            {
+              "title": "identical raw chemistry is attenuated monotonically by the support envelope",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1598,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[reduction-attenuation] r=0.000 meanV=3.811e-4 occ=0.00146 tier1=1.397e-3\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] r=0.500 meanV=3.811e-4 occ=0.00146 tier1=1.397e-3\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] r=0.703 meanV=3.554e-4 occ=0.00140 tier1=1.397e-3\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] r=0.833 meanV=1.775e-4 occ=0.00122 tier1=1.397e-3\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] r=0.938 meanV=3.483e-5 occ=0.00000 tier1=1.397e-3\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] annulus-only sample 0: meanV=1.137e-5 occ=0.00000\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] annulus-only sample 1: meanV=1.137e-5 occ=0.00000\n"
+                        },
+                        {
+                          "text": "[reduction-attenuation] annulus-only sample 2: meanV=1.137e-5 occ=0.00000\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:48.382Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "1979a82873f0834b532a-d3f5df04f44cf4fdc7d7",
+              "file": "analysis-reduction.spec.ts",
+              "line": 87,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "arcs.spec.ts",
+      "file": "arcs.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "ARCS=1 parallel full arcs",
+          "file": "arcs.spec.ts",
+          "line": 395,
+          "column": 6,
+          "specs": [
+            {
+              "title": "three seeds, three complete arcs, concurrently at 1×",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set ARCS=1 to record three complete arcs (long, GPU-heavy)",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/arcs.spec.ts",
+                        "line": 396,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:50.036Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set ARCS=1 to record three complete arcs (long, GPU-heavy)",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/arcs.spec.ts",
+                            "line": 396,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e1e1bf43c291d64511d-15385242fd00965d0aef",
+              "file": "arcs.spec.ts",
+              "line": 398,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "ARC_TUNED=1 single complete arc at the presentation default (deviations 44/45)",
+          "file": "arcs.spec.ts",
+          "line": 433,
+          "column": 6,
+          "specs": [
+            {
+              "title": "one complete tuned arc at 3× into arcs/arc-tuned/",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set ARC_TUNED=1 to record one complete arc at the default speed",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/arcs.spec.ts",
+                        "line": 434,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:50.037Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set ARC_TUNED=1 to record one complete arc at the default speed",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/arcs.spec.ts",
+                            "line": 434,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "3e1e1bf43c291d64511d-938f4463bf2af55a79cd",
+              "file": "arcs.spec.ts",
+              "line": 445,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "calibrate.spec.ts",
+      "file": "calibrate.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "material calibration",
+          "file": "calibrate.spec.ts",
+          "line": 39,
+          "column": 6,
+          "specs": [
+            {
+              "title": "staged sweep of roughness, intensity, exposure and emission on a mature field",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set CALIBRATE=1 to run the material calibration sweep",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/calibrate.spec.ts",
+                        "line": 40,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:50.038Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set CALIBRATE=1 to run the material calibration sweep",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/calibrate.spec.ts",
+                            "line": 40,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ee2b88f9c32fa76eb668-d897547709aef2474cc3",
+              "file": "calibrate.spec.ts",
+              "line": 42,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "capture.spec.ts",
+      "file": "capture.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "composite capture",
+          "file": "capture.spec.ts",
+          "line": 15,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC.6 no seed produces an exactly black background",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1518,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.6] unseeded composite: max=0 mean=0.000000 anyNonZero=0 nonBlack=0\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:50.070Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a0260cabe6bbf638b217-97e89f66b4f05b7e2f67",
+              "file": "capture.spec.ts",
+              "line": 16,
+              "column": 3
+            },
+            {
+              "title": "AC.6 a viable seed produces a nonzero structured response",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3200,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.6] seeded composite after 4000 steps (42ms): max=250 mean=1.840 p50=0 p95=1 p99=62 nonBlack=0.0374 bright=0.0212 clipped=0.000001 channelMean=[1.75, 1.79, 1.84] field occupied=0.0572 edgeDensity=0.00622\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:51.626Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a0260cabe6bbf638b217-b0b186a601d4480a1a22",
+              "file": "capture.spec.ts",
+              "line": 40,
+              "column": 3
+            },
+            {
+              "title": "the PNG capture path returns a decodable image of the composite",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1579,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[capture] PNG payload 26708 chars, magic iVBORw0KGgoA\n"
+                        },
+                        {
+                          "text": "[capture] PNG 1280x720, canvas 1280x720\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:54.899Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a0260cabe6bbf638b217-173a0b51cad0c4415115",
+              "file": "capture.spec.ts",
+              "line": 92,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "exploration.spec.ts",
+      "file": "exploration.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "§10 exploration mode",
+          "file": "exploration.spec.ts",
+          "line": 22,
+          "column": 6,
+          "specs": [
+            {
+              "title": "is off by default, restarts on every switch, and cycles without leaking",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3543,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:07:56.530Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "b9b4b397a1d4a5f1d1d3-823fc2d569b281efd8cb",
+              "file": "exploration.spec.ts",
+              "line": 23,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "gate.spec.ts",
+      "file": "gate.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "phase 1 material gate",
+          "file": "gate.spec.ts",
+          "line": 509,
+          "column": 6,
+          "specs": [
+            {
+              "title": "one continuous single-seed arc, a rejected lattice control, candidates, verified clip and README-gate.md",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set GATE=1 to produce the phase-1 gate artifacts (long-running)",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/gate.spec.ts",
+                        "line": 510,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:00.147Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set GATE=1 to produce the phase-1 gate artifacts (long-running)",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/gate.spec.ts",
+                            "line": 510,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "ae50b80c83818b971e9a-846a098a3f699375cbc2",
+              "file": "gate.spec.ts",
+              "line": 512,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "phase 1 material gate (publish safety)",
+          "file": "gate.spec.ts",
+          "line": 531,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a mismatched live exposure fails the gate and publishes nothing",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 600000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7464,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[gate] genesis applied: kind=single mode=replace seed=2026031 center=[0.44153, 0.52601] radiusCells=6.206 strength=0.97181\n"
+                        },
+                        {
+                          "text": "[gate] live state at the mature capture: exposure=2.5 (config 1.5), bloomGain=0.04 (config 0.04), relief=0.006 (config 0.006), roughness=0.36 (config 0.36), light intensity=30 (config 30) elevation=0.13962634015954636 (config 0.13962634015954636), F=0.029 k=0.057\n"
+                        },
+                        {
+                          "text": "[gate-negative] stages reached: opened -> mandatory-captures-written -> provenance-assertions\n"
+                        },
+                        {
+                          "text": "[gate-negative] failed with: composite exposure the capture used |  | \u001b[2mexpect(\u001b[22m\u001b[31mreceived\u001b[39m\u001b[2m).\u001b[22mtoBe\u001b[2m(\u001b[22m\u001b[32mexpected\u001b[39m\u001b[2m) // Object.is equality\u001b[22m |  | Expected: \u001b[32m1.5\u001b[39m\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:00.147Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "ae50b80c83818b971e9a-2bb54cd0dd7f6e2ce2fe",
+              "file": "gate.spec.ts",
+              "line": 540,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "genesis-sheet.spec.ts",
+      "file": "genesis-sheet.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "GENESIS=1 genesis-kind contact sheet",
+          "file": "genesis-sheet.spec.ts",
+          "line": 79,
+          "column": 6,
+          "specs": [
+            {
+              "title": "all seven §4.4 kinds, grown and captured at 512²",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set GENESIS=1 to build the §4.4 genesis contact sheet",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/genesis-sheet.spec.ts",
+                        "line": 80,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:07.675Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set GENESIS=1 to build the §4.4 genesis contact sheet",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/genesis-sheet.spec.ts",
+                            "line": 80,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "4dbf55bb73487d32ea2a-24f726abf96bc358d1f8",
+              "file": "genesis-sheet.spec.ts",
+              "line": 82,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "gpu-correctness.spec.ts",
+      "file": "gpu-correctness.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "GPU correctness",
+          "file": "gpu-correctness.spec.ts",
+          "line": 92,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC.1 capability report and framebuffer completeness on the real device",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "renderer",
+                      "description": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)"
+                    }
+                  ],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 927,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.1] capability report written to /home/david/projects/vibe2/artifacts/capability-report.md\n"
+                        },
+                        {
+                          "text": "[AC.1] renderer=ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver) vendor=Google Inc. (Intel) software=false\n"
+                        },
+                        {
+                          "text": "[AC.1] formats: RG32F:complete/write-ok RGBA16F:complete/write-ok RGBA8:complete/write-ok DEPTH_COMPONENT24:complete RGBA32UI:complete/write-ok\n"
+                        },
+                        {
+                          "text": "[AC.1] limits: MAX_TEXTURE_SIZE=16384 MAX_VERTEX_TEXTURE_IMAGE_UNITS=32 MAX_RENDERBUFFER_SIZE=16384\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:07.696Z",
+                      "annotations": [
+                        {
+                          "type": "renderer",
+                          "description": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)"
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-345283596827a914ab47",
+              "file": "gpu-correctness.spec.ts",
+              "line": 93,
+              "column": 3
+            },
+            {
+              "title": "AC.2 GPU matches the CPU reference at 1 and 10 steps, including toroidal edges",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1136,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.2] 1 step(s) @ 40x40 with a seam-crossing seed: maxdU=2.384e-7 maxdV=1.043e-7 observed=2.384e-7 tolerance=0.000001\n"
+                        },
+                        {
+                          "text": "[AC.2] 10 step(s) @ 40x40 with a seam-crossing seed: maxdU=1.788e-7 maxdV=1.192e-7 observed=1.788e-7 tolerance=0.000005\n"
+                        },
+                        {
+                          "text": "[AC.2] evolution between step 1 and step 10: maxdV=7.625e-2\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:08.650Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-f9594fed757feddc4853",
+              "file": "gpu-correctness.spec.ts",
+              "line": 151,
+              "column": 3
+            },
+            {
+              "title": "AC.3 uniform (U=1,V=0) survives 50 GPU steps and no pass feeds back",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 933,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.3] uniform invariance over 50 GPU steps: u===1 true, v===0 true\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:09.820Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-479a8b4c264fa25e5ed1",
+              "file": "gpu-correctness.spec.ts",
+              "line": 196,
+              "column": 3
+            },
+            {
+              "title": "AC.5 10,000 GPU steps stay finite and bounded with the clipping frequency instrumented",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 51337,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.5] GPU 10000 steps @ 256x256 in 2.1s (316.3 M cell-updates/s): nonFinite=0 occupied=0.0754 meanV=0.0221 edgeDensity=0.00957 feedbackViolations=0 steps=10000\n"
+                        },
+                        {
+                          "text": "[AC.5] pre-clamp instrumentation: clippedU=0 clippedV=0 frequency=0.000e+0 (bound 0.001) maxExcursion=0.000e+0 significantCellSteps=0 | CPU reference: clippedU=0 clippedV=0 maxExcursion=0.000e+0 | saturation proxy (includes the untouched U=1 void): 35928 cells\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:08:10.784Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-9383016023cd37c89346",
+              "file": "gpu-correctness.spec.ts",
+              "line": 220,
+              "column": 3
+            },
+            {
+              "title": "AC.5 the clipping instrumentation is sensitive: a deliberately unstable fixture registers excursions",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1373,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.5] unstable fixture (Du=0.3, dt*Du=0.3 > 0.25): GPU clippedU=67626 clippedV=0 maxExcursion=0.272 significantCellSteps=45824 | CPU clippedU=67626 clippedV=0 maxExcursion=0.272\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:02.180Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-1e1f50df5b141c78f7f4",
+              "file": "gpu-correctness.spec.ts",
+              "line": 296,
+              "column": 3
+            },
+            {
+              "title": "resource lifecycle: depth renderbuffers are owned and released (no resize leak)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1716,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[lifecycle] resize churn x200: renderbuffers 1 -> 1; textures 18 -> 18; framebuffers 18 -> 18\n"
+                        },
+                        {
+                          "text": "[lifecycle] scratch targets x25 created+deleted -> {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0}\n"
+                        },
+                        {
+                          "text": "[lifecycle] throwaway app: after construct {\"textures\":18,\"framebuffers\":18,\"renderbuffers\":1,\"programs\":14,\"shaders\":0,\"vertexArrays\":4,\"buffers\":5} -> after dispose {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0}\n"
+                        },
+                        {
+                          "text": "[lifecycle] validation toggle x6: baseline {\"textures\":2,\"framebuffers\":2,\"renderbuffers\":0,\"programs\":2,\"shaders\":0,\"vertexArrays\":1,\"buffers\":0}; enabled {\"textures\":4,\"framebuffers\":4,\"renderbuffers\":0,\"programs\":3,\"shaders\":0,\"vertexArrays\":1,\"buffers\":0}; after first disable {\"textures\":2,\"framebuffers\":2,\"renderbuffers\":0,\"programs\":2,\"shaders\":0,\"vertexArrays\":1,\"buffers\":0}; after last disable {\"textures\":2,\"framebuffers\":2,\"renderbuffers\":0,\"programs\":2,\"shaders\":0,\"vertexArrays\":1,\"buffers\":0}; after dispose {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:03.609Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-ff824c1031260532864f",
+              "file": "gpu-correctness.spec.ts",
+              "line": 335,
+              "column": 3
+            },
+            {
+              "title": "resource lifecycle: a failed target construction leaves the tracker exactly where it started",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1075,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[lifecycle] construction probe \"zero-extent colour attachment + depth renderbuffer\": failed: framebuffer 0x0 format 0x8058 incomplete: 0x8cd6 | before {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0} -> after {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0}\n"
+                        },
+                        {
+                          "text": "[lifecycle] construction probe \"non-colour-renderable internal format\": failed: framebuffer 32x32 format 0x8c3d incomplete: 0x8cd6 | before {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0} -> after {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0}\n"
+                        },
+                        {
+                          "text": "[lifecycle] construction probe tracker after all attempts: {\"textures\":0,\"framebuffers\":0,\"renderbuffers\":0,\"programs\":0,\"shaders\":0,\"vertexArrays\":0,\"buffers\":0}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:05.357Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-1098a35be9ccb5faf5ee",
+              "file": "gpu-correctness.spec.ts",
+              "line": 410,
+              "column": 3
+            },
+            {
+              "title": "informational: delivered throughput of the live 768^2 pipeline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 27912,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[perf] canvas 1280x720 (scene 1280x720): 60.0 fps, 120.0 sim steps/s (nominal 120), frame p50=16.7ms p95=16.8ms p99=16.8ms submit-only sim=0.13ms render=0.12ms overload=false\n"
+                        },
+                        {
+                          "text": "[perf] canvas 1920x1080 (scene 1920x1080): 60.0 fps, 120.0 sim steps/s (nominal 120), frame p50=16.7ms p95=16.8ms p99=16.8ms submit-only sim=0.16ms render=0.11ms overload=false\n"
+                        },
+                        {
+                          "text": "[perf] drained frame cost @1080p: 8.36 ms/frame (119.6 fps implied, serialised)\n"
+                        },
+                        {
+                          "text": "[perf] drained frame cost @720p: 7.45 ms/frame (134.3 fps implied, serialised)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:06.466Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-37f0edcbe8789a357447",
+              "file": "gpu-correctness.spec.ts",
+              "line": 448,
+              "column": 3
+            },
+            {
+              "title": "parameter override reaches the solver through the command surface",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 836,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:34.413Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "25bbd786769d88ea7302-af205b03df96f2c1a45e",
+              "file": "gpu-correctness.spec.ts",
+              "line": 532,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "growth.spec.ts",
+      "file": "growth.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "single-seed growth curve",
+          "file": "growth.spec.ts",
+          "line": 26,
+          "column": 6,
+          "specs": [
+            {
+              "title": "occupancy, extent and translational symmetry vs delivered steps",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set GROWTH=1 to measure the single-seed growth curve",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/growth.spec.ts",
+                        "line": 27,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:35.278Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set GROWTH=1 to measure the single-seed growth curve",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/growth.spec.ts",
+                            "line": 27,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "1f595333b79266d37cc2-e2dedbe261e77ab28838",
+              "file": "growth.spec.ts",
+              "line": 29,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "lab-composition.spec.ts",
+      "file": "lab-composition.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "§10 laboratory composition controls",
+          "file": "lab-composition.spec.ts",
+          "line": 31,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the lab shows the running movement and composition readouts after boot",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1974,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:35.303Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-fd2581c0730e722457bf",
+              "file": "lab-composition.spec.ts",
+              "line": 32,
+              "column": 3
+            },
+            {
+              "title": "the genesis selector applies a viable seed (epoch bump, occupancy grows)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2158,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[lab] genesis 'single' occupancy after 2000 steps: 0.0116\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:37.326Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-054faf67fa946e92f933",
+              "file": "lab-composition.spec.ts",
+              "line": 64,
+              "column": 3
+            },
+            {
+              "title": "a malformed trajectory import is rejected visibly and leaves the piece running",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3180,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:39.525Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-5a74894baf23c2b15bb5",
+              "file": "lab-composition.spec.ts",
+              "line": 91,
+              "column": 3
+            },
+            {
+              "title": "export → import round-trip is identity (through a real download)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1967,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:42.737Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-a7a447de8c8c0730608f",
+              "file": "lab-composition.spec.ts",
+              "line": 115,
+              "column": 3
+            },
+            {
+              "title": "skipping a movement advances the composition without a chemistry reset",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3061,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[lab] skip: nucleation -> cellular-growth (epoch 1 -> 1)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:44.753Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-3d8c3921df409058d672",
+              "file": "lab-composition.spec.ts",
+              "line": 146,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Fix A: trajectory provenance surfaced in the laboratory",
+          "file": "lab-composition.spec.ts",
+          "line": 181,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a failed bootstrap is visible in the lab status with source bundled",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1395,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:47.851Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-834eb24841ef0ebda1ea",
+              "file": "lab-composition.spec.ts",
+              "line": 182,
+              "column": 3
+            },
+            {
+              "title": "a successful bootstrap clears the error and the lab status shows fetched",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1186,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:49.284Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-a97915f62c6af2c47cab",
+              "file": "lab-composition.spec.ts",
+              "line": 207,
+              "column": 3
+            }
+          ]
+        },
+        {
+          "title": "Fix B: manual-mode camera release restores the calibrated camera",
+          "file": "lab-composition.spec.ts",
+          "line": 229,
+          "column": 6,
+          "specs": [
+            {
+              "title": "releasing a grazing override with composition off returns to the overhead camera",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1191,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:50.514Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3c29b4290ffeea18ca79-7190224fe478526e9edb",
+              "file": "lab-composition.spec.ts",
+              "line": 230,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
       "title": "nucleation-rescue.spec.ts",
       "file": "nucleation-rescue.spec.ts",
       "column": 0,
@@ -122,31 +1615,47 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 360000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set RESCUE=1 to record the §6.4 premature-extinction evidence",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/nucleation-rescue.spec.ts",
+                        "line": 180,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
                   "projectId": "headless-gpu",
                   "projectName": "headless-gpu",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 30610,
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
                       "errors": [],
-                      "stdout": [
-                        {
-                          "text": "[rescue] rising: movements=dormancy>nucleation>cellular-growth rescues=0 growth@72.9 perf s decisions=0\n"
-                        }
-                      ],
+                      "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T04:01:06.526Z",
-                      "annotations": [],
+                      "startTime": "2026-09-21T04:09:51.740Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set RESCUE=1 to record the §6.4 premature-extinction evidence",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/nucleation-rescue.spec.ts",
+                            "line": 180,
+                            "column": 8
+                          }
+                        }
+                      ],
                       "attachments": []
                     }
                   ],
-                  "status": "expected"
+                  "status": "skipped"
                 }
               ],
               "id": "3779272a99bfbb3e5f40-9e810d982639c920d5af",
@@ -160,31 +1669,47 @@
               "tags": [],
               "tests": [
                 {
-                  "timeout": 360000,
-                  "annotations": [],
-                  "expectedStatus": "passed",
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set RESCUE=1 to record the §6.4 premature-extinction evidence",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/nucleation-rescue.spec.ts",
+                        "line": 180,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
                   "projectId": "headless-gpu",
                   "projectName": "headless-gpu",
                   "results": [
                     {
-                      "workerIndex": 0,
-                      "parallelIndex": 0,
-                      "status": "passed",
-                      "duration": 23992,
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
                       "errors": [],
-                      "stdout": [
-                        {
-                          "text": "[rescue] dead fixture: rescue @57.10 perf s (deadSeconds=20.01, intention=emerge, occupancyGrowing=false), decisions=1\n"
-                        }
-                      ],
+                      "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T04:01:37.772Z",
-                      "annotations": [],
+                      "startTime": "2026-09-21T04:09:51.741Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set RESCUE=1 to record the §6.4 premature-extinction evidence",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/nucleation-rescue.spec.ts",
+                            "line": 180,
+                            "column": 8
+                          }
+                        }
+                      ],
                       "attachments": []
                     }
                   ],
-                  "status": "expected"
+                  "status": "skipped"
                 }
               ],
               "id": "3779272a99bfbb3e5f40-3befe59f6e59ef43a119",
@@ -195,14 +1720,1082 @@
           ]
         }
       ]
+    },
+    {
+      "title": "pacing.spec.ts",
+      "file": "pacing.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "pacing calibration",
+          "file": "pacing.spec.ts",
+          "line": 366,
+          "column": 6,
+          "specs": [
+            {
+              "title": "per-step cost at 768^2 and 512^2, and the derived steps/frame caps at 1080p",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set PACING=1 to run the pacing calibration",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/pacing.spec.ts",
+                        "line": 367,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:51.741Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set PACING=1 to run the pacing calibration",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/pacing.spec.ts",
+                            "line": 367,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "f58bd77690351665ada6-e0c17052fc884c5b04de",
+              "file": "pacing.spec.ts",
+              "line": 369,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "phase2-integrity.spec.ts",
+      "file": "phase2-integrity.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase-2 integration integrity",
+          "file": "phase2-integrity.spec.ts",
+          "line": 116,
+          "column": 6,
+          "specs": [
+            {
+              "title": "MAJOR 1: restart and resolution switch start a fresh composition arc",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 10850,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:09:51.766Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-4426588b14f6a92cb312",
+              "file": "phase2-integrity.spec.ts",
+              "line": 117,
+              "column": 3
+            },
+            {
+              "title": "MAJOR 2 / MINOR A: epoch provenance, stale rejection, and null-fence drops",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2456,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:10:02.657Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-441cda9bf435e289f35b",
+              "file": "phase2-integrity.spec.ts",
+              "line": 188,
+              "column": 3
+            },
+            {
+              "title": "MAJOR 3: analysis and publication follow performance time with a real-time ceiling",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14301,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[cadence] 1x: pub/real=1.99 pub/perf=2.00 req/real=1.99\n"
+                        },
+                        {
+                          "text": "[cadence] 6x: pub/real=3.99 pub/perf=0.66 req/real=3.79\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:10:05.145Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-d5a0704be04c2a869f93",
+              "file": "phase2-integrity.spec.ts",
+              "line": 255,
+              "column": 3
+            },
+            {
+              "title": "MAJOR 5: the real-shader health reduction matches a CPU full-domain mean",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 81233,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[MAJOR 5] uniform: cpu occ=0.000000 flux=0.000000 change=0.000000 | gpu occ=0.000000 flux=0.000000 change=0.000000 | dOcc=0.00e+0 dFlux=0.00e+0 dChange=0.00e+0\n"
+                        },
+                        {
+                          "text": "[MAJOR 5] grown-sparse: cpu occ=0.003350 flux=0.000080 change=0.000004 | gpu occ=0.003350 flux=0.000080 change=0.000004 | dOcc=2.59e-11 dFlux=7.88e-11 dChange=4.01e-12\n"
+                        },
+                        {
+                          "text": "[MAJOR 5] high-flux: cpu occ=0.919244 flux=0.017728 change=0.000095 | gpu occ=0.919244 flux=0.017727 change=0.000095 | dOcc=1.06e-7 dFlux=2.07e-7 dChange=4.21e-11\n"
+                        },
+                        {
+                          "text": "[MAJOR 5] float format=RGBA32F packSaturated(last)=false saturatedSamples=0\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:10:19.485Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-29fd98013a0c31f3cca7",
+              "file": "phase2-integrity.spec.ts",
+              "line": 299,
+              "column": 3
+            },
+            {
+              "title": "MAJOR 7: overrides route through the director (pin/unpin, no re-enable jump)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 14737,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[MAJOR 7] re-enable: distance 4.4564 -> 4.5030, azimuth 2.3562 -> 2.3547\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:11:40.754Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-015de788a7d25d3a7ce6",
+              "file": "phase2-integrity.spec.ts",
+              "line": 359,
+              "column": 3
+            },
+            {
+              "title": "MAJOR 1: a hanging trajectory fetch never blocks startup, and a late success crossfades in",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1382,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:11:55.531Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-7ddd82fa4e1fd468159f",
+              "file": "phase2-integrity.spec.ts",
+              "line": 419,
+              "column": 3
+            },
+            {
+              "title": "MAJOR 2: a same-arc restart re-arms the director to the new seed's light target",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1155,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:11:56.955Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-04b077fe0669c89ef9b7",
+              "file": "phase2-integrity.spec.ts",
+              "line": 466,
+              "column": 3
+            },
+            {
+              "title": "Phase 3: the presentation tier populates live and is cleared on a field replacement",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2139,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:11:58.142Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-092169da79efa35c3ba6",
+              "file": "phase2-integrity.spec.ts",
+              "line": 505,
+              "column": 3
+            },
+            {
+              "title": "MINOR 3: a mid-batch replace makes every later composition step see invalid health",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1753,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:00.315Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "fcd386dc107a483b5dce-df2d122db812bc5ec6ab",
+              "file": "phase2-integrity.spec.ts",
+              "line": 551,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "phase2-live.spec.ts",
+      "file": "phase2-live.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "Phase-2 live loop",
+          "file": "phase2-live.spec.ts",
+          "line": 45,
+          "column": 6,
+          "specs": [
+            {
+              "title": "curator, analysis and director run on the real GPU without errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 18406,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[phase2] curator left dormancy: movement=nucleation intention=emerge arc=0\n"
+                        },
+                        {
+                          "text": "[phase2] chemistryHealth: occupied=0.0005 flux=0.000011 change=0.000001 age=0.80s\n"
+                        },
+                        {
+                          "text": "[phase2] presentation: occ=0.0009 β0=1 β1=1 bands=[0.05, 0.35, 0.31, 0.27] coh=0.005 sym=0.000 conf=1.000 age=0.9s\n"
+                        },
+                        {
+                          "text": "[phase2] events: serial=0 latest=none; horizon: state=idle moments=0\n"
+                        },
+                        {
+                          "text": "[phase2] coarseOccupancy: size=16 occupied=0.0007 centroid=[0.495, 0.505]\n"
+                        },
+                        {
+                          "text": "[phase2] director targets: azimuth 2.43897 -> 2.48273 (moved=true), distance 5.51650 -> 6.50426 (moved=true)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:02.136Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "c9be13cd4635957b0042-e494a67b5218d6d3e34e",
+              "file": "phase2-live.spec.ts",
+              "line": 46,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "readback-lifecycle.spec.ts",
+      "file": "readback-lifecycle.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "§7.1 readback lifecycle (AC.11)",
+          "file": "readback-lifecycle.spec.ts",
+          "line": 32,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the PBO/fence ring stays balanced over many samples",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1426,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[readback] ring: requests=40 samples=40 buffers 5 -> 5 format=RGBA32F\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:20.586Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "6967780acf22160cab27-0ab724149d9b6f651a39",
+              "file": "readback-lifecycle.spec.ts",
+              "line": 33,
+              "column": 3
+            },
+            {
+              "title": "a WAIT_FAILED fence drops the sample and recycles the slot",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3878,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:22.033Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "6967780acf22160cab27-c584c7ab2d28850a2997",
+              "file": "readback-lifecycle.spec.ts",
+              "line": 55,
+              "column": 3
+            },
+            {
+              "title": "a field replacement while work is pending drops it and keeps the ring balanced",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 120000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1180,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:25.939Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "6967780acf22160cab27-4200e91b61472ab93d03",
+              "file": "readback-lifecycle.spec.ts",
+              "line": 79,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "replay.spec.ts",
+      "file": "replay.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "REPLAY=1 fixed-seed replay",
+          "file": "replay.spec.ts",
+          "line": 287,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the same seed reproduces the same commands and descriptors in two fresh contexts",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set REPLAY=1 to run the fixed-seed replay",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/replay.spec.ts",
+                        "line": 288,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:27.147Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set REPLAY=1 to run the fixed-seed replay",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/replay.spec.ts",
+                            "line": 288,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "6613f1f6335d1a86a8f6-1f9e9288192ea46481f9",
+              "file": "replay.spec.ts",
+              "line": 290,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "smoke.spec.ts",
+      "file": "smoke.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "presentation purity and startup",
+          "file": "smoke.spec.ts",
+          "line": 10,
+          "column": 6,
+          "specs": [
+            {
+              "title": "AC.15 presentation mode contains no UI nodes and no visible text",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3107,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[AC.15] presentation DOM: {\"bodyChildren\":[{\"tag\":\"canvas\",\"id\":\"stage\",\"className\":\"\"}],\"laboratoryNodes\":0,\"visibleText\":0,\"canvasCount\":1,\"uiCandidates\":0}\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:27.159Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4219922fea2e2bd3c691-84d88b49277fd34ac83a",
+              "file": "smoke.spec.ts",
+              "line": 11,
+              "column": 3
+            },
+            {
+              "title": "AC.15 the cursor hides after 3 s of stillness and returns on movement",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3855,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:30.292Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4219922fea2e2bd3c691-442aee53a9bde1ccadca",
+              "file": "smoke.spec.ts",
+              "line": 42,
+              "column": 3
+            },
+            {
+              "title": "laboratory opens only behind the backquote key and leaves no DOM behind",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 1337,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[smoke] laboratory controls: 36\n"
+                        },
+                        {
+                          "text": "[smoke] lab regime: \"approximate regime: mitosis (nearest @ .028/.062, d=0.003)\" | tempo: \"sim tempo: 3.00× requested (360 steps/s, measuring…)\"\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:34.180Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4219922fea2e2bd3c691-204457964987ecbd54dd",
+              "file": "smoke.spec.ts",
+              "line": 64,
+              "column": 3
+            },
+            {
+              "title": "the loop runs, delivers simulation steps, and raises no page errors",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5895,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[smoke] after 5 s: steps=1835 performanceSeconds=15.29 scene=1280x720 renderer=ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:35.550Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4219922fea2e2bd3c691-806feeb0a69541395063",
+              "file": "smoke.spec.ts",
+              "line": 102,
+              "column": 3
+            },
+            {
+              "title": "pause suspends transport and resumes without a catch-up burst",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 5010,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[smoke] resume after 2 s paused: +186 steps\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:41.478Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4219922fea2e2bd3c691-fce042e1203a35fbe77b",
+              "file": "smoke.spec.ts",
+              "line": 127,
+              "column": 3
+            },
+            {
+              "title": "the activation gesture is reported truthfully",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2498,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[smoke] activation status: activated; fullscreen granted; audio: none in Phase 1\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:46.527Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "4219922fea2e2bd3c691-f7ec4f2634da89d8b08a",
+              "file": "smoke.spec.ts",
+              "line": 153,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "soak.spec.ts",
+      "file": "soak.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "SOAK=1 accelerated multi-arc soak",
+          "file": "soak.spec.ts",
+          "line": 77,
+          "column": 6,
+          "specs": [
+            {
+              "title": "≥3 arcs back-to-back at 512² max speed with bounded resources",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set SOAK=1 to run the accelerated soak (long, GPU-heavy)",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/soak.spec.ts",
+                        "line": 78,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:49.059Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set SOAK=1 to run the accelerated soak (long, GPU-heavy)",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/soak.spec.ts",
+                            "line": 78,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "c6beb51bfea44d74f96f-5e6527efb914844faa30",
+              "file": "soak.spec.ts",
+              "line": 80,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "stillness-hold.spec.ts",
+      "file": "stillness-hold.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "AC.8 Phase-2 stillness bypass",
+          "file": "stillness-hold.spec.ts",
+          "line": 42,
+          "column": 6,
+          "specs": [
+            {
+              "title": "reaches a silence-bypass black-hold and rebirths into the next arc",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [
+                    {
+                      "type": "skip",
+                      "description": "set STILLNESS=1 to run the long-form stillness reachability spec",
+                      "location": {
+                        "file": "/home/david/projects/vibe2/tests/browser/stillness-hold.spec.ts",
+                        "line": 43,
+                        "column": 8
+                      }
+                    }
+                  ],
+                  "expectedStatus": "skipped",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": -1,
+                      "parallelIndex": -1,
+                      "status": "skipped",
+                      "duration": 0,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:12:49.060Z",
+                      "annotations": [
+                        {
+                          "type": "skip",
+                          "description": "set STILLNESS=1 to run the long-form stillness reachability spec",
+                          "location": {
+                            "file": "/home/david/projects/vibe2/tests/browser/stillness-hold.spec.ts",
+                            "line": 43,
+                            "column": 8
+                          }
+                        }
+                      ],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "skipped"
+                }
+              ],
+              "id": "dd7f5572ff2489fe9a84-598446ffc4dc399afb88",
+              "file": "stillness-hold.spec.ts",
+              "line": 45,
+              "column": 3
+            }
+          ]
+        }
+      ]
     }
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-21T04:01:05.734Z",
-    "duration": 56166.647000000004,
-    "expected": 2,
-    "skipped": 0,
+    "startTime": "2026-09-21T04:07:42.654Z",
+    "duration": 306626.505,
+    "expected": 43,
+    "skipped": 12,
     "unexpected": 0,
     "flaky": 0
   }
