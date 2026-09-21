@@ -10,10 +10,10 @@
  * The synthetic worlds carry only the fields the audio engine reads (presentation tier, event record,
  * clock, phase), so the fixtures are explicit and hermetic — they never touch the simulation or GPU.
  */
-import { AudioEngine, type BusName } from './audio.ts';
+import { AudioEngine, type BusName, type PitchChangeLogEntry, type PitchDiagnostics } from './audio.ts';
 import { AUDIO } from '../config.ts';
 import { neutralAnalysisState, neutralEventState, neutralPhaseState } from '../core/world.ts';
-import { deriveAudioControls } from './voices.ts';
+import { activityForX, deriveAudioControls } from './voices.ts';
 import type { EventState, Params, PresentationAnalysis, WorldState } from '../core/types.ts';
 
 export type OfflineScenarioName =
@@ -36,7 +36,14 @@ export type OfflineScenarioName =
   | 'reset-clean'
   | 'reset-bloom'
   | 'reset-grain'
-  | 'reset-grain-clean';
+  | 'reset-grain-clean'
+  | 'lively'
+  | 'lively-fragmented'
+  | 'lively-freeze'
+  | 'chatter'
+  | 'register-fine'
+  | 'register-coarse'
+  | 'glide-event';
 
 export interface OfflineScenarioOptions {
   scenario: OfflineScenarioName;
@@ -107,6 +114,10 @@ export interface OfflineMeasurements {
   rootSeed: number | null;
   /** §4.4 deterministic fingerprint of the live noise/IR material (for same-vs-different-seed checks). */
   soundChecksum: number;
+  /** §9.5 (TAKE-4) musicality diagnostics: selectors, degrees, carriers and accept/drop counters. */
+  pitch: PitchDiagnostics;
+  /** §9.5 the bounded pad-degree change log (oldest first): exactly which crossings committed. */
+  pitchLog: PitchChangeLogEntry[];
 }
 
 const PARAMS: Params = { F: 0.03, k: 0.062, Du: 0.16, Dv: 0.08 };
@@ -281,6 +292,31 @@ function fineDetailPresentation(): Partial<PresentationAnalysis> & { valid: bool
  */
 function noSupportPresentation(): Partial<PresentationAnalysis> & { valid: boolean } {
   return { ...fineDetailPresentation(), supportFraction: 0 };
+}
+
+/**
+ * §9.4 (TAKE-4) the deterministic "lively" degree walk: a settled degree-0 reveal, then raw activity
+ * targets at the centres of bands 1, 2, 3, 4 and finally back down to the **band-2** centre, one step
+ * every 20 s. On the way down the τ-smoothed selector decays *through* band 3 before reaching band 2, so
+ * the **confirmed crossings** are into bands 1, 2, 3, 4, 3, 2 (six), the last being refractory-dropped.
+ * Each step lands squarely inside its target band (`activityForX` inverts the selector exactly), so the
+ * fixture is a clean traversal of all five degrees in both directions with no band-edge ambiguity.
+ */
+function livelyActivityAt(t: number): number {
+  if (t < 4) return activityForX(0.1); // band 0 — the reveal settles at degree 0 (A)
+  if (t < 24) return activityForX(0.3); // band 1
+  if (t < 44) return activityForX(0.5); // band 2
+  if (t < 64) return activityForX(0.7); // band 3
+  if (t < 84) return activityForX(0.9); // band 4
+  return activityForX(0.5); // back down to band 2 (the decay crosses band 3 on the way)
+}
+
+/** A supported field whose only moving descriptor is the reaction activity (the pad's pitch selector). */
+function livelyPresentation(
+  t: number,
+  extra: Partial<PresentationAnalysis> = {},
+): Partial<PresentationAnalysis> & { valid: boolean } {
+  return { ...activePresentation(), reactionActivity: livelyActivityAt(t), ...extra };
 }
 
 interface ScenarioOutput {
@@ -496,6 +532,68 @@ function scenario(name: OfflineScenarioName): ScenarioOutput {
         silenceWindow: [7 + AUDIO.declickSeconds + 0.05, 7.5],
       };
     }
+    case 'lively':
+      // §9.4 (TAKE-4) acceptance 4: a settled degree-0 reveal, then raw band targets 1, 2, 3, 4 and back
+      // to band 2 at 20 s intervals — six confirmed crossings (1, 2, 3, 4, 3, 2), five accepted and one
+      // refractory-dropped = exactly five accepted pad changes.
+      return { world: (t) => syntheticWorld(livelyPresentation(t)) };
+    case 'lively-fragmented':
+      // The same walk over a fragmented, low-intensity field: `mapVoiceCount` stays 1, so the single-voice
+      // body is exercised at **every** root and the texture stays quiet.
+      return {
+        world: (t) =>
+          syntheticWorld(
+            livelyPresentation(t, {
+              occupiedFraction: 0.03,
+              edgeDensity: 0.02,
+              spectralBands: [0.2, 0.1, 0.05, 0.02],
+              beta0Approx: 6,
+              largestComponentFraction: 0.1,
+              topologyConfidence: 0.3,
+              coherence: 0.4,
+            }),
+          ),
+      };
+    case 'lively-freeze':
+      // §9 acceptance 3: once the descriptors freeze, no further pitch targets may appear (120 s).
+      return { world: (t) => syntheticWorld(livelyPresentation(Math.min(t, 24))) };
+    case 'chatter':
+      // §8: activity oscillating *inside* the hysteresis deadband must never move the pad.
+      return {
+        world: (t) =>
+          syntheticWorld({
+            ...activePresentation(),
+            reactionActivity: activityForX(Math.floor(t) % 2 === 0 ? 0.15 : 0.25),
+          }),
+      };
+    case 'register-fine':
+      // A fine structure (featureScaleNorm → 0) puts the bloom in the **fine** register.
+      return {
+        world: (t) =>
+          syntheticWorld(
+            { ...activePresentation(), featureScaleUV: 0.02 },
+            { event: { serial: t < 3 ? 1 : 2, kind: 'merge', strength: 0.8 } },
+          ),
+      };
+    case 'register-coarse':
+      // A coarse structure (featureScaleNorm → 1) puts the bloom in the **coarse** register.
+      return {
+        world: (t) =>
+          syntheticWorld(
+            { ...activePresentation(), featureScaleUV: 0.66 },
+            { event: { serial: t < 3 ? 1 : 2, kind: 'merge', strength: 0.8 } },
+          ),
+      };
+    case 'glide-event':
+      // A bloom fires **during** the first committed pad glide (the band-1 step commits at ≈ 6.5 s and its
+      // glide runs to ≈ 7.75 s), so the two voices overlap mid-transition: the bloom must still take its
+      // note from the coherence latch and the register, never from the in-flight pad pitch.
+      return {
+        world: (t) =>
+          syntheticWorld(livelyPresentation(t), {
+            event: { serial: t < 7 ? 1 : 2, kind: 'merge', strength: 0.8 },
+          }),
+      };
   }
 }
 
@@ -744,5 +842,8 @@ export async function renderOfflineScenario(
     terminalZeroAt: status.terminalZeroAt,
     rootSeed: options.rootSeed ?? null,
     soundChecksum: signature.checksum,
+    // §9.5 (TAKE-4) musicality diagnostics: what the selectors saw, which crossings committed and why.
+    pitch: engine.pitchDiagnostics(),
+    pitchLog: engine.pitchChangeLog(),
   };
 }

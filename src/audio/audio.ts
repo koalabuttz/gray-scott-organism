@@ -33,12 +33,16 @@ import type { PresentationAnalysis, WorldState } from '../core/types.ts';
 import { createImpulseResponse, createNoiseBuffer } from './buffers.ts';
 import { deriveSoundSeeds, type SoundSubstreamSeeds } from './substream.ts';
 import {
-  DETUNE_MULTIPLIERS,
-  VOICE_RATIOS,
+  NEUTRAL_DEGREE,
+  bandOf,
+  bloomBaseHz,
   clamp,
   deriveAudioControls,
   featureScaleNorm,
+  hystereticBand,
+  mapVoiceFilterHz,
   neutralAudioControls,
+  voicingCarriers,
   type AudioControls,
 } from './voices.ts';
 
@@ -193,6 +197,148 @@ interface RootSegment {
 }
 
 /**
+ * §2/§4 (TAKE-4) one hysteretic band selector — the pad's **reaction-activity** bands and the bloom's
+ * **coherence** bands share it. State is deliberately plain data so it can be reasoned about across the
+ * live and offline paths and reset as a unit.
+ */
+interface BandSelector {
+  /** τ-smoothed selector value in [0,1]; null until the first valid sample initializes it. */
+  smoothed: number | null;
+  /** Context time of the last smoothing update (the elapsed step is capped at 1 s per fresh sample). */
+  lastUpdateAt: number;
+  /** The latched observed band (`0..edges.length`). */
+  observed: number;
+  /** The candidate band currently being confirmed, or null. */
+  candidate: { band: number; since: number; samples: number; mark: number } | null;
+  /** The sample mark of the last counted fresh sample — duplicates never advance anything. */
+  mark: number | null;
+}
+
+/** A selector that has never seen a sample: uninitialized, latched to band 0, no candidate. */
+function freshBandSelector(observed = 0): BandSelector {
+  return { smoothed: null, lastUpdateAt: 0, observed, candidate: null, mark: null };
+}
+
+/**
+ * Advance one band selector by one tick and report a **confirmed** band crossing.
+ *
+ * - `raw` is the normalized selector input; it is smoothed with `AUDIO.selectorTau` **only** on a fresh
+ *   sample mark, with the elapsed step capped at 1 s (a stalled tab cannot integrate a huge step, and
+ *   repeated ticks on one snapshot never advance the smoothing).
+ * - The band is derived with Schmitt hysteresis, so a value sitting on a boundary cannot chatter.
+ * - A candidate band must persist `AUDIO.confirmSeconds` of **real** time *and* `AUDIO.confirmSamples`
+ *   distinct fresh samples; reverting to the observed band clears it, and a different candidate restarts.
+ * - On confirmation the observed band is latched **regardless** of any musical permission — the caller
+ *   decides separately whether the crossing may commit.
+ */
+function advanceBandSelector(
+  selector: BandSelector,
+  raw: number,
+  mark: number,
+  now: number,
+  edges: readonly number[],
+  hysteresis: number,
+): number | null {
+  const fresh = mark !== selector.mark;
+  if (selector.smoothed === null) {
+    // Initialize from the current sample.
+    selector.smoothed = raw;
+    selector.lastUpdateAt = now;
+    selector.mark = mark;
+  } else if (fresh) {
+    // MAJOR 1: the smoothing step is the elapsed time since the previous **fresh** sample, not the
+    // scheduler tick gap. Fresh marks can arrive every 0.5 s while ticks fire every 50 ms, so using the
+    // tick gap would stretch τ = 1.5 s into ≈ 15 s and recreate the static drone the revision exists to
+    // fix. Duplicates return without touching `lastUpdateAt`, so they contribute no elapsed time either.
+    const elapsed = Math.min(Math.max(0, now - selector.lastUpdateAt), 1);
+    const alpha = 1 - Math.exp(-elapsed / AUDIO.selectorTau);
+    selector.smoothed += (raw - selector.smoothed) * alpha;
+    selector.lastUpdateAt = now;
+    selector.mark = mark;
+  }
+
+  const band = hystereticBand(selector.smoothed, selector.observed, edges, hysteresis);
+  if (band === selector.observed) {
+    selector.candidate = null;
+    return null;
+  }
+  if (!selector.candidate || selector.candidate.band !== band) {
+    selector.candidate = { band, since: now, samples: 1, mark };
+    return null;
+  }
+  // MAJOR 3: confirmation is evaluated **only while processing a distinct fresh sample**. A duplicate
+  // tick carries no new evidence, so it may never be the state-changing event that latches the band —
+  // otherwise three rapid samples plus scheduler time would commit on a stale snapshot.
+  if (!fresh) return null;
+  selector.candidate.samples += 1;
+  selector.candidate.mark = mark;
+  if (
+    selector.candidate.samples >= AUDIO.confirmSamples &&
+    now - selector.candidate.since >= AUDIO.confirmSeconds
+  ) {
+    selector.observed = band;
+    selector.candidate = null;
+    return band;
+  }
+  return null;
+}
+
+/** §3 (TAKE-4) one committed pad pitch glide, mirrored in plain JS (never a read of `AudioParam.value`). */
+interface PitchGlide {
+  readonly from: number[];
+  readonly to: number[];
+  readonly start: number;
+  readonly end: number;
+}
+
+/** Why a confirmed crossing did or did not move the pad degree (§9.5 diagnostics). */
+export type PitchChangeReason = 'accepted' | 'refractory' | 'prohibited' | 'held';
+
+/** One entry of the bounded pad-degree change log. */
+export interface PitchChangeLogEntry {
+  /** Context time of the confirmed crossing. */
+  at: number;
+  /** The observed band the crossing moved to. */
+  band: number;
+  /** The pad degree after the tick (unchanged unless accepted). */
+  degree: number;
+  accepted: boolean;
+  reason: PitchChangeReason;
+}
+
+/** §9.5 musicality diagnostics: exactly what a reviewer needs to see *why* the pad moved or did not. */
+export interface PitchDiagnostics {
+  activityX: number | null;
+  observedBand: number;
+  padDegree: number;
+  coherenceX: number | null;
+  bloomDegree: number;
+  bloomRegister: 'coarse' | 'fine';
+  /** The settled (target) carriers of the current pad degree, in voice order. */
+  carriers: number[];
+  lastCommitAt: number | null;
+  /** Confirmed crossings observed (all of them, permitted or not). */
+  crossings: number;
+  /** Crossings that were admissible, i.e. eligible to commit (accepted + refractory-dropped + held). */
+  eligibleCrossings: number;
+  acceptedChanges: number;
+  droppedRefractory: number;
+  droppedProhibited: number;
+  /** §4 the most recent bloom: its scale note, degree, register and context time (null before any). */
+  lastBloom: { at: number; baseHz: number; degree: number; register: 'coarse' | 'fine' } | null;
+}
+
+/**
+ * §3 (TAKE-4) resolution of one pad pitch glide: 129 points over the 1.25 s glide is ≈ 10 ms per step,
+ * so the linearly-interpolated `setValueCurveAtTime` curve tracks the exact `f0·(f1/f0)^u` logarithm
+ * far more closely than any pitch perception threshold.
+ */
+const PITCH_CURVE_POINTS = 129;
+
+/** §9.5 how many pad-degree change-log entries are retained for diagnostics. */
+const PITCH_LOG_LIMIT = 64;
+
+/**
  * §8 live-path instrumentation: the default FFT size for the destination-tapped analyser. 8192 gives a
  * 5.9 Hz bin at 48 kHz — fine enough to resolve the deep fundamental band (≈55–110 Hz) — over a 170 ms
  * window that is short enough to catch a drone as it rises.
@@ -303,14 +449,15 @@ export class AudioGraph {
     this.dryBus.gain.value = 1;
 
     // --- §2 four logical voices ---------------------------------------------
-    // Removal-priority order [1, 2, 3, 5/2] × fundamental. Each is a `PeriodicWave` on the existing
-    // built-in `OscillatorNode` — a warm body with restrained even harmonics and a just major third,
-    // never a triangle/saw drone. No oscillator phase retrigger on descriptor changes.
+    // Removal-priority order from the §3 scale-aware voicing table. Each is a `PeriodicWave` on the
+    // existing built-in `OscillatorNode` — a warm body of restrained even harmonics, never a
+    // triangle/saw drone, and never detuned (TAKE-4: `maxDetuneCents = 0`, no beating). Non-finite
+    // pitch is impossible: `voicingCarriers` is a total function of the integer degree.
+    const neutralCarriers = voicingCarriers(NEUTRAL_DEGREE);
     for (let i = 0; i < AUDIO.maxVoices; i += 1) {
       const oscillator = context.createOscillator();
       oscillator.setPeriodicWave(createVoiceWave(context, i));
-      oscillator.frequency.value = AUDIO.fundamentalMaxHz * (VOICE_RATIOS[i] ?? 1);
-      oscillator.detune.value = 0;
+      oscillator.frequency.value = neutralCarriers[i] ?? AUDIO.tonicHz;
       const gain = context.createGain();
       gain.gain.value = 0;
       const filter = context.createBiquadFilter();
@@ -410,15 +557,20 @@ export class AudioGraph {
 
   // --- parameter application ------------------------------------------------
 
+  /**
+   * §2/§6 apply a voice's **gain** and **filter** targets. Pitch is deliberately *not* handled here: it
+   * has its own idempotent path (`applyPitchGlide` / `applyPitchImmediate`), so a per-tick control pass
+   * can never overwrite a scheduled glide (TAKE-4 §5).
+   */
   applyVoice(
     index: number,
-    values: { frequencyHz: number; detuneCents: number; level: number; filterHz: number },
+    values: { level: number; filterHz: number },
     now: number,
-    taus: { frequencyTau: number; detuneTau: number; levelTau: number; filterTau: number },
+    taus: { levelTau: number; filterTau: number },
   ): void {
     const voice = this.voices[index];
     if (!voice) return;
-    this.applyVoiceTone(index, values, now, taus);
+    setTarget(voice.filter.frequency, values.filterHz, now, taus.filterTau);
     const level = this.busEnabled.pad ? values.level : 0;
     // §6 (MINOR 4) mirror the root's intended gain so a later bounded reveal can start from it.
     if (index === 0) {
@@ -462,37 +614,66 @@ export class AudioGraph {
     this.rootSegment = { start: now, end: now, from: held, to: held, curve: 'linear', tau: 1e-3 };
   }
 
-  /** §2/§6 glide a voice's pitch/filter only (used while a dedicated root envelope drives its gain). */
+  /** §2/§6 glide a voice's filter only (used while a dedicated root envelope drives its gain). */
   applyVoiceTone(
     index: number,
-    values: { frequencyHz: number; detuneCents: number; filterHz: number },
+    values: { filterHz: number },
     now: number,
-    taus: { frequencyTau: number; detuneTau: number; filterTau: number },
+    taus: { filterTau: number },
   ): void {
     const voice = this.voices[index];
     if (!voice) return;
-    setTarget(voice.oscillator.frequency, values.frequencyHz, now, taus.frequencyTau);
-    setTarget(voice.oscillator.detune, values.detuneCents, now, taus.detuneTau);
-    // §2 filter smoothing is its own, faster time constant (6 s) than the 10 s frequency glide.
     setTarget(voice.filter.frequency, values.filterHz, now, taus.filterTau);
   }
 
   /**
-   * §6 from exact silence: prepare the root behind the **zero** master — set pitch/filter/gain to their
-   * latest valid targets **immediately** so the reveal does not audibly glide from a placeholder pitch
-   * and there is no second root envelope in series with the master reveal.
+   * §3 (TAKE-4) the pad's own **pitch** path: one bounded logarithmic glide per committed degree change,
+   * shared start/end across all four voices, scheduled once as a `setValueCurveAtTime` curve so it is
+   * idempotent — a per-tick control pass can never fight or restart it. No phase retrigger, no gain
+   * boost, no vibrato: the curve is exactly `f0 · (f1/f0)^u`.
    */
-  prepareRoot(
-    values: { frequencyHz: number; detuneCents: number; level: number; filterHz: number },
-    now: number,
-  ): void {
+  applyPitchGlide(from: readonly number[], to: readonly number[], now: number, seconds: number): void {
+    const duration = Math.max(1e-3, seconds);
+    for (let i = 0; i < this.voices.length; i += 1) {
+      const voice = this.voices[i];
+      if (!voice) continue;
+      const f0 = clamp(from[i] ?? to[i] ?? AUDIO.tonicHz, 1, 20000);
+      const f1 = clamp(to[i] ?? f0, 1, 20000);
+      const curve = new Float32Array(PITCH_CURVE_POINTS);
+      for (let point = 0; point < PITCH_CURVE_POINTS; point += 1) {
+        const u = point / (PITCH_CURVE_POINTS - 1);
+        curve[point] = f0 * Math.pow(f1 / f0, u);
+      }
+      const param = voice.oscillator.frequency;
+      param.cancelScheduledValues(now);
+      param.setValueCurveAtTime(curve, now, duration);
+    }
+  }
+
+  /**
+   * §5 (TAKE-4) set all four carriers **immediately** — the silent preparation before a reveal, or the
+   * post-reset neutral A target. Never a glide: this is the "no change without a crossing" endpoint.
+   */
+  applyPitchImmediate(carriers: readonly number[], now: number): void {
+    for (let i = 0; i < this.voices.length; i += 1) {
+      const voice = this.voices[i];
+      if (!voice) continue;
+      const hz = clamp(carriers[i] ?? AUDIO.tonicHz, 1, 20000);
+      const param = voice.oscillator.frequency;
+      param.cancelScheduledValues(now);
+      param.setValueAtTime(hz, now);
+    }
+  }
+
+  /**
+   * §6 from exact silence: prepare the root behind the **zero** master — set its filter and gain
+   * immediately so the reveal does not glide from a placeholder and there is no second root envelope in
+   * series with the master reveal. Pitch is initialized separately (`applyPitchImmediate`).
+   */
+  prepareRoot(values: { level: number; filterHz: number }, now: number): void {
     const voice = this.voices[0];
     if (!voice) return;
     const level = this.busEnabled.pad ? values.level : 0;
-    voice.oscillator.frequency.cancelScheduledValues(now);
-    voice.oscillator.frequency.setValueAtTime(values.frequencyHz, now);
-    voice.oscillator.detune.cancelScheduledValues(now);
-    voice.oscillator.detune.setValueAtTime(values.detuneCents, now);
     voice.filter.frequency.cancelScheduledValues(now);
     voice.filter.frequency.setValueAtTime(values.filterHz, now);
     voice.gain.gain.cancelScheduledValues(now);
@@ -704,6 +885,9 @@ export class AudioGraph {
     for (const voice of this.voices) {
       voice.gain.gain.cancelScheduledValues(now);
       voice.gain.gain.setValueAtTime(0, now);
+      // §5 (TAKE-4) pitch automation is part of the episode state too: a glide in flight is cancelled
+      // here so a reset can never leave the fresh field sliding from the old key.
+      voice.oscillator.frequency.cancelScheduledValues(now);
     }
     this.textureGain.gain.cancelScheduledValues(now);
     this.textureGain.gain.setValueAtTime(0, now);
@@ -914,15 +1098,12 @@ export class AudioGraph {
    * bend or mallet click. The pitch is sampled **once** and held, so unchanged geometry gives the same
    * pitch and a different geometry a different one. Three partials count as one event.
    */
-  spawnEvent(when: number, spec: { rootHz: number; featureScaleNorm: number; strength: number }): void {
+  spawnEvent(when: number, spec: { baseHz: number; strength: number }): void {
     if (!this.busEnabled.event) return;
-    const register =
-      spec.featureScaleNorm >= AUDIO.bloomFeaturePivot ? AUDIO.bloomRegisterLarge : AUDIO.bloomRegisterSmall;
-    const bellBaseHz = clamp(
-      spec.rootHz * register,
-      AUDIO.fundamentalMinHz * AUDIO.bloomRegisterLarge,
-      AUDIO.fundamentalMaxHz * AUDIO.bloomRegisterSmall,
-    );
+    // §4 (TAKE-4) the engine selects the scale note (bloom degree + register) and hands over an exact
+    // base frequency; the graph never derives pitch from a smoothed pad root, so an in-flight pad glide
+    // can never be quantized by a bloom.
+    const baseHz = clamp(spec.baseHz, AUDIO.fundamentalMinHz, 20000);
     const eventPeak = AUDIO.eventLevelMax * clamp(0.4 + spec.strength, 0.4, 1) * this.eventBoost;
     // MAJOR 2: `clearEpisodeState` muzzles the event bus at a reset's zero instant; every new bloom
     // re-asserts unity at its own start time so the event path keeps working after a reset.
@@ -936,7 +1117,7 @@ export class AudioGraph {
       const tau = AUDIO.bloomDecayTaus[index] ?? 0.5;
       const oscillator = this.context.createOscillator();
       oscillator.type = 'sine';
-      oscillator.frequency.value = bellBaseHz * (AUDIO.bloomPartialRatios[index] ?? 1);
+      oscillator.frequency.value = baseHz * (AUDIO.bloomPartialRatios[index] ?? 1);
       const env = this.context.createGain();
       env.gain.value = 0;
       const peakAmp = eventPeak * amplitude;
@@ -1143,12 +1324,6 @@ export class AudioEngine {
   private supportStartAt = 0;
   /** The performance-seconds mark of the last sample counted toward confirmation (dedupes repeats). */
   private lastSupportMark: number | null = null;
-  /**
-   * §3 the current smoothed **audible** root, mirrored in the engine (never read from a scheduled
-   * `AudioParam.value`), so a bloom samples a pitch that is actually sounding rather than a future
-   * unsmoothed target.
-   */
-  private rootHzSmoothed: number | null = null;
   /** §6 the context time the current reveal window ends (grains/events are suppressed until then). */
   private revealUntil: number | null = null;
   /**
@@ -1167,6 +1342,32 @@ export class AudioEngine {
   private rootRevealPending = false;
   /** §2 which voices sounded on the previous tick (to pick the admit/remove smoothing τ = 10 s). */
   private voiceOn = [false, false, false, false];
+
+  // --- §2/§3/§4 (TAKE-4) musicalization state ---------------------------------
+  /** The pad's reaction-activity band selector (smoothed x, hysteretic band, confirmation). */
+  private activitySelector = freshBandSelector();
+  /** The accepted pad degree (0–4) — what actually sounds. */
+  private padDegree = NEUTRAL_DEGREE;
+  /** Context time of the last **committed** degree change (the 12 s gate). */
+  private lastCommitAt = Number.NEGATIVE_INFINITY;
+  /** The in-flight pad pitch glide mirror, or null when settled. */
+  private pitch: PitchGlide | null = null;
+  /** Whether the previous tick admitted pitch changes (used to detect entering a prohibition). */
+  private pitchAdmissibleLast = false;
+  /** The bloom's coherence band selector — a *silent latch* that gates nothing. */
+  private coherenceSelector = freshBandSelector();
+  /** The settled bloom degree taken from the coherence latch. */
+  private bloomDegree = 0;
+  /** The bloom register (octave) with its own hysteresis and confirmation. */
+  private bloomRegister: 'coarse' | 'fine' = 'coarse';
+  private bloomRegisterSet = false;
+  private registerCandidate: { value: 'coarse' | 'fine'; since: number; samples: number; mark: number } | null =
+    null;
+  /** §9.5 bounded musicality counters and change log. */
+  private pitchCounters = { crossings: 0, eligible: 0, accepted: 0, refractory: 0, prohibited: 0 };
+  private pitchLog: PitchChangeLogEntry[] = [];
+  /** §4 the last bloom's note/degree/register, for the offline and live musicality diagnostics. */
+  private lastBloom: { at: number; baseHz: number; degree: number; register: 'coarse' | 'fine' } | null = null;
 
   constructor(context: BaseAudioContext, options: AudioEngineOptions = {}) {
     this.graph = new AudioGraph(context, options);
@@ -1296,7 +1497,6 @@ export class AudioEngine {
 
     const presentation = world.analysis.presentation;
     const controls = deriveAudioControls(presentation);
-    this.updateRootPitchMirror(controls, dt);
 
     // §8.3 quiet requires **support below support-off** as well as low occupancy/activity: a visually
     // supported low-activity body is not empty dormancy.
@@ -1344,6 +1544,11 @@ export class AudioEngine {
       }
     }
 
+    // §2/§3 (TAKE-4) the musical tick: advance the band selectors and admit at most one adjacent pad
+    // degree change. Deliberately **before** the event gate, so a tick carrying both a crossing and an
+    // event accepts the pad change first.
+    this.updatePitch(now, rawGap, world.analysis.samplePerformanceSeconds, presentation, controls);
+
     this.updateSilence(now, dt, quiet);
     this.updateEvent(now, world, presentation, controls);
     if (this.phase !== 'silent') this.applyControls(now, controls);
@@ -1351,15 +1556,250 @@ export class AudioEngine {
     this.graph.reap(now);
   }
 
-  /** §3 mirror of the smoothed audible root, tracking the graph's frequency glide (one-pole, τ=10 s). */
-  private updateRootPitchMirror(controls: AudioControls, dt: number): void {
-    if (!controls.valid) return;
-    if (this.rootHzSmoothed === null || dt <= 0) {
-      this.rootHzSmoothed = controls.fundamentalHz;
+  /**
+   * §5 (TAKE-4) reset every piece of musical state: both selectors, the accepted degree, the commit
+   * clock, the glide mirror and the bloom-register latch. Called from `resetPerformance`, so a fresh
+   * performance always starts on a silent neutral A.
+   */
+  private resetPitchState(): void {
+    this.activitySelector = freshBandSelector();
+    this.padDegree = NEUTRAL_DEGREE;
+    this.lastCommitAt = Number.NEGATIVE_INFINITY;
+    this.pitch = null;
+    this.pitchAdmissibleLast = false;
+    this.coherenceSelector = freshBandSelector();
+    this.bloomDegree = 0;
+    this.bloomRegisterSet = false;
+    this.registerCandidate = null;
+    // A fresh performance starts a fresh §9.5 diagnostic window too.
+    this.pitchCounters = { crossings: 0, eligible: 0, accepted: 0, refractory: 0, prohibited: 0 };
+    this.pitchLog = [];
+    this.lastBloom = null;
+  }
+
+  /**
+   * MAJOR 2 / spec §"Degree acceptance, not queued motion" ("At silent preparation both = current
+   * nominal activity band"): snap the activity selector's smoothed value and observed band, and the pad
+   * degree, onto the descriptors as they stand now. Called only while the master is at exact zero, so
+   * the resulting voicing is applied inaudibly. Deliberately writes **no** candidate, counter or log
+   * entry — a silent baseline is neither a crossing nor a commit.
+   */
+  private baselinePitchFromActivity(now: number, controls: AudioControls): void {
+    const nominalBand = bandOf(controls.activityX, AUDIO.activityBandEdges);
+    this.activitySelector.smoothed = controls.activityX;
+    this.activitySelector.observed = nominalBand;
+    this.activitySelector.candidate = null;
+    this.activitySelector.lastUpdateAt = now;
+    // Force the next driver tick to be treated as fresh so the smoothing clock is refreshed from a real
+    // sample rather than left anchored at the preparation instant.
+    this.activitySelector.mark = null;
+    this.padDegree = nominalBand;
+    this.pitch = null;
+  }
+
+  /** §2/§5 whether a confirmed crossing may move the pad right now. */
+  private pitchAdmissible(now: number): boolean {
+    if (!this.presenceEligible) return false; // absent support
+    if (this.revealActive(now)) return false; // suppressed during the reveal — never replayed
+    return this.revealPermitted(); // pause / mute / stillness / pre-gesture lock
+  }
+
+  /** §3 the four carriers currently sounding: the glide's in-flight value, else the settled degree. */
+  pitchCarriersAt(t: number): number[] {
+    const glide = this.pitch;
+    if (!glide) return voicingCarriers(this.padDegree);
+    const span = glide.end - glide.start;
+    const u = span > 0 ? clamp((t - glide.start) / span, 0, 1) : 1;
+    return glide.to.map((f1, i) => {
+      const f0 = glide.from[i] ?? f1;
+      return f0 * Math.pow(f1 / f0, u);
+    });
+  }
+
+  /**
+   * §2/§4/§5 the musical tick: advance the pad's activity-band selector and the bloom's coherence-band
+   * latch, then admit **at most one adjacent** pad-degree change.
+   *
+   * Crossing policy (§2): a confirmed crossing is *consumed* when prohibited, dropped inside the 12 s
+   * degree refractory, and otherwise moves `padDegree` one step toward the observed band. There is no
+   * pending destination and no catch-up, so a large jump still takes one step per crossing and a missed
+   * crossing is never replayed. The observed band is latched regardless of permission.
+   */
+  private updatePitch(
+    now: number,
+    rawGap: number,
+    mark: number,
+    presentation: PresentationAnalysis,
+    controls: AudioControls,
+  ): void {
+    const admissible = this.pitchAdmissible(now);
+    if (this.pitchAdmissibleLast && !admissible) {
+      // §5 entering a prohibited interval clears candidate debt — a new post-return crossing is required.
+      this.activitySelector.candidate = null;
+      this.coherenceSelector.candidate = null;
+      this.registerCandidate = null;
+    } else if (!this.pitchAdmissibleLast && admissible) {
+      // MAJOR 4: permission *return* rebaselines too. While already prohibited the selectors keep
+      // advancing, so a candidate formed inside the interval would otherwise keep its pre-return `since`
+      // and sample count and commit on the first fresh admissible sample using evidence gathered while
+      // the pad was forbidden to move. Clearing here means only a candidate that fully forms *after*
+      // the return can commit. A crossing that **fully confirmed** while prohibited already latched
+      // `observed` (its candidate was nulled by confirmation), so that consumption is preserved.
+      this.activitySelector.candidate = null;
+      this.coherenceSelector.candidate = null;
+      this.registerCandidate = null;
+    }
+    this.pitchAdmissibleLast = admissible;
+
+    if (!presentation.valid) {
+      // §5 invalid/stale: hold the last valid pitch (never NaN → degree 0) and clear candidates.
+      this.activitySelector.candidate = null;
+      this.coherenceSelector.candidate = null;
+      this.registerCandidate = null;
       return;
     }
-    const alpha = 1 - Math.exp(-dt / AUDIO.frequencyTau);
-    this.rootHzSmoothed += (controls.fundamentalHz - this.rootHzSmoothed) * alpha;
+
+    if (rawGap > AUDIO.stallSeconds) {
+      // §5 a stall drops candidates; the observed bands are rebaselined **after** this tick's selector
+      // update (below) so the latch agrees with the value it is compared against.
+      this.activitySelector.candidate = null;
+      this.coherenceSelector.candidate = null;
+      this.registerCandidate = null;
+    }
+
+    const crossing = advanceBandSelector(
+      this.activitySelector,
+      controls.activityX,
+      mark,
+      now,
+      AUDIO.activityBandEdges,
+      AUDIO.selectorHysteresis,
+    );
+    // §4 the coherence selector is a *silent latch*: it gates nothing, it only picks the bloom degree.
+    const coherenceCrossing = advanceBandSelector(
+      this.coherenceSelector,
+      controls.coherence,
+      mark,
+      now,
+      AUDIO.coherenceBandEdges,
+      AUDIO.coherenceHysteresis,
+    );
+
+    if (rawGap > AUDIO.stallSeconds) {
+      // §5 rebaseline both observed bands to the current smoothed value's band. The held degree is
+      // preserved, and this tick's crossings are *discarded*: a stall is not a crossing event, so it can
+      // never queue or release a pad change.
+      this.activitySelector.observed =
+        this.activitySelector.smoothed === null
+          ? 0
+          : bandOf(this.activitySelector.smoothed, AUDIO.activityBandEdges);
+      this.coherenceSelector.observed =
+        this.coherenceSelector.smoothed === null
+          ? 0
+          : bandOf(this.coherenceSelector.smoothed, AUDIO.coherenceBandEdges);
+      return;
+    }
+
+    if (coherenceCrossing !== null) this.bloomDegree = coherenceCrossing;
+    this.updateBloomRegister(now, presentation, mark);
+
+    if (crossing === null) return;
+    this.pitchCounters.crossings += 1;
+    let accepted = false;
+    let reason: PitchChangeReason = 'accepted';
+    if (!admissible) {
+      reason = 'prohibited';
+      this.pitchCounters.prohibited += 1;
+    } else {
+      this.pitchCounters.eligible += 1;
+      if (now - this.lastCommitAt < AUDIO.degreeRefractorySeconds) {
+        reason = 'refractory';
+        this.pitchCounters.refractory += 1;
+      } else {
+        const direction = Math.sign(crossing - this.padDegree);
+        if (direction !== 0) {
+          this.commitDegree(this.padDegree + direction, now);
+          accepted = true;
+        } else {
+          reason = 'held';
+        }
+      }
+    }
+    if (this.pitchLog.length >= PITCH_LOG_LIMIT) this.pitchLog.shift();
+    this.pitchLog.push({ at: now, band: crossing, degree: this.padDegree, accepted, reason });
+  }
+
+  /** §2/§3 one committed degree change: one adjacent step and exactly one bounded logarithmic glide. */
+  private commitDegree(degree: number, now: number): void {
+    const target = clamp(Math.round(degree), 0, 4);
+    const from = this.pitchCarriersAt(now);
+    const to = voicingCarriers(target);
+    this.padDegree = target;
+    this.lastCommitAt = now;
+    this.pitch = { from, to, start: now, end: now + AUDIO.glideSeconds };
+    this.graph.applyPitchGlide(from, to, now, AUDIO.glideSeconds);
+    this.pitchCounters.accepted += 1;
+  }
+
+  /** §4 the bloom register: `featureScaleNorm` with hysteresis (.55 / .45) and the standard confirmation. */
+  private updateBloomRegister(now: number, presentation: PresentationAnalysis, mark: number): void {
+    const norm = featureScaleNorm(presentation.featureScaleUV);
+    if (!this.bloomRegisterSet) {
+      // Coarse if ≥ .5 on the first valid sample.
+      this.bloomRegister = norm >= AUDIO.registerInitialPivot ? 'coarse' : 'fine';
+      this.bloomRegisterSet = true;
+      this.registerCandidate = null;
+      return;
+    }
+    let target = this.bloomRegister;
+    if (target === 'fine' && norm >= AUDIO.registerFineToCoarse) target = 'coarse';
+    else if (target === 'coarse' && norm <= AUDIO.registerCoarseToFine) target = 'fine';
+    if (target === this.bloomRegister) {
+      this.registerCandidate = null;
+      return;
+    }
+    if (!this.registerCandidate || this.registerCandidate.value !== target) {
+      this.registerCandidate = { value: target, since: now, samples: 1, mark };
+      return;
+    }
+    // MAJOR 3: a duplicate tick carries no fresh evidence and may never be the state-changing event that
+    // latches the register — otherwise three rapid samples plus scheduler time would commit on a stale
+    // snapshot.
+    if (mark === this.registerCandidate.mark) return;
+    this.registerCandidate.samples += 1;
+    this.registerCandidate.mark = mark;
+    if (
+      this.registerCandidate.samples >= AUDIO.confirmSamples &&
+      now - this.registerCandidate.since >= AUDIO.confirmSeconds
+    ) {
+      this.bloomRegister = target;
+      this.registerCandidate = null;
+    }
+  }
+
+  /** §9.5 the musicality diagnostics snapshot (why the pad did or did not move). */
+  pitchDiagnostics(): PitchDiagnostics {
+    return {
+      activityX: this.activitySelector.smoothed,
+      observedBand: this.activitySelector.observed,
+      padDegree: this.padDegree,
+      coherenceX: this.coherenceSelector.smoothed,
+      bloomDegree: this.bloomDegree,
+      bloomRegister: this.bloomRegister,
+      carriers: voicingCarriers(this.padDegree),
+      lastCommitAt: this.lastCommitAt === Number.NEGATIVE_INFINITY ? null : this.lastCommitAt,
+      crossings: this.pitchCounters.crossings,
+      eligibleCrossings: this.pitchCounters.eligible,
+      acceptedChanges: this.pitchCounters.accepted,
+      droppedRefractory: this.pitchCounters.refractory,
+      droppedProhibited: this.pitchCounters.prohibited,
+      lastBloom: this.lastBloom ? { ...this.lastBloom } : null,
+    };
+  }
+
+  /** The bounded pad-degree change log, oldest first. */
+  pitchChangeLog(): PitchChangeLogEntry[] {
+    return this.pitchLog.map((entry) => ({ ...entry }));
   }
 
   /**
@@ -1426,17 +1866,29 @@ export class AudioEngine {
    */
   private beginReveal(now: number, controls: AudioControls): void {
     const master = this.graph.masterLevelAt(now);
+    if (master <= 1e-4 && controls.valid) {
+      // MAJOR 2 / spec §"Degree acceptance, not queued motion" ("At silent preparation both = current
+      // nominal activity band"): while the master is still at *exact* zero, seed the activity selector's
+      // smoothed value and observed band **and** the pad degree from the descriptors as they stand now,
+      // so the pad reveals on the band the organism is actually in rather than the neutral A — otherwise
+      // a high-activity organism reveals on A and stays there (its confirmed crossings are consumed while
+      // the reveal window is prohibited). Applied while inaudible, and deliberately not a crossing, a
+      // glide, or a commit: no candidate survives, no counter or log entry is written.
+      this.baselinePitchFromActivity(now, controls);
+    }
+    const carriers = voicingCarriers(this.padDegree);
     const rootValues = {
-      frequencyHz: controls.voiceFrequencies[0] ?? controls.fundamentalHz,
-      detuneCents: controls.detuneCents * (DETUNE_MULTIPLIERS[0] ?? 0),
-      filterHz: controls.voiceFilters[0] ?? AUDIO.voiceFilterMaxHz,
+      filterHz: mapVoiceFilterHz(carriers[0]!, controls.intensity),
       level: controls.voiceLevels[0] ?? controls.voiceLevel,
     };
     if (this.phase === 'fading' || master <= 1e-4) {
       if (master <= 1e-4 && controls.valid) {
-        // From exact silence: prepare the root behind the zero master, then one 1.5 s master reveal.
+        // §5 (TAKE-4) from exact silence: initialize the pad pitch from the current descriptors behind
+        // the zero master (an immediate set, never a glide), prepare the root, then one 1.5 s master
+        // reveal. The reveal is a pitch *endpoint*, so no glide may run across it.
+        this.graph.applyPitchImmediate(carriers, now);
+        this.pitch = null;
         this.graph.prepareRoot(rootValues, now);
-        this.rootHzSmoothed = controls.fundamentalHz;
       } else if (controls.valid && this.rootRevealUntil === null) {
         // A *live-ish* mid-fade master: the root additionally returns through its own bounded 0.75 s ramp,
         // concurrently with (never in series with) the master reveal, so it does not reappear at its floor
@@ -1446,8 +1898,8 @@ export class AudioEngine {
       }
       this.graph.revealMaster(now, AUDIO.revealSeconds);
     } else if (controls.valid) {
-      // Master already live: raise the root to its new floor through the dedicated **bounded** envelope
-      // (MINOR 4) — a mirrored linear ramp with an explicit 0.75 s endpoint, never an asymptotic step.
+      // Master already live: **hold the pitch and wait** (§5) — only the root regains its floor, through
+      // the dedicated bounded 0.75 s envelope rather than an asymptotic step.
       this.rootRevealUntil = this.graph.revealVoice(0, rootValues.level, now, AUDIO.rootRevealSeconds);
     }
     this.phase = 'live';
@@ -1509,7 +1961,9 @@ export class AudioEngine {
     this.revealUntil = null;
     this.rootRevealUntil = null;
     this.rootRevealPending = false;
-    this.rootHzSmoothed = null;
+    // §5 (TAKE-4) the fresh performance starts on a silent neutral A: pitch state and its automation are
+    // cleared with the episode (the reset's zero instant already cancels any in-flight glide).
+    this.resetPitchState();
     this.voiceOn = [false, false, false, false];
     this.lastStillness = 'none';
     this.obsoleteEventsSkipped = 0;
@@ -1616,9 +2070,12 @@ export class AudioEngine {
     if (now - this.lastEventAt < AUDIO.eventRefractorySeconds) return;
     if (this.graph.liveNodes('event') > 0) return; // at most one live bloom group
     this.lastEventAt = now;
+    const baseHz = bloomBaseHz(this.bloomDegree, this.bloomRegister);
+    this.lastBloom = { at: now, baseHz, degree: this.bloomDegree, register: this.bloomRegister };
     this.graph.spawnEvent(now, {
-      rootHz: this.rootHzSmoothed ?? controls.fundamentalHz,
-      featureScaleNorm: featureScaleNorm(presentation.featureScaleUV),
+      // §4 (TAKE-4) the bloom's note is a scale degree (coherence latch) in a register chosen by feature
+      // scale — never derived from an in-flight pad glide.
+      baseHz,
       strength: world.events.strength,
     });
   }
@@ -1627,51 +2084,36 @@ export class AudioEngine {
     if (!controls.valid) return; // §3.4: invalid/stale tier → hold the last smoothed values.
     if (this.rootRevealUntil !== null && now >= this.rootRevealUntil) this.rootRevealUntil = null;
     const rootReveal = this.rootRevealUntil !== null;
+    // §3 (TAKE-4) every filter follows the **selected carrier target** of the accepted degree, so it
+    // steps with the chord rather than chasing an in-flight glide.
+    const carriers = voicingCarriers(this.padDegree);
     for (let i = 0; i < AUDIO.maxVoices; i += 1) {
       const on = i < controls.voiceCount;
       // §6 the pad floor is gated by presence eligibility (the latched §6 state, MAJOR 2): absent
       // support → exactly zero, and the floor is held through the hysteresis band.
       const level = this.presenceEligible && on ? (controls.voiceLevels[i] ?? 0) : 0;
       const values = {
-        frequencyHz: controls.voiceFrequencies[i] ?? controls.fundamentalHz,
-        detuneCents: controls.detuneCents * (DETUNE_MULTIPLIERS[i] ?? 0),
         level,
-        filterHz: controls.voiceFilters[i] ?? AUDIO.voiceFilterMaxHz,
+        filterHz: mapVoiceFilterHz(carriers[i] ?? AUDIO.tonicHz, controls.intensity),
       };
       if (i === 0 && rootReveal) {
-        // §6 (MINOR 4) the dedicated bounded root raise owns the root gain for its 0.75 s; glide pitch
-        // and filter only, so the explicit ramp is never fought by the ordinary τ smoothing.
-        this.graph.applyVoiceTone(0, values, now, {
-          frequencyTau: AUDIO.frequencyTau,
-          detuneTau: AUDIO.detuneTau,
-          filterTau: AUDIO.filterTau,
-        });
+        // §6 (MINOR 4) the dedicated bounded root raise owns the root gain for its 0.75 s; the filter
+        // follows normally, so the explicit ramp is never fought by the ordinary τ smoothing.
+        this.graph.applyVoiceTone(0, values, now, { filterTau: AUDIO.filterTau });
       } else if (i === 0 && this.rootRevealPending) {
         // §6 (MAJOR) the reveal is pending through a prohibited interval: hold the root **down** with the
         // ordinary bounded τ and never schedule a positive target, so it cannot rise behind the mute or
         // under the stillness fade. `applyVoice` keeps the gain mirror in sync for the restart's
         // `from = rootLevelAt(now)`.
-        this.graph.applyVoice(
-          0,
-          { ...values, level: 0 },
-          now,
-          {
-            frequencyTau: AUDIO.frequencyTau,
-            detuneTau: AUDIO.detuneTau,
-            levelTau: AUDIO.levelTau,
-            filterTau: AUDIO.filterTau,
-          },
-        );
+        this.graph.applyVoice(0, { ...values, level: 0 }, now, {
+          levelTau: AUDIO.levelTau,
+          filterTau: AUDIO.filterTau,
+        });
       } else {
         // §2 the root follows the ordinary pad τ; an upper voice newly admitted/removed uses τ = 10 s.
         const transitioning = on !== this.voiceOn[i];
         const levelTau = i === 0 ? AUDIO.levelTau : transitioning ? AUDIO.upperVoiceTau : AUDIO.levelTau;
-        this.graph.applyVoice(i, values, now, {
-          frequencyTau: AUDIO.frequencyTau,
-          detuneTau: AUDIO.detuneTau,
-          levelTau,
-          filterTau: AUDIO.filterTau,
-        });
+        this.graph.applyVoice(i, values, now, { levelTau, filterTau: AUDIO.filterTau });
       }
       this.voiceOn[i] = on;
     }
@@ -1758,6 +2200,8 @@ export class AudioEngine {
     supportSamples: number;
     /** §6 the context time the current reveal window ends, or null. */
     revealUntil: number | null;
+    /** §9.5 (TAKE-4) musicality diagnostics: selectors, degrees, carriers and accept/drop counters. */
+    pitch: PitchDiagnostics;
   } {
     return {
       nodes: this.graph.stats(),
@@ -1772,6 +2216,7 @@ export class AudioEngine {
       presence: this.presenceEligible,
       supportSamples: this.supportSamples,
       revealUntil: this.revealUntil,
+      pitch: this.pitchDiagnostics(),
     };
   }
 

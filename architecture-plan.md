@@ -2272,4 +2272,96 @@ deviations must be recorded here. Each entry states what differs, why, and what 
     `AUDIO.masterLevel` ending at permission-return + `AUDIO.revealSeconds`, and the master still
     `< 0.2·masterLevel` at +0.15 s — so paused, muted and locked all pin the early-level bound and the
     ramp value. Counts after Round-E: `npx tsc --noEmit` clean, `npm test` **332/332**.
+    **Round-F: TAKE-4 musicalization (operator take-3 feedback).** The operator found the pad drone
+    "changes too slowly to feel alive" and asked for the tones to be married to a musical scale. The
+    design of record is the **"TAKE-4 REVISION" section appended to `sound-design-spec.md`** (both
+    generations of that file are retained for the reviewer); it **supersedes** the continuous
+    feature-scale→fundamental mapping, the universal just-major ratios `[1, 2, 3, 5/2]`, the bloom
+    2×/3× pitch rule and the 165 Hz pad ceiling. **Feature scale remains causally audible through bloom
+    octave selection**, so no approved mapping is lost. Everything else is untouched: causal
+    architecture, presence/reveal/reset lifecycle (through Round-E), silence discipline, level plan, IR
+    recipe, grain recipe, compressor, high-pass, `masterLevel`, and every output guard.
+    **What changed.** A fixed **A-major-pentatonic key** (tonic A2 = 110 Hz; just ratios
+    `[1, 9/8, 5/4, 3/2, 5/3]`; `scaleHz(k) = 110·2^floor(k/5)·ratios[k mod 5]`). The pad's **degree** is
+    chosen by **reaction-activity bands**: `x = ln(1 + a/.001)/ln(31)` over `a = clamp(activity, 0, .03)`,
+    five bands at `.2/.4/.6/.8`, τ = 1.5 s smoothing that advances **only on distinct fresh valid
+    samples** (elapsed capped at 1 s per update), Schmitt hysteresis ±.025, a ≥ 1 s + ≥ 3-distinct-sample
+    confirmation, a **12 s degree refractory**, at most **one adjacent step** per confirmed crossing, no
+    queued destination or catch-up, and no 4→0 wrap. Voicings are an explicit **scale-aware table**
+    (A major, B/F♯/E suspended-fourth, C♯ fourth + minor-third colour), carriers 110–550 Hz, all in key.
+    Detuning is gone (`maxDetuneCents = 0`; coherence controls chord-colour gain, bloom degree and wet
+    only). Each committed change is **one bounded 1.25 s logarithmic glide** (`f0·(f1/f0)^u`) scheduled
+    **once** as a `setValueCurveAtTime` curve on a dedicated idempotent pitch path — the old per-tick
+    `setTarget` on voice frequencies (and the `rootHzSmoothed` scalar mirror) are removed, so a control
+    pass can never fight or quantize a glide. Bloom degree comes from **coherence bands** (τ 1.5 s,
+    hysteresis ±.03) and its octave from `featureScaleNorm` (coarse `scaleHz(degree+5)` = 220–366.667 Hz,
+    fine `scaleHz(degree+10)` = 440–733.333 Hz; highest weak harmonic 2200 Hz); `spawnEvent` now takes
+    `{baseHz, strength}` and the engine selects the note; the bloom attack lengthened 120 → 180 ms.
+    `AudioEngine` gained the musical state (fresh-sample identity, smoothed selectors, confirmed bands,
+    accepted degree, commit clock, frequency mirror), and `stats()`/`OfflineMeasurements` expose the §9.5
+    diagnostics (selector values, observed/committed degrees, carriers, crossing/accept/drop counters and
+    a bounded change log with reasons).
+    **§9.4 acceptance fixture (offline `lively`).** A settled degree-0 reveal, then **raw activity
+    targets** at the centres of bands 1, 2, 3, 4 (one step every 20 s) and finally back down to the
+    band-2 centre. The raw target sequence and the **confirmed crossing** sequence differ: on the way
+    down the τ-smoothed selector decays *through* band 3 before reaching band 2, so the **confirmed
+    crossings** are into bands 1, 2, 3, 4, 3, **2** — **6 confirmed crossings**, of which the first five
+    (bands 1, 2, 3, 4, 3) are accepted and the last (band 2, only ≈2 s after the band-3 commit) is
+    dropped by the 12 s refractory; 0 are dropped by admissibility. That yields **exactly 5 accepted pad
+    changes**, the accepted path `0→1→2→3→4→3` (the fifth accepted crossing — into band 3 — moves the
+    degree from 4 one adjacent step to 3; the final band-2 crossing would move 3→2 but is
+    refractory-dropped before it can), every commit ≥ 12 s apart, all
+    settled carriers in key, peak 0.372 (≤ −6 dBFS). A fragmented single-voice companion fixture (`lively-fragmented`)
+    reproduces the same five changes with `maxVoices = 1`, and `lively-freeze` shows identical
+    diagnostics at 60 s and 130 s (frozen descriptors add no crossing and no glide). `chatter` (activity
+    oscillating inside the deadband) confirms nothing, and both bloom registers produce in-key notes
+    (fine 550 Hz / coarse 275 Hz at coherence-band 2).
+    **Counts after Round-F:** `npx tsc --noEmit` clean; `npm test` **349/349**; the offline browser suite
+    gains 6 musicality cases (fixture 4, single-voice-at-every-root, freeze, chatter, both bloom octaves,
+    glide+event overlap) and all prior guards are unchanged and unrelaxed.
+    **Round-G: TAKE-4 selector-state-machine review (4 MAJOR + 2 MINOR).** A reviewer pass over the
+    Round-F selector machinery found four state-machine defects that the offline fixtures cannot see
+    (every fixture tick is a *fresh* sample, so the live path's fresh/duplicate split is never
+    exercised) plus two documentation issues; all six are fixed, each with a unit test that was checked
+    to fail against the pre-fix code.
+    1. *Smoothing used the scheduler tick gap, not real elapsed time.* `advanceBandSelector` was passed
+       `dt = clamp(tickGap, 0, 1)` and `lastUpdateAt` was written but never read, so with fresh marks
+       every 0.5 s and ticks every 50 ms τ = 1.5 s acted as ≈15 s — the static drone the revision exists
+       to remove. Elapsed is now `min(now − lastUpdateAt, 1)` measured from the previous **fresh** sample;
+       duplicates never touch the clock. Applies to the activity, coherence and bloom-register selectors.
+    2. *Silent preparation ignored the current descriptors.* Spec §"Degree acceptance, not queued
+       motion" ("At silent preparation both = current nominal activity band") is now implemented by
+       `baselinePitchFromActivity`, called from `beginReveal` while the master is at exact zero: the
+       observed band, the smoothed selector value and `padDegree` are all seeded from the current
+       nominal band, and that voicing is applied immediately (inaudible, no candidate, no counter, no
+       log). Without it a high-activity organism revealed on the neutral A and stayed there, its
+       confirmed crossing consumed as prohibited during the reveal window.
+    3. *Duplicate ticks could emit the confirmation.* The `samples ≥ 3 && elapsed ≥ 1 s` test ran
+       outside the `if (fresh)` block in both `advanceBandSelector` and `updateBloomRegister`, so three
+       rapid samples plus scheduler time latched a band on a stale snapshot. Confirmation/latching is now
+       evaluated only while processing a distinct fresh sample.
+    4. *Candidate debt straddled a prohibited interval.* Candidates are now rebaselined on permission
+       **return** as well as on entry to prohibition (activity, coherence and register candidates), so a
+       candidate formed while already prohibited cannot commit on the first fresh post-return sample. A
+       crossing that *fully confirmed* while prohibited still latches the observed band (consumed, never
+       replayed). Verified for pause, mute, armed stillness, the reveal window and absent support.
+    5. *Clean browser report (MINOR).* The retained `artifacts/playwright-report.json` had recorded one
+       unexpected failure (a `smoke` loop test reading an undefined `.clock`); it did not reproduce, so
+       it was a flake. The default suite now reports **75 passed / 12 gated skips / 0 unexpected / 0
+       flaky** (JSON report `expected 75, skipped 12, unexpected 0, flaky 0`). Note: passing
+       `--reporter=list` on the CLI *overrides* the config reporters and suppresses the JSON report, so
+       the default `npm run test:browser` (no override) is what regenerates it.
+    6. *Round-F wording (MINOR).* Round-F conflated raw target bands with confirmed crossings. The raw
+       `lively` targets are the centres of bands 1, 2, 3, 4 then back to the **band-2** centre; because the
+       τ-smoothed selector decays *through* band 3 on the way down, the **confirmed crossings** are into
+       bands 1, 2, 3, 4, 3, **2** — six in total, the first five accepted (`0→1→2→3→4→3`) and the last
+       (band 2, ≈2 s after the band-3 commit) refractory-dropped. The stale `offline.ts` comments that
+       said the last target returned "to band 3" were corrected to band 2 for the same reason.
+    **Counts after Round-G:** `npx tsc --noEmit` clean; `npm test` **355/355** (6 new selector
+    state-machine cases: fresh-vs-tick-gap smoothing, silent-reveal baseline for bands 0–4, duplicate
+    non-confirmation for activity+coherence+register, and the four permission-return debt cases);
+    default `npm run test:browser` **75 passed / 12 gated skips / 0 unexpected**; `STILLNESS=1` stillness
+    reachability passed. The §9.4 `lively` diagnostics are unchanged (every offline driver tick is fresh,
+    so the Round-G freshness rules are a no-op there): still exactly 5 accepted changes with 6 confirmed
+    crossings and 1 refractory drop.
 

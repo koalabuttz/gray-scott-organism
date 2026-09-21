@@ -177,3 +177,127 @@ Required tests: mapping bounds (110–165 Hz, consonant ratios, ≤3¢ detune, m
 ## Alternatives rejected
 
 Raising master gain / keeping 55 Hz (doesn't fix laptop reproduction; eats headroom). Globally speeding smoothing (audible morphology jitter). Lowering occupancy/topology thresholds (changes analysis semantics). Composed pentatonic sequences or chime schedulers (uncasued melody). A second sound-mode UI or dual engines (one reviewable change set; roll back as a unit if listening acceptance fails).
+
+---
+
+# TAKE-4 REVISION: Musicalization (design of record supersedes the tonal sections above)
+
+## Recommendation
+
+Use one fixed **A-major pentatonic key**, with **reaction activity selecting the pad degree**, **coherence selecting bloom degree**, and **feature scale selecting bloom octave only**. Replace continuously drifting feature-scale pitch with discrete, hysteretic, organism-triggered note changes. Keep the existing four-oscillator body, grain layer, bloom event source, level plan, IR, and hardened lifecycle.
+
+Use explicit scale-aware voicings rather than transposing the existing major chord indiscriminately. A major chord built on every pentatonic note does not remain in one pentatonic key. This revision deliberately replaces that requirement with a related family of major, suspended, and minor-color voicings, all from the same scale.
+
+Do not add a new bell voice in this pass: the existing bloom already provides that role without another excitation policy or node budget.
+
+## 1. Scope, evidence, and explicit amendments
+
+Verified current behavior:
+- `src/audio/voices.ts`: feature scale and low-band energy continuously choose a 110–165 Hz fundamental; all voice frequencies derive from fixed ratios.
+- `src/config.ts`: four voices, ratios `[1,2,3,2.5]`, weights `[1,.48,.26,.22]`, frequency smoothing 10 seconds, detune ceiling 3 cents, bloom refractory 15 seconds.
+- `src/audio/audio.ts`: presentation controls, presence confirmation, reveal handling, silence, events, and grains integrated in the existing tick path; blooms use a mirrored continuously smoothed pad root; serials consumed even when suppressed.
+- `src/analysis/presentation.ts`: reaction activity is measured reaction flux; coherence from the gradient tensor. Existing presentation descriptors, not new analysis.
+
+This revision supersedes the old design's scale→pad-fundamental requirement, universal just-major chord ratios, 10-second pitch smoothing, bloom 2×/3× pitch rule, and 165 Hz pad ceiling. **Feature scale remains causally audible through bloom octave selection.** Other approved mappings remain.
+
+Non-goals: simulation/analysis changes, topology-threshold changes, autonomous melody, a new scheduler, random pitch, extra persistent oscillators, extra IRs, or lifecycle redesign.
+
+## 2. Shared musical system
+
+### Key and tuning
+
+Fix the tonic at **A2 = 110 Hz**, across seeds, arcs, pauses, and rebirths. A fixed key simplifies listening comparison and prevents reset-time key jumps. Sound-substream seeds retain their existing noise/IR/grain responsibilities; they do not choose pitch.
+
+Just major-pentatonic ratios:
+
+| Degree | Note | Ratio to A | Cents | Base Hz |
+|---|---|---:|---:|---:|
+| 0 | A | 1 | 0 | 110 |
+| 1 | B | 9/8 | 203.910 | 123.750 |
+| 2 | C♯ | 5/4 | 386.314 | 137.500 |
+| 3 | E | 3/2 | 701.955 | 165.000 |
+| 4 | F♯ | 5/3 | 884.359 | 183.333333 |
+
+Absolute scale index `k >= 0`: `110 * 2^floor(k/5) * ratios[k mod 5]`. Ratios are the source of truth. Scale membership means settled carrier/note targets, not Fourier harmonics; bounded glides may traverse intermediate frequencies, no off-scale endpoint.
+
+### Pad descriptor and bands
+
+Use only presentation `reactionActivity` for pad degree selection (not occupancy — it saturates and hides activity changes).
+
+Normalize: `a = clamp(reactionActivity, 0, .03)`; `x = ln(1 + a/.001) / ln(31)`.
+
+Five bands `[0,.2) [.2,.4) [.4,.6) [.6,.8) [.8,1]` → degrees 0–4 (raw thresholds ≈ .000987/.002950/.006845/.014599; initial calibration values).
+
+Smooth `x` with τ=**1.5 real seconds**, updated only on distinct fresh valid presentation samples (sample-mark identity; elapsed capped at 1 s per fresh update; duplicates never advance smoothing). Initialize from the current sample.
+
+Schmitt hysteresis: upward across boundary `b` needs `x >= b+.025`; downward `x <= b-.025`. A candidate band must persist **≥1 real second and ≥3 distinct valid samples**; reversion clears it; a different candidate restarts. Confirmation emits one band-crossing event and updates the observed-band latch regardless of musical permission.
+
+### Degree acceptance, not queued motion
+
+Controller keeps separate `observedBand` and `padDegree`. At silent preparation both = current nominal band. On each confirmed crossing:
+1. Prohibited → consume without a note change.
+2. Fewer than **12 real audio-clock seconds** since the last committed change → drop.
+3. Otherwise move `padDegree` **at most one degree toward** the observed band; equal → nothing.
+4. No pending destination or catch-up. Adjacent movements are 182.404/203.910/315.641 cents; no wrap 4→0. Path-dependent Schmitt behavior, not a sequence counter.
+
+Expiry never triggers. Crossings suppressed by reveal/pause/mute/absent support/invalidity/stillness are not replayed.
+
+## 3. Pad voicing and warmth
+
+Absolute-scale-index voicing table (voice order = removal priority):
+
+| Pad degree | V0 | V1 | V2 | V3 | Color |
+|---|---:|---:|---:|---:|---|
+| A / 0 | 0 | 5 | 8 | 7 | A2, A3, E4, C♯4 — warm major |
+| B / 1 | 1 | 6 | 9 | 8 | B2, B3, F♯4, E4 — suspended fourth |
+| C♯ / 2 | 2 | 7 | 9 | 8 | C♯3, C♯4, F♯4, E4 — fourth + minor-third color |
+| E / 3 | 3 | 8 | 11 | 10 | E3, E4, B4, A4 — suspended fourth |
+| F♯ / 4 | 4 | 9 | 12 | 11 | F♯3, F♯4, C♯5, B4 — suspended fourth |
+
+Carriers 110–550 Hz, all in-key. Keep voice weights, normalization, waveforms, voice-count/fragmentation behavior, coherence color window .25–.75. Rename `thirdColorGain` → `chordColorGain` (voice 3 is not universally a major third). `maxDetuneCents=0` — no beating; coherence controls color gain and wet only.
+
+Pitch transition: one **bounded 1.25-second logarithmic glide** per committed change (`f = f0*(f1/f0)^u`), all four voices shared start/end, no restart, no gain boost. Transitions cannot overlap (12 s gate). Prepare initial frequencies behind a zero master before reveal; no pitch-related gain dips or extra envelopes. Voice filters compute from the selected carrier target. Warmth comes from stable just endpoints, no beating, recognizable small movements, shared-key voicing — not more bass/loudness/tail.
+
+## 4. Blooms: scale notes, still topology-caused
+
+Keep serial policy, eligibility gates, one live group, ≥15 s spacing. Bloom degree from presentation **coherence**: clamp [0,1]; bands .2/.4/.6/.8; τ=1.5 s smoothing; hysteresis ±.03; 1 s + 3 distinct samples confirmation; updates a silent selector latch. Each accepted event snapshots the current degree. Bloom octave from `featureScaleNorm`: coarse if ≥.5 initially; fine→coarse at ≥.55, coarse→fine at ≤.45 (1 s + 3 samples). Coarse: `scaleHz(degree+5)` = 220–366.667 Hz; fine: `scaleHz(degree+10)` = 440–733.333 Hz. No continuous modulation, counters, or randomness.
+
+Graph event input changes to `{baseHz, strength}`; the engine selects the scale note. Remove the `rootHzSmoothed` dependency; never quantize an in-flight glide. Keep partial ratios [1,2,3], amps [.72,.21,.07], decay τ .85/.55/.35, terminal fade 3.3–3.4 s, disposal by 3.42 s. Attack **120 → 180 ms**. Highest weak harmonic 2200 Hz. Event level .065; paired-render ≤ +3 dB. Bloom pitch latched through the decay; refractory bounds note changes too.
+
+## 5. Ownership, freshness, lifecycle
+
+Pure math in `voices.ts` (scale conversion, normalization, bands, voicing lookup, carrier filters, level/detail mappings). State in `AudioEngine` (fresh-sample identity, smoothed selectors, confirmed bands, accepted degree, last commit time, frequency mirrors). Control path: `presentation sample → continuous controls + pitch-selector input → engine crossing state → scale voicing → graph`. All call sites (activateEdge, beginReveal, silent preparation) use the engine-selected voicing; no fallback reinstates the old mapping.
+
+Rules: duplicate sample marks never advance selectors; distinct identical samples may finish one confirmation. Invalid/nonfinite → hold last valid pitch, clear candidates (never NaN → degree 0); before any valid sample, silent neutral A targets. Prohibited intervals baseline/consume but never commit; candidates clear on entry; a new post-return crossing is required. Stall >1 s drops candidates and rebaselines observed bands (held degree preserved). Pause/mute don't reset key/degree; a started glide may complete behind mute; no new glide admitted there. Presence clearing stops admitting changes and clears candidates; at a zero-master reveal initialize pitch from current descriptors before gain rises; a nonzero-master reveal holds pitch and waits. Reset/reseed at the deferred zero clears pitch state and frequency automation with the episode clearing. A tick with both a crossing and an event: accept the pad change first, then the event gate.
+
+The graph's `applyVoice`/`applyVoiceTone` must not overwrite frequency ramps every tick — pitch gets its own idempotent application path; gain/filter/reveal branches unchanged. Frequency mirrors replace the scalar root mirror where needed.
+
+## 6. Invariants untouched
+
+Presentation-only causality; exact-zero silence; terminal master ordering; silence acknowledgement; black-hold; reset/reseed de-click; presence/reveal hysteresis and pending-root handling (Round-E); four oscillators; built-in WebAudio; one noise buffer; one IR; substream ownership; recording; grain policy; IR recipe; dry/wet; compressor; high-pass; master=.75; pad levels/weights; event level; texture level; audibility guards; peaks ≤0.501187 aiming ≤0.398107. "No change without a crossing" applies to new pitch targets, not caused glides/gain mappings/noise.
+
+## 7. Ordered implementation handoff
+
+1. `src/config.ts` AUDIO: tonic/scale ratios, voicing table, activity normalization (.03 ceiling/.001 knee), band edges, hysteresis .025/.03, selector τ1.5, confirmation 1 s/3 samples, degree refractory 12 s, glide 1.25 s, register hysteresis .45/.55, octave offsets 5/10; replace universal voice-ratio constants and continuous fundamental bounds (fundamental bounds 110 and 110·5/3, detune 0, bloom attack .18).
+2. `src/audio/voices.ts`: pure scale/voicing/selector functions; remove feature-scale→fundamental; keep `featureScaleNorm` for bloom register; rename third-color semantics; neutral controls + filters from actual carriers.
+3. `src/audio/audio.ts`: pitch state, crossing admission, finite ramps/mirrors, silent initialization; remove old smoothed-root bloom coupling; update `spawnEvent` input and all control call sites.
+4. `src/audio/offline.ts`: deterministic degree-step/chatter/freeze fixtures; isolated scale-register event fixtures; diagnostics (raw activity, selector, degrees, crossing marks, accept/drop reasons, carriers, bloom degree/octave/serial).
+5. Tests + docs: revise `sound-design-spec.md` (this section) is authoritative; record superseded assumptions in `architecture-plan.md` deviations; rollback as a focused musicalization change set if take 4 fails (lifecycle fixes stay).
+
+## 8. Required verification
+
+Mapping tests: exact ratio/octave conversion; all voicings in-key; root bounds 110–183.333; pad carriers ≤550; adjacent movement ≤315.642¢; normalization monotone/bounded; exact threshold/deadband; adversarial finite handling; feature scale alone cannot move the pad; activity alone can. Engine tests: confirmation (3 distinct marks + 1 s); duplicates/stale never advance; chatter doesn't move pitch; one commit + one finite glide per qualifying crossing; 11.999 s drop / 12 s expiry inert; large jump = one step; no catch-up; pause/mute/stall/reveal/invalidity/reset clear candidate debt; frequency ramps never touch root-reveal gain automation; bloom frequencies match selector+octave; pitch latched per decay; serial/refractory/teardown intact. Offline/browser: all five degrees, adjacent transitions both ways, coherence sweep, fragmented single voice at every root, both bloom octaves/all degrees, event+pad overlap during glides, worst mixtures at 44.1/48 kHz multiple seeds; finite; peak ceiling; RMS plan; event ≤+3 dB; texture ≥12 dB under pad; wet ≥15 dB under dry; exact zeros; balanced disposal; guards not relaxed. Keep lifecycle/reveal/audibility assertions intact.
+
+## 9. Take-4 acceptance
+
+1. Every committed degree change has a logged fresh confirmed activity-band crossing; none from refractory expiry, repeated ticks, event count, phase names, seed, or wall-clock logic.
+2. Settled pad carriers and bloom fundamentals exactly in-key; root changes one adjacent degree, ≥12 s apart; blooms ≥15 s apart.
+3. Each transition reaches its endpoint in 1.25 s; frozen descriptors produce no new pitch targets after one resolution (freeze 120 s to verify).
+4. Deterministic lively fixture: settled degree-0 reveal → confirmed crossings into bands 1,2,3,4,3 at 20 s intervals → exactly five accepted changes, endpoint arrival ≤1.25 s; refractory crossings dropped, not delayed.
+5. Real-arc interest: representative 180-s supported live segment targets ≥4 accepted pad changes, first within 30 s of reveal; full arc ≥6. Log eligible crossings alongside. If bands aren't traversed, inspect the activity distribution and recalibrate band normalization as a documented design adjustment — never timer notes, adaptive extrema, or synthetic crossings.
+6. Operator listening at fixed laptop volume: single-voice body warmer and less static; intervals related; blooms soft and occasional; no beat or repeating tune.
+7. Lifecycle/output guards all pass unrelaxed.
+
+## Risks
+
+Main uncertainty: live activity-band traversal frequency (no real descriptor trace was consulted). Bands are implementable and testable; live trace inspection and take-4 listening are mandatory. Deliberate choices: fixed A pentatonic, activity-led stepwise pad, coherence-led bloom, no new voice, no detuning, scale-aware voicings.

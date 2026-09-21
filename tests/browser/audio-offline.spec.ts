@@ -11,8 +11,20 @@
  * supplies synthetic `WorldState`s and explicit tick times.
  */
 import { expect, test } from '@playwright/test';
+import { AUDIO } from '../../src/config.ts';
+import { voicingCarriers } from '../../src/audio/voices.ts';
 import { hook, openArtwork } from '../support/browser.ts';
 import type { OfflineAudioShape } from '../support/types.ts';
+
+/** The A-major-pentatonic degrees in cents above the tonic, for the in-key assertions. */
+const IN_KEY_CENTS = [0, 203.910, 386.314, 701.955, 884.359] as const;
+
+/** Whether a frequency is an exact note of the fixed A-major-pentatonic key. */
+function isInKey(hz: number): boolean {
+  if (!Number.isFinite(hz) || hz <= 0) return false;
+  const cents = (((1200 * Math.log2(hz / AUDIO.tonicHz)) % 1200) + 1200) % 1200;
+  return IN_KEY_CENTS.some((reference) => Math.abs(cents - reference) < 0.5);
+}
 
 /** −6 dBFS in linear amplitude (§8.2 conservative level ceiling). */
 const PEAK_CEILING = 0.5012;
@@ -475,5 +487,153 @@ test.describe('AC.12 offline audio', () => {
       Math.max(0.5, noiseFloor + 0.5),
     );
     expect(grain.windowRms[10], 'the texture really is sounding after the reveal').toBeGreaterThan(0);
+  });
+
+  test('§9.4 acceptance: the deterministic lively fixture commits exactly five degree changes', async ({
+    page,
+  }) => {
+    const probe = await openArtwork(page);
+    test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
+    if (!probe.ok) return;
+
+    // A settled degree-0 reveal, then confirmed activity-band crossings into bands 1, 2, 3, 4, 3 at 20 s
+    // intervals. Refractory crossings must be *dropped*, never delayed.
+    const m = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [
+      { scenario: 'lively', seconds: 110, rootSeed: 11 },
+    ]);
+    const log = m.pitchLog.map((entry) => `${entry.at.toFixed(1)}s→band${entry.band}:${entry.reason}`);
+    console.info(
+      `[audio-offline] lively: accepted=${m.pitch.acceptedChanges} crossings=${m.pitch.crossings} ` +
+        `eligible=${m.pitch.eligibleCrossings} refractory=${m.pitch.droppedRefractory} ` +
+        `prohibited=${m.pitch.droppedProhibited} degree=${m.pitch.padDegree} peak=${m.peak.toFixed(4)}\n` +
+        `    ${log.join(', ')}`,
+    );
+    expect(m.finite).toBe(true);
+    expect(m.pitch.acceptedChanges, 'exactly five accepted degree changes').toBe(5);
+    expect(m.pitch.droppedProhibited, 'nothing was suppressed by a prohibited interval').toBe(0);
+    // Every crossing that did not commit is a **refractory** drop — §9.4's "refractory crossings dropped,
+    // not delayed" — and none is replayed later.
+    expect(m.pitch.crossings).toBe(m.pitch.acceptedChanges + m.pitch.droppedRefractory);
+    expect(m.pitch.droppedRefractory).toBeGreaterThanOrEqual(1);
+    expect(m.pitch.padDegree, 'the walk ends back on degree 3').toBe(3);
+    // The accepted path is 0→1→2→3→4→3 (one adjacent step per crossing, no catch-up).
+    expect(m.pitchLog.filter((entry) => entry.accepted).map((entry) => entry.degree)).toEqual([1, 2, 3, 4, 3]);
+    // Every committed change is separated by at least the 12 s refractory.
+    const accepted = m.pitchLog.filter((entry) => entry.accepted).map((entry) => entry.at);
+    for (let i = 1; i < accepted.length; i += 1) {
+      expect(accepted[i]! - accepted[i - 1]!).toBeGreaterThanOrEqual(AUDIO.degreeRefractorySeconds);
+    }
+    // Every settled carrier is an exact note of the fixed key, and the peak guard is untouched.
+    expect(m.pitch.carriers.every(isInKey), 'the settled carriers are in key').toBe(true);
+    expect(m.pitch.carriers).toEqual(voicingCarriers(3));
+    expect(m.peak).toBeLessThanOrEqual(PEAK_CEILING);
+  });
+
+  test('§8 a fragmented single voice is exercised at every root, all in key', async ({ page }) => {
+    const probe = await openArtwork(page);
+    test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
+    if (!probe.ok) return;
+
+    const m = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [
+      { scenario: 'lively-fragmented', seconds: 110, rootSeed: 11 },
+    ]);
+    console.info(
+      `[audio-offline] lively-fragmented: accepted=${m.pitch.acceptedChanges} voices=${m.maxVoices} ` +
+        `carriers=[${m.pitch.carriers.map((hz) => hz.toFixed(2)).join(', ')}] peak=${m.peak.toFixed(4)}`,
+    );
+    expect(m.maxVoices, 'the pad stays a single voice at every root').toBe(1);
+    expect(m.pitch.acceptedChanges, 'the same five changes on the fragmented field').toBe(5);
+    expect(m.pitch.carriers.every(isInKey)).toBe(true);
+    expect(m.peak).toBeLessThanOrEqual(PEAK_CEILING);
+  });
+
+  test('§9 the descriptors freeze after one resolution and issue no further pitch targets', async ({ page }) => {
+    const probe = await openArtwork(page);
+    test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
+    if (!probe.ok) return;
+
+    // The descriptors stop changing at 24 s; the remaining ~106 s must add no crossing and no glide. A
+    // shorter render of the same fixture must therefore produce *identical* musicality diagnostics.
+    const short = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [
+      { scenario: 'lively-freeze', seconds: 60, rootSeed: 11 },
+    ]);
+    const long = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [
+      { scenario: 'lively-freeze', seconds: 130, rootSeed: 11 },
+    ]);
+    console.info(
+      `[audio-offline] lively-freeze: accepted=${long.pitch.acceptedChanges} crossings=${long.pitch.crossings} ` +
+        `degree=${long.pitch.padDegree} lastCommit=${long.pitch.lastCommitAt?.toFixed(1)}s`,
+    );
+    expect(long.pitch.crossings, 'no crossing is manufactured from frozen descriptors').toBe(
+      short.pitch.crossings,
+    );
+    expect(long.pitch.acceptedChanges, 'one resolution, then silence of intent').toBe(short.pitch.acceptedChanges);
+    expect(long.pitch.padDegree).toBe(short.pitch.padDegree);
+    expect(long.pitch.lastCommitAt).toBeCloseTo(short.pitch.lastCommitAt!, 6);
+    expect(long.pitch.crossings, 'every crossing committed (none dropped, none delayed)').toBe(
+      long.pitch.acceptedChanges,
+    );
+    expect(long.pitch.carriers.every(isInKey)).toBe(true);
+  });
+
+  test('§8 activity chatter inside the hysteresis deadband never moves the pad', async ({ page }) => {
+    const probe = await openArtwork(page);
+    test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
+    if (!probe.ok) return;
+
+    const m = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [
+      { scenario: 'chatter', seconds: 40, rootSeed: 11 },
+    ]);
+    console.info(`[audio-offline] chatter: crossings=${m.pitch.crossings} accepted=${m.pitch.acceptedChanges}`);
+    expect(m.pitch.crossings, 'no crossing from in-band chatter').toBe(0);
+    expect(m.pitch.acceptedChanges).toBe(0);
+    expect(m.pitch.padDegree).toBe(0);
+  });
+
+  test('§4 both bloom octaves take an in-key scale note (and the highest harmonic stays ≤ 2200 Hz)', async ({
+    page,
+  }) => {
+    const probe = await openArtwork(page);
+    test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
+    if (!probe.ok) return;
+
+    const runs: Array<[string, 'register-fine' | 'register-coarse', 'fine' | 'coarse']> = [
+      ['register-fine', 'register-fine', 'fine'],
+      ['register-coarse', 'register-coarse', 'coarse'],
+    ];
+    for (const [label, scenario, register] of runs) {
+      const m = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [{ scenario, seconds: 8, rootSeed: 11 }]);
+      console.info(
+        `[audio-offline] ${label}: bloom degree=${m.pitch.lastBloom?.degree} register=${m.pitch.lastBloom?.register} ` +
+          `base=${m.pitch.lastBloom?.baseHz.toFixed(2)}Hz`,
+      );
+      expect(m.pitch.lastBloom, `${label}: a bloom fired`).not.toBeNull();
+      expect(m.pitch.lastBloom!.register).toBe(register);
+      expect(isInKey(m.pitch.lastBloom!.baseHz), `${label}: the bloom note is in key`).toBe(true);
+      expect(m.pitch.lastBloom!.baseHz * 3, `${label}: highest weak harmonic ≤ 2200 Hz`).toBeLessThanOrEqual(2200.01);
+      expect(m.pitch.lastBloom!.baseHz).toBeGreaterThanOrEqual(220);
+      expect(m.pitch.lastBloom!.baseHz).toBeLessThanOrEqual(733.34);
+    }
+  });
+
+  test('§8 a bloom overlapping a pad glide stays in key and leaves the pad in key', async ({ page }) => {
+    const probe = await openArtwork(page);
+    test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
+    if (!probe.ok) return;
+
+    const m = await hook<OfflineAudioShape>(page, 'audioOfflineProbe', [
+      { scenario: 'glide-event', seconds: 30, rootSeed: 11 },
+    ]);
+    console.info(
+      `[audio-offline] glide-event: accepted=${m.pitch.acceptedChanges} events=${m.eventsFired} ` +
+        `bloom=${m.pitch.lastBloom?.baseHz.toFixed(2)}Hz`,
+    );
+    expect(m.pitch.acceptedChanges, 'the pad still commits during the overlap').toBeGreaterThanOrEqual(1);
+    expect(m.eventsFired, 'a bloom fired during the glide').toBeGreaterThanOrEqual(1);
+    expect(isInKey(m.pitch.lastBloom!.baseHz), 'the bloom note is a scale note, not the in-flight pad pitch').toBe(
+      true,
+    );
+    expect(m.pitch.carriers.every(isInKey), 'the pad settles in key').toBe(true);
+    expect(m.peak).toBeLessThanOrEqual(PEAK_CEILING);
   });
 });

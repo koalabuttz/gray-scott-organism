@@ -309,12 +309,28 @@ export const EVENTS = {
  */
 export const AUDIO = {
   /**
-   * §2 voice ratios (just intervals), in removal-priority order: root, octave, fifth above the octave,
-   * then the major third above the octave. The audible stack is 1 · f, 2 · f, 3 · f, 5/2 · f; the
-   * highest carrier is 3 · 165 = 495 Hz. The ratios are fixed and just — nothing morphs through
-   * dissonant intermediate chord ratios.
+   * §2 (TAKE-4) fixed tonic **A2 = 110 Hz**, across seeds, arcs, pauses and rebirths. A fixed key keeps
+   * listening comparison meaningful and prevents reset-time key jumps; the sound-substream seeds keep
+   * their noise/IR/grain responsibilities and never choose pitch.
    */
-  voiceRatios: [1, 2, 3, 2.5] as const,
+  tonicHz: 110,
+  /**
+   * §2 (TAKE-4) just **major-pentatonic** ratios for degrees 0–4: A, B, C♯, E, F♯. Ratios are the
+   * source of truth; the absolute scale index `k` maps to `tonic · 2^floor(k/5) · ratios[k mod 5]`.
+   */
+  scaleRatios: [1, 9 / 8, 5 / 4, 3 / 2, 5 / 3] as const,
+  /**
+   * §3 (TAKE-4) absolute-scale-index **voicing table**, voice order = removal priority. Every row is a
+   * related major / suspended / minor-color chord from the same pentatonic key — a major chord built on
+   * each pentatonic note would not stay in one key, so the voicings are explicit rather than transposed.
+   */
+  padVoicings: [
+    [0, 5, 8, 7], // A  → A2, A3, E4, C♯4 — warm major
+    [1, 6, 9, 8], // B  → B2, B3, F♯4, E4 — suspended fourth
+    [2, 7, 9, 8], // C♯ → C♯3, C♯4, F♯4, E4 — fourth + minor-third color
+    [3, 8, 11, 10], // E  → E3, E4, B4, A4 — suspended fourth
+    [4, 9, 12, 11], // F♯ → F♯3, F♯4, C♯5, B4 — suspended fourth
+  ] as const,
   /** §2 base relative weights, before normalisation and the coherence colour on voice 3. */
   voiceWeights: [1, 0.48, 0.26, 0.22] as const,
   /**
@@ -324,20 +340,44 @@ export const AUDIO = {
   voice0Harmonics: [1, 0.28, 0.1] as const,
   /** §2 upper-voice waveform: harmonics 1/2, divided by 1.10 under `disableNormalization:true`. */
   voiceHarmonics: [1, 0.1] as const,
-  /** §2 detune multipliers per voice: root never detunes; direction alternates to avoid whole-stack shift. */
-  detuneMultipliers: [0, 1, -1, 0.5] as const,
-  /** §2 the just major third (voice 3) becomes audible only as coherence rises (smoothstep window). */
-  thirdCoherenceLow: 0.25,
-  thirdCoherenceHigh: 0.75,
+  /** §3 coherence reveals the chord colour on voice 3 (smoothstep window; never a universal major third). */
+  chordColorLow: 0.25,
+  chordColorHigh: 0.75,
   /**
-   * §2 register: a reproducible low-mid band (110–165 Hz; highest carrier 495 Hz) that real speakers,
-   * not only headphones, reproduce. The logarithmic decreasing mapping is unchanged — large structures
-   * still sound lower — but the whole stack now sits where a laptop speaker has output. (Deviation 58
-   * supersedes the 55–110 Hz band of deviation 57.)
+   * §2/§3 (TAKE-4) the pad's musical anchors: the tonic and the top of the base pentatonic register
+   * (`110 · 5/3 ≈ 183.333 Hz`). These are the *key* bounds, not a continuous feature-scale sweep — the
+   * pad's degree is chosen by the activity-band selector below.
    */
   fundamentalMinHz: 110,
-  fundamentalMaxHz: 165,
+  fundamentalMaxHz: 110 * (5 / 3),
   maxVoices: 4,
+  /** §3 (TAKE-4) one bounded logarithmic glide per committed degree change (no restart, no gain boost). */
+  glideSeconds: 1.25,
+  /**
+   * §2 (TAKE-4) activity-band selector. `a = clamp(reactionActivity, 0, ceiling)`,
+   * `x = ln(1 + a/knee) / ln(1 + ceiling/knee)` ∈ [0,1]; five bands at the edges below select the pad
+   * degree. Selector τ 1.5 s, Schmitt hysteresis, and a 1 s / 3-distinct-sample confirmation.
+   */
+  activityCeiling: 0.03,
+  activityKnee: 0.001,
+  activityBandEdges: [0.2, 0.4, 0.6, 0.8] as const,
+  selectorTau: 1.5,
+  selectorHysteresis: 0.025,
+  /** §4 (TAKE-4) coherence bands select the bloom degree; same delays, slightly wider hysteresis. */
+  coherenceBandEdges: [0.2, 0.4, 0.6, 0.8] as const,
+  coherenceHysteresis: 0.03,
+  /** §2/§4 confirmation: a candidate band needs ≥ this many real seconds and ≥ this many fresh samples. */
+  confirmSeconds: 1,
+  confirmSamples: 3,
+  /** §2 (TAKE-4) ≥ 12 real audio-clock seconds between committed pad-degree changes. */
+  degreeRefractorySeconds: 12,
+  /** §4 (TAKE-4) bloom register: featureScaleNorm ≥ .5 coarsely (initial), ≥ .55 fine→coarse, ≤ .45 coarse→fine. */
+  registerFineToCoarse: 0.55,
+  registerCoarseToFine: 0.45,
+  registerInitialPivot: 0.5,
+  /** §4 (TAKE-4) bloom octave offsets in scale degrees: coarse `scaleHz(degree+5)`, fine `scaleHz(degree+10)`. */
+  bloomOctaveOffsetCoarse: 5,
+  bloomOctaveOffsetFine: 10,
   /** §2 pad level floor and intensity term: `0.18 + 0.06·√intensity` for a supported field; zero if absent. */
   padLevelFloor: 0.18,
   padLevelIntensityGain: 0.06,
@@ -372,15 +412,11 @@ export const AUDIO = {
   /** §5 reverb wet gain `0.07 + 0.04·clamp01(0.5·coherence + 0.5·intensity)` → 0.07–0.11. */
   wetMin: 0.07,
   wetMax: 0.11,
-  /** §3 porcelain bloom: three temporary sine partials at 1/2/3 × bellBaseHz, normalised amplitudes. */
+  /** §3 porcelain bloom: three temporary sine partials at 1/2/3 × baseHz, normalised amplitudes. */
   bloomPartialRatios: [1, 2, 3] as const,
   bloomPartialAmplitudes: [0.72, 0.21, 0.07] as const,
-  /** §3 bellBaseHz = rootHz · (featureScaleNorm ≥ 0.5 ? 2 : 3); range 220–495 Hz. */
-  bloomRegisterLarge: 2,
-  bloomRegisterSmall: 3,
-  bloomFeaturePivot: 0.5,
-  /** §3 raised-cosine 120 ms attack, then exponential decay τ 0.85 / 0.55 / 0.35 s. */
-  bloomAttackSeconds: 0.12,
+  /** §4 (TAKE-4) raised-cosine 180 ms attack, then exponential decay τ 0.85 / 0.55 / 0.35 s. */
+  bloomAttackSeconds: 0.18,
   bloomDecayTaus: [0.85, 0.55, 0.35] as const,
   /** §3 from 3.3 s a 100 ms bounded terminal fade; stop/disconnect all bloom nodes by 3.42 s. */
   bloomTerminalFadeStart: 3.3,
@@ -391,9 +427,7 @@ export const AUDIO = {
   /** §8.3 smoothing time constants (seconds): pad level 3, newly admitted/removed upper voices 10. */
   levelTau: 3,
   upperVoiceTau: 10,
-  frequencyTau: 10,
   filterTau: 6,
-  detuneTau: 8,
   textureTau: 4,
   wetTau: 8,
   /** §6 presence: support-on 0.001, support-off 0.00025, two samples and 0.5 s to confirm. */
@@ -415,8 +449,8 @@ export const AUDIO = {
   fadeSeconds: 8,
   /** §8.2 at least 15 s between porcelain blooms. */
   eventRefractorySeconds: 15,
-  /** §2 non-just detuning ceiling (cents) at zero coherence; coherence tightens it toward the ratios. */
-  maxDetuneCents: 3,
+  /** §3 (TAKE-4) zero detuning: coherence controls the chord-colour gain and the wet send only. */
+  maxDetuneCents: 0,
   /**
    * Conservative levels (linear, pre-compressor). §2's active pad level is `0.18 + 0.06·√intensity`
    * (a living-field floor, exactly zero when support is absent), the bloom peak is `0.065·clamp(…)` and

@@ -1,6 +1,6 @@
 /**
  * §8.1 six signal mappings (Phase 3, pure and unit-testable), palette per the Sunlit Porcelain Garden
- * sound-design record (§2 warm body, §4 soft shimmer, §5 small luminous space).
+ * sound-design record and its **TAKE-4 REVISION** (musicalization).
  *
  * Every mapping consumes only the **presentation tier** of the analysis snapshot
  * (`analysis.presentation`), never image pixels or GPU resources, and is a total, bounded function of
@@ -9,24 +9,29 @@
  * assert boundedness and monotonicity on injected synthetic sequences directly.
  *
  * The six controls of §8.1:
- *   1. scale        → `mapFundamentalHz`         (feature scale + low band → deeper fundamental)
+ *   1. scale        → the **activity-band pad-degree selector** (TAKE-4): the pitch *scale* is a fixed
+ *                     A-major-pentatonic key whose degree is chosen by reaction activity; feature scale
+ *                     survives causally through bloom octave selection only.
  *   2. fine detail  → `mapGrainRate` / filter     (high band + edge density → sparse shimmer)
  *   3. intensity    → `mapVoiceCount`/`mapPadLevel` (flux × occupancy → density + warm body)
- *   4. coherence    → `mapDetuneCents`/`thirdColorGain` (tighter ratios, hidden third revealed)
+ *   4. coherence    → `chordColorGain` / bloom degree / wet (colour revealed, no detuning)
  *   5. fragmentation→ `mapVoiceCount`/`mapTextureLevel` (progressive removal of upper voices/bandwidth)
  *   6. event serial → the engine's refractory porcelain bloom (one excitation per serial)
+ *
+ * All of the stateful parts (fresh-sample identity, smoothed selectors, confirmed bands, the accepted
+ * degree, the commit clock and the frequency mirrors) live in `AudioEngine`; everything here is pure.
  */
 import { AUDIO } from '../config.ts';
 import type { PresentationAnalysis } from '../core/types.ts';
 
-/** §2 just-interval voice ratios, declared once (the config value is the source of truth). */
-export const VOICE_RATIOS: readonly number[] = AUDIO.voiceRatios;
+/** §2 just-interval major-pentatonic ratios, declared once (the config value is the source of truth). */
+export const SCALE_RATIOS: readonly number[] = AUDIO.scaleRatios;
 
-/**
- * §2 detune multipliers per voice: the root never detunes (`0`), the upper voices alternate direction
- * so non-just detuning beats rather than shifting the whole stack.
- */
-export const DETUNE_MULTIPLIERS: readonly number[] = AUDIO.detuneMultipliers;
+/** §3 the absolute-scale-index voicing table (rows = pad degree, columns = voice in removal order). */
+export const PAD_VOICINGS: readonly (readonly number[])[] = AUDIO.padVoicings;
+
+/** §2 the pad's degree before any valid sample and after a reset: the tonic, A. */
+export const NEUTRAL_DEGREE = 0;
 
 /** Feature scale below which the field reads as fine texture, and above which as a large smooth mass. */
 const FEATURE_SCALE_FINE_UV = 0.02;
@@ -55,17 +60,86 @@ export function featureScaleNorm(featureScaleUV: number): number {
   return clamp01((Math.log(featureScaleUV) - lo) / (hi - lo));
 }
 
+// ---------------------------------------------------------------------------------------------
+// §2 (TAKE-4) the fixed A-major-pentatonic key
+// ---------------------------------------------------------------------------------------------
+
 /**
- * (1) Scale: large-scale structure and low-band energy pull the fundamental **down**. Logarithmic in
- * the §2 110–165 Hz register (deviation 58 supersedes deviation 57's 55–110 Hz band) so equal ratio
- * changes are equal perceptions; large structures still sound lower. Bounded, monotone decreasing in
- * both inputs.
+ * §2 absolute scale index → Hz: `tonic · 2^floor(k/5) · ratios[k mod 5]`. Ratios are the source of
+ * truth, so every settled carrier is exactly in-key regardless of octave. Non-finite or fractional
+ * indices are floored and clamped so a hostile input can never produce NaN.
  */
-export function mapFundamentalHz(featureScaleUV: number, lowBandEnergy: number): number {
-  const size = clamp01(0.65 * featureScaleNorm(featureScaleUV) + 0.35 * clamp01(lowBandEnergy));
-  const ratio = AUDIO.fundamentalMinHz / AUDIO.fundamentalMaxHz;
-  return AUDIO.fundamentalMaxHz * Math.pow(ratio, size);
+export function scaleHz(index: number): number {
+  if (!Number.isFinite(index)) return AUDIO.tonicHz;
+  const k = Math.max(0, Math.floor(index));
+  const octave = Math.floor(k / SCALE_RATIOS.length);
+  const ratio = SCALE_RATIOS[k % SCALE_RATIOS.length] ?? 1;
+  return AUDIO.tonicHz * Math.pow(2, octave) * ratio;
 }
+
+/** §2 normalized reaction-activity selector input `x ∈ [0, 1]` (log-compressed, knee at `AUDIO.activityKnee`). */
+export function activityX(reactionActivity: number): number {
+  const a = clamp(reactionActivity, 0, AUDIO.activityCeiling);
+  const span = Math.log(1 + AUDIO.activityCeiling / AUDIO.activityKnee);
+  if (!(span > 0)) return 0;
+  return clamp01(Math.log(1 + a / AUDIO.activityKnee) / span);
+}
+
+/**
+ * The exact inverse of `activityX`: the raw reaction activity whose normalized selector value is `x`.
+ * Used by the offline fixtures and the calibration documentation to place a fixture squarely inside a
+ * target band rather than guessing a raw number.
+ */
+export function activityForX(x: number): number {
+  const span = Math.log(1 + AUDIO.activityCeiling / AUDIO.activityKnee);
+  return AUDIO.activityKnee * (Math.exp(clamp01(x) * span) - 1);
+}
+
+/** The band index `0..edges.length` of a selector value against ascending band edges. */
+export function bandOf(value: number, edges: readonly number[]): number {
+  if (!Number.isFinite(value)) return 0;
+  let band = 0;
+  for (const edge of edges) if (value >= edge) band += 1;
+  return band;
+}
+
+/**
+ * §2/§4 Schmitt band: the band only moves **up** when the value clears `edge + hysteresis` and only
+ * **down** when it falls below `edge − hysteresis`, so a value sitting on a boundary cannot chatter.
+ */
+export function hystereticBand(
+  value: number,
+  current: number,
+  edges: readonly number[],
+  hysteresis: number,
+): number {
+  if (!Number.isFinite(value)) return current;
+  let band = clamp(Math.round(current), 0, edges.length);
+  while (band < edges.length && value >= edges[band]! + hysteresis) band += 1;
+  while (band > 0 && value < edges[band - 1]! - hysteresis) band -= 1;
+  return band;
+}
+
+/** §3 the four absolute scale indices for a pad degree (clamped to the table). */
+export function padVoicing(degree: number): readonly number[] {
+  const index = clamp(Math.round(degree), 0, PAD_VOICINGS.length - 1);
+  return PAD_VOICINGS[index]!;
+}
+
+/** §3 the four carrier frequencies (Hz) for a pad degree — every one exactly in-key. */
+export function voicingCarriers(degree: number): [number, number, number, number] {
+  const voicing = padVoicing(degree);
+  return [scaleHz(voicing[0]!), scaleHz(voicing[1]!), scaleHz(voicing[2]!), scaleHz(voicing[3]!)] as [
+    number,
+    number,
+    number,
+    number,
+  ];
+}
+
+// ---------------------------------------------------------------------------------------------
+// §8.1 continuous controls
+// ---------------------------------------------------------------------------------------------
 
 /** (3) Intensity: reaction flux × occupancy, each against a calibrated reference. Bounded 0–1. */
 export function mapIntensity(occupiedFraction: number, reactionActivity: number): number {
@@ -85,14 +159,9 @@ export function mapVoiceCount(intensity: number, fragmentation: number): number 
   return clamp(Math.round(effective), 1, AUDIO.maxVoices);
 }
 
-/** (4) Coherence tightens detuning toward the just ratios; zero coherence leaves the 3-cent ceiling. */
-export function mapDetuneCents(coherence: number): number {
-  return AUDIO.maxDetuneCents * (1 - clamp01(coherence));
-}
-
-/** §2 the just major third (voice 3) becomes audible only as coherence rises (smoothstep 0.25→0.75). */
-export function thirdColorGain(coherence: number): number {
-  return smoothstep(AUDIO.thirdCoherenceLow, AUDIO.thirdCoherenceHigh, clamp01(coherence));
+/** §3 coherence reveals the chord colour on voice 3 (which is not universally a major third). */
+export function chordColorGain(coherence: number): number {
+  return smoothstep(AUDIO.chordColorLow, AUDIO.chordColorHigh, clamp01(coherence));
 }
 
 /** (2) Fine detail: high band + edge density → a normalized detail amount in [0, 1]. */
@@ -126,9 +195,9 @@ export function mapWetGain(coherence: number, intensity: number): number {
 /**
  * §2 active pad level: `0.18 + 0.06·√intensity` for a field that carries **any** support, and exactly
  * zero for an absent field. The *stateful* decision belongs to the engine's latched presence
- * eligibility (MAJOR 2): the floor stays through the hysteresis band `[supportOff, supportOn)` and is
- * removed only when presence clears, so this function must not re-gate on the raw on-threshold (which
- * would chatter the pad to zero inside the band). Gating on `supportFraction > 0` keeps the floor from
+ * eligibility: the floor stays through the hysteresis band `[supportOff, supportOn)` and is removed
+ * only when presence clears, so this function must not re-gate on the raw on-threshold (which would
+ * chatter the pad to zero inside the band). Gating on `supportFraction > 0` keeps the floor from
  * leaking into an empty fixture.
  */
 export function mapPadLevel(intensity: number, supportFraction: number): number {
@@ -137,9 +206,10 @@ export function mapPadLevel(intensity: number, supportFraction: number): number 
 }
 
 /**
- * §2 per-voice target levels: base weights, the §2 coherence colour applied to voice 3, then normalise
- * the **active** weights by `max(1, sqrt(sum(weight²)))` before scaling by the pad level. Density
- * therefore increases spectral richness without loudness jumps. Inactive voices are exactly zero.
+ * §2 per-voice target levels: base weights, the §3 chord colour applied to voice 3, then normalise the
+ * **active** weights by `max(1, sqrt(sum(weight²)))` before scaling by the pad level. Density therefore
+ * increases spectral richness without loudness jumps. Inactive voices are exactly zero (unchanged from
+ * the pre-TAKE-4 design — the level plan is an untouched invariant, §6).
  */
 export function voiceLevels(
   voiceCount: number,
@@ -147,7 +217,7 @@ export function voiceLevels(
   coherence: number,
 ): [number, number, number, number] {
   const weights = AUDIO.voiceWeights.map((weight, index) =>
-    index === 3 ? weight * thirdColorGain(coherence) : weight,
+    index === 3 ? weight * chordColorGain(coherence) : weight,
   );
   const count = clamp(Math.round(voiceCount), 1, AUDIO.maxVoices);
   let sumSquares = 0;
@@ -172,16 +242,28 @@ export function mapTextureFilterHz(fineDetail: number): number {
   return AUDIO.grainFilterMinHz * Math.pow(AUDIO.grainFilterMaxHz / AUDIO.grainFilterMinHz, t);
 }
 
-/** §2 a voice's low-pass sits above its own partial: `clamp(carrier·(3 + 2·intensity), 500, 2400)`. */
-export function mapVoiceFilterHz(fundamentalHz: number, voiceIndex: number, intensity: number): number {
-  const ratio = VOICE_RATIOS[Math.max(0, Math.min(VOICE_RATIOS.length - 1, voiceIndex))] ?? 1;
-  const centre = fundamentalHz * ratio;
+/** §2 a voice's low-pass sits above its **selected carrier**: `clamp(carrier·(3 + 2·intensity), 500, 2400)`. */
+export function mapVoiceFilterHz(carrierHz: number, intensity: number): number {
   return clamp(
-    centre * (AUDIO.voiceFilterBase + AUDIO.voiceFilterIntensityGain * clamp01(intensity)),
+    carrierHz * (AUDIO.voiceFilterBase + AUDIO.voiceFilterIntensityGain * clamp01(intensity)),
     AUDIO.voiceFilterMinHz,
     AUDIO.voiceFilterMaxHz,
   );
 }
+
+/**
+ * §4 (TAKE-4) the bloom's base frequency: the scale note for the current bloom degree in the coarse
+ * (`degree + 5` → 220–366.667 Hz) or fine (`degree + 10` → 440–733.333 Hz) register.
+ */
+export function bloomBaseHz(degree: number, register: 'coarse' | 'fine'): number {
+  const offset =
+    register === 'coarse' ? AUDIO.bloomOctaveOffsetCoarse : AUDIO.bloomOctaveOffsetFine;
+  return scaleHz(clamp(Math.round(degree), 0, 4) + offset);
+}
+
+// ---------------------------------------------------------------------------------------------
+// §7.1 control bundle
+// ---------------------------------------------------------------------------------------------
 
 /** The complete per-tick control bundle derived from one presentation sample. */
 export interface AudioControls {
@@ -191,14 +273,16 @@ export interface AudioControls {
   fineDetail: number;
   fragmentation: number;
   coherence: number;
-  fundamentalHz: number;
-  voiceFrequencies: [number, number, number, number];
-  voiceFilters: [number, number, number, number];
-  detuneCents: number;
+  /**
+   * §2 (TAKE-4) normalized reaction-activity selector input `x ∈ [0,1]`. The engine smooths it, derives
+   * the hysteretic band and decides whether a pad-degree change is admitted; the *carriers* come from
+   * the engine's accepted degree, not from this bundle.
+   */
+  activityX: number;
   voiceCount: number;
   /** §2 active pad level for a supported field (`0.18 + 0.06·√intensity`), exactly 0 when support is absent. */
   voiceLevel: number;
-  /** §2 per-voice target levels (base weights, coherence colour on voice 3, normalised). */
+  /** §2 per-voice target levels (base weights, chord colour on voice 3, normalised). */
   voiceLevels: [number, number, number, number];
   /** The raw §6 support descriptor carried through for the presence state machine. */
   supportFraction: number;
@@ -210,19 +294,13 @@ export interface AudioControls {
 
 /** A bounded, silent control bundle used before any valid sample and while the tier is stale. */
 export function neutralAudioControls(): AudioControls {
-  const fundamentalHz = (AUDIO.fundamentalMinHz + AUDIO.fundamentalMaxHz) / 2;
   return {
     valid: false,
     intensity: 0,
     fineDetail: 0,
     fragmentation: 0,
     coherence: 0,
-    fundamentalHz,
-    voiceFrequencies: VOICE_RATIOS.map((ratio) => fundamentalHz * ratio) as [number, number, number, number],
-    voiceFilters: VOICE_RATIOS.map((_, index) =>
-      mapVoiceFilterHz(fundamentalHz, index, 0),
-    ) as [number, number, number, number],
-    detuneCents: 0,
+    activityX: 0,
     voiceCount: 1,
     voiceLevel: 0,
     voiceLevels: [0, 0, 0, 0],
@@ -234,11 +312,10 @@ export function neutralAudioControls(): AudioControls {
   };
 }
 
-/** Derive the six §8.1 controls from one presentation sample. Pure. */
+/** Derive the six §8.1 continuous controls from one presentation sample. Pure. */
 export function deriveAudioControls(presentation: PresentationAnalysis): AudioControls {
   if (!presentation.valid) return neutralAudioControls();
   const bands = presentation.spectralBands;
-  const lowBand = bands[0] ?? 0;
   const highBand = bands[3] ?? 0;
   const intensity = mapIntensity(presentation.occupiedFraction, presentation.reactionActivity);
   const fragmentation = mapFragmentation(
@@ -247,7 +324,6 @@ export function deriveAudioControls(presentation: PresentationAnalysis): AudioCo
   );
   const coherence = clamp01(presentation.coherence);
   const fineDetail = mapFineDetail(highBand, presentation.edgeDensity);
-  const fundamentalHz = mapFundamentalHz(presentation.featureScaleUV, lowBand);
   const voiceCount = mapVoiceCount(intensity, fragmentation);
   const supportFraction = clamp01(presentation.supportFraction);
   const padLevel = mapPadLevel(intensity, supportFraction);
@@ -257,12 +333,7 @@ export function deriveAudioControls(presentation: PresentationAnalysis): AudioCo
     fineDetail,
     fragmentation,
     coherence,
-    fundamentalHz,
-    voiceFrequencies: VOICE_RATIOS.map((ratio) => fundamentalHz * ratio) as [number, number, number, number],
-    voiceFilters: VOICE_RATIOS.map((_, index) =>
-      mapVoiceFilterHz(fundamentalHz, index, intensity),
-    ) as [number, number, number, number],
-    detuneCents: mapDetuneCents(coherence),
+    activityX: activityX(presentation.reactionActivity),
     voiceCount,
     voiceLevel: padLevel,
     voiceLevels: voiceLevels(voiceCount, padLevel, coherence),

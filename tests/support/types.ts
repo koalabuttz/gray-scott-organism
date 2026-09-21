@@ -366,6 +366,25 @@ export interface OfflineAudioShape {
   rootSeed: number | null;
   /** §4.4 deterministic fingerprint of the live noise/IR material. */
   soundChecksum: number;
+  /** §9.5 (TAKE-4) musicality diagnostics: selectors, degrees, carriers and accept/drop counters. */
+  pitch: {
+    activityX: number | null;
+    observedBand: number;
+    padDegree: number;
+    coherenceX: number | null;
+    bloomDegree: number;
+    bloomRegister: string;
+    carriers: number[];
+    lastCommitAt: number | null;
+    crossings: number;
+    eligibleCrossings: number;
+    acceptedChanges: number;
+    droppedRefractory: number;
+    droppedProhibited: number;
+    lastBloom: { at: number; baseHz: number; degree: number; register: string } | null;
+  };
+  /** §9.5 the bounded pad-degree change log (oldest first). */
+  pitchLog: Array<{ at: number; band: number; degree: number; accepted: boolean; reason: string }>;
 }
 
 /** §4.4 the live sound substream (`audioSoundSignature()`), for restart-determinism checks. */

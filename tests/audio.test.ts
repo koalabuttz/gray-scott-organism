@@ -20,7 +20,13 @@ import { AudioEngine } from '../src/audio/audio.ts';
 import { createImpulseResponse, createNoiseBuffer } from '../src/audio/buffers.ts';
 import { syntheticWorld } from '../src/audio/offline.ts';
 import { deriveSoundSeeds } from '../src/audio/substream.ts';
-import { deriveAudioControls } from '../src/audio/voices.ts';
+import {
+  activityForX,
+  bandOf,
+  bloomBaseHz,
+  deriveAudioControls,
+  voicingCarriers,
+} from '../src/audio/voices.ts';
 import type { EventState, WorldState } from '../src/core/types.ts';
 import { FakeAudioContext, type FakeAudioParam, asBaseAudioContext } from './support/fake-audio.ts';
 
@@ -69,6 +75,11 @@ function eventParam(engine: AudioEngine): FakeAudioParam {
   return engine.graph.eventGain.gain as unknown as FakeAudioParam;
 }
 
+/** A pad voice's **frequency** param, as the recording fake (the TAKE-4 pitch path). */
+function voiceFreqParam(engine: AudioEngine, index: number): FakeAudioParam {
+  return engine.graph.voices[index]!.oscillator.frequency as unknown as FakeAudioParam;
+}
+
 /** Every `worldFor()` call carries a *fresh* sample mark, so support confirmation can advance. */
 let sampleSeq = 0;
 function worldFor(
@@ -110,14 +121,14 @@ describe('§3 porcelain bloom (deviation 58)', () => {
     expect(AUDIO.bloomPartialAmplitudes).toEqual([0.72, 0.21, 0.07]);
   });
 
-  it('spawns three sine partials — not three Q = 8 band-passes — at the 2× register', () => {
+  it('spawns three sine partials — not three Q = 8 band-passes — from the engine-selected note', () => {
     const context = new FakeAudioContext();
     const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true });
     const oscBefore = context.oscillators.length;
     const filtersBefore = context.filters.length;
 
-    // §3 a *large* structure (featureScaleNorm ≥ 0.5) sounds as a larger object → the 2× register.
-    engine.graph.spawnEvent(10, { rootHz: 110, featureScaleNorm: 0.8, strength: 0.8 });
+    // TAKE-4 §4: the engine hands over an exact scale note; the graph only builds the three partials.
+    engine.graph.spawnEvent(10, { baseHz: 220, strength: 0.8 });
 
     const created = context.oscillators.slice(oscBefore);
     expect(created, 'one bloom creates three partials, not four').toHaveLength(3);
@@ -128,22 +139,23 @@ describe('§3 porcelain bloom (deviation 58)', () => {
     engine.dispose();
   });
 
-  it('chooses the 3× register for a fine structure (smaller, brighter object)', () => {
-    const context = new FakeAudioContext();
-    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true });
-    const oscBefore = context.oscillators.length;
-    // §3 a *fine* structure (featureScaleNorm < 0.5) sounds as a smaller object → the 3× register.
-    engine.graph.spawnEvent(10, { rootHz: 110, featureScaleNorm: 0.2, strength: 0.5 });
-    const created = context.oscillators.slice(oscBefore);
-    expect(created.map((oscillator) => oscillator.frequency.value)).toEqual([330, 660, 990]);
-    engine.dispose();
+  it('scales the partials from any in-key base note (all five degrees, both registers)', () => {
+    for (const baseHz of [220, 247.5, 275, 330, 366.6666667, 440, 495, 550, 660, 733.3333333]) {
+      const context = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true });
+      const oscBefore = context.oscillators.length;
+      engine.graph.spawnEvent(10, { baseHz, strength: 0.5 });
+      const created = context.oscillators.slice(oscBefore);
+      expect(created.map((oscillator) => oscillator.frequency.value)).toEqual([baseHz, baseHz * 2, baseHz * 3]);
+      engine.dispose();
+    }
   });
 
   it('schedules a raised-cosine attack, exponential decay and a bounded terminal fade to zero', () => {
     const context = new FakeAudioContext();
     const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true });
     const gainsBefore = context.gains.length;
-    engine.graph.spawnEvent(10, { rootHz: 110, featureScaleNorm: 0.8, strength: 1 });
+    engine.graph.spawnEvent(10, { baseHz: 220, strength: 1 });
     const env = context.gains.slice(gainsBefore)[0]!; // the fundamental partial's gain
     const attack = env.gain.events.find((event) => event.kind === 'curve')!;
     expect(attack.duration).toBeCloseTo(AUDIO.bloomAttackSeconds, 6);
@@ -1392,6 +1404,642 @@ describe('§2 graph palette', () => {
     expect(curve[0], 'the grain starts at exactly zero').toBeCloseTo(0, 9);
     expect(curve[curve.length - 1], 'the grain ends at exactly zero').toBeCloseTo(0, 9);
     expect(Math.max(...curve)).toBeCloseTo(AUDIO.grainPeak, 3);
+    engine.dispose();
+  });
+});
+
+describe('§2/§3 (TAKE-4) the musicalized pad', () => {
+  /** A world whose reaction activity lands squarely in a band (centres .1/.3/.5/.7/.9). */
+  function bandWorld(x: number, extra: Parameters<typeof worldFor>[1] = {}): WorldState {
+    return worldFor({ reactionActivity: activityForX(x), occupiedFraction: 0.32, coherence: 0.45 }, extra);
+  }
+
+  /** Tick `[from, to]` inclusive at the scheduler cadence. */
+  function run(
+    engine: AudioEngine,
+    context: FakeAudioContext,
+    from: number,
+    to: number,
+    world: () => WorldState,
+  ): void {
+    for (let t = from; t <= to + 1e-9; t += AUDIO.tickMs / 1000) {
+      context.currentTime = t;
+      engine.consume(world());
+      engine.tick(t);
+    }
+  }
+
+  /** Tick until the crossing count rises, or `limit` elapses; returns the confirm time or null. */
+  function tickUntilCrossing(
+    engine: AudioEngine,
+    context: FakeAudioContext,
+    limit: number,
+    world: () => WorldState,
+  ): number | null {
+    const from = context.currentTime;
+    for (let t = from; t <= from + limit; t += 0.05) {
+      context.currentTime = t;
+      engine.consume(world());
+      engine.tick(t);
+      if (engine.pitchDiagnostics().crossings > 0) return t;
+    }
+    return null;
+  }
+
+  it('settles at degree 0 (neutral A) with no crossing of its own', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 8, () => bandWorld(0.1));
+    const pitch = engine.pitchDiagnostics();
+    expect(pitch.padDegree).toBe(0);
+    expect(pitch.observedBand).toBe(0);
+    expect(pitch.crossings).toBe(0);
+    expect(pitch.acceptedChanges).toBe(0);
+    expect(pitch.carriers).toEqual(voicingCarriers(0));
+    engine.dispose();
+  });
+
+  it('confirms after ≥1 s and ≥3 distinct samples, and moves exactly one adjacent degree', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 3, () => bandWorld(0.1));
+
+    const stepAt = 3;
+    let confirmedAt: number | null = null;
+    for (let t = stepAt; t <= stepAt + 10; t += 0.05) {
+      context.currentTime = t;
+      engine.consume(bandWorld(0.7));
+      engine.tick(t);
+      if (confirmedAt === null && engine.pitchDiagnostics().crossings > 0) confirmedAt = t;
+    }
+    expect(confirmedAt, 'a crossing confirmed').not.toBeNull();
+    const pitch = engine.pitchDiagnostics();
+    expect(pitch.observedBand, 'the observed band latched to the band the activity crossed into').toBe(3);
+    expect(pitch.padDegree, 'a large jump still moves exactly one adjacent degree').toBe(1);
+    expect(pitch.acceptedChanges).toBe(1);
+    expect(pitch.carriers).toEqual(voicingCarriers(1));
+    // The confirmation cannot fire before a full second of persistence.
+    expect(confirmedAt!).toBeGreaterThan(stepAt + AUDIO.confirmSeconds - 0.06);
+    engine.dispose();
+  });
+
+  it('never confirms from a duplicate sample mark (repeated ticks on one snapshot)', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 12, () => bandWorld(0.7, { sampleSeconds: 42 }));
+    expect(engine.pitchDiagnostics().crossings, 'a repeated snapshot never confirms').toBe(0);
+    expect(engine.pitchDiagnostics().padDegree).toBe(0);
+    engine.dispose();
+  });
+
+  it('confirms nothing from activity chatter inside the hysteresis deadband', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 30, () => bandWorld(Math.floor(context.currentTime) % 2 === 0 ? 0.15 : 0.25));
+    expect(engine.pitchDiagnostics().crossings).toBe(0);
+    expect(engine.pitchDiagnostics().padDegree).toBe(0);
+    engine.dispose();
+  });
+
+  it('issues exactly one finite logarithmic glide per commit — and no per-tick pitch target', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 3, () => bandWorld(0.1));
+    const before = voiceFreqParam(engine, 0).events.length;
+    expect(tickUntilCrossing(engine, context, 10, () => bandWorld(0.7))).not.toBeNull();
+
+    const curves = voiceFreqParam(engine, 0).events.slice(before).filter((event) => event.kind === 'curve');
+    expect(curves, 'exactly one glide curve per committed change').toHaveLength(1);
+    expect(curves[0]!.duration).toBeCloseTo(AUDIO.glideSeconds, 9);
+    const curve = curves[0]!.curve!;
+    expect(curve[0]).toBeCloseTo(voicingCarriers(0)[0]!, 4);
+    expect(curve[curve.length - 1]).toBeCloseTo(voicingCarriers(1)[0]!, 4);
+    expect(curve[Math.floor(curve.length / 2)]!).toBeGreaterThan(curve[0]!); // monotone glide
+    // The old continuous mapping used a per-tick `setTarget` on every voice frequency; it is gone.
+    for (let i = 0; i < AUDIO.maxVoices; i += 1) {
+      expect(voiceFreqParam(engine, i).events.every((event) => event.kind !== 'target')).toBe(true);
+    }
+    engine.dispose();
+  });
+
+  it('drops a crossing inside the 12 s refractory and never releases a catch-up later', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 3, () => bandWorld(0.1));
+    expect(tickUntilCrossing(engine, context, 12, () => bandWorld(0.3))).not.toBeNull();
+    const first = engine.pitchDiagnostics();
+    expect(first.acceptedChanges).toBe(1);
+    expect(first.padDegree).toBe(1);
+
+    // Step back down inside the gate: the crossing is observed and dropped, not delayed.
+    const from = context.currentTime;
+    run(engine, context, from + 0.05, from + 6, () => bandWorld(0.1));
+    const after = engine.pitchDiagnostics();
+    expect(after.droppedRefractory, 'the crossing was dropped by the refractory').toBeGreaterThanOrEqual(1);
+    expect(after.acceptedChanges).toBe(1);
+    expect(after.padDegree).toBe(1);
+
+    // Holding the same descriptors must not release a queued change once the gate expires.
+    const held = context.currentTime;
+    run(engine, context, held + 0.05, held + 20, () => bandWorld(0.1));
+    expect(engine.pitchDiagnostics().acceptedChanges, 'no catch-up change is ever queued').toBe(1);
+    engine.dispose();
+  });
+
+  it('consumes a crossing from a prohibited interval and requires a fresh one afterwards', () => {
+    for (const kind of ['pause', 'mute'] as const) {
+      const context = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+      run(engine, context, 0, 2, () => bandWorld(0.1));
+      context.currentTime = 2;
+      if (kind === 'pause') engine.setPaused(true);
+      if (kind === 'mute') engine.setMuted(true);
+      run(engine, context, 2, 12, () => bandWorld(0.9));
+      const during = engine.pitchDiagnostics();
+      expect(during.crossings, `${kind}: the crossing was observed`).toBeGreaterThanOrEqual(1);
+      expect(during.droppedProhibited).toBeGreaterThanOrEqual(1);
+      expect(during.acceptedChanges, `${kind}: nothing commits while prohibited`).toBe(0);
+      expect(during.padDegree).toBe(0);
+
+      // Restore permission and step to a *different* band: only a new crossing may commit.
+      const restoreAt = context.currentTime + 0.05;
+      context.currentTime = restoreAt;
+      if (kind === 'pause') engine.setPaused(false);
+      if (kind === 'mute') engine.setMuted(false);
+      engine.consume(bandWorld(0.9));
+      engine.tick(restoreAt);
+      expect(engine.pitchDiagnostics().acceptedChanges, `${kind}: the spent crossing is not replayed`).toBe(0);
+      run(engine, context, restoreAt + 0.05, restoreAt + 8, () => bandWorld(0.5));
+      const after = engine.pitchDiagnostics();
+      expect(after.acceptedChanges, `${kind}: a fresh post-return crossing commits`).toBe(1);
+      expect(after.padDegree).toBe(1);
+      engine.dispose();
+    }
+  });
+
+  it('a stall rebaselines the observed band, and invalidity holds the last pitch', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 3, () => bandWorld(0.1));
+    run(engine, context, 3, 3.4, () => bandWorld(0.9));
+    const beforeDegree = engine.pitchDiagnostics().padDegree;
+
+    // A multi-second stall: candidates are dropped and the observed band is rebaselined to the smoothed
+    // value's band; the held degree is preserved.
+    context.currentTime = 6.4;
+    engine.consume(bandWorld(0.9));
+    engine.tick(6.4);
+    const stalled = engine.pitchDiagnostics();
+    expect(stalled.padDegree, 'the held degree is preserved across the stall').toBe(beforeDegree);
+    expect(stalled.observedBand, 'the observed band is rebaselined').toBe(
+      bandOf(stalled.activityX!, AUDIO.activityBandEdges),
+    );
+
+    // An invalid/stale sample clears candidates and holds the pitch — never NaN, never degree 0 from NaN.
+    run(engine, context, 6.45, 10, () => worldFor({ valid: false }));
+    const invalid = engine.pitchDiagnostics();
+    expect(invalid.padDegree).toBe(beforeDegree);
+    expect(invalid.carriers.every((hz) => Number.isFinite(hz))).toBe(true);
+    expect(invalid.carriers).toEqual(voicingCarriers(beforeDegree));
+    engine.dispose();
+  });
+
+  it('takes the bloom note from the coherence degree and the feature-scale register', () => {
+    for (const [featureScaleUV, register] of [
+      [0.66, 'coarse'],
+      [0.02, 'fine'],
+    ] as const) {
+      const context = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+      const oscBefore = context.oscillators.length;
+      for (let t = 0; t <= 4; t += 0.05) {
+        context.currentTime = t;
+        engine.consume(
+          worldFor(
+            { coherence: 0.45, featureScaleUV },
+            { event: { serial: t < 2.5 ? 1 : 2, kind: 'merge', strength: 0.8 } },
+          ),
+        );
+        engine.tick(t);
+      }
+      const pitch = engine.pitchDiagnostics();
+      expect(pitch.bloomRegister).toBe(register);
+      expect(pitch.bloomDegree, 'coherence .45 is the third band').toBe(2);
+      expect(pitch.lastBloom, 'a bloom fired').not.toBeNull();
+      expect(pitch.lastBloom!.baseHz).toBeCloseTo(bloomBaseHz(2, register), 6);
+      const bloomOscillators = context.oscillators.slice(oscBefore);
+      expect(bloomOscillators.map((oscillator) => oscillator.frequency.value)).toEqual([
+        pitch.lastBloom!.baseHz,
+        pitch.lastBloom!.baseHz * 2,
+        pitch.lastBloom!.baseHz * 3,
+      ]);
+      // Highest weak harmonic ≤ 2200 Hz, and the pitch is latched (no frequency automation on the bloom).
+      expect(pitch.lastBloom!.baseHz * 3).toBeLessThanOrEqual(2200 + 1e-6);
+      expect(bloomOscillators.every((oscillator) => oscillator.frequency.events.length === 0)).toBe(true);
+      engine.dispose();
+    }
+  });
+
+  it('resets to the silent neutral A and cancels pitch automation with the episode', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 1 });
+    run(engine, context, 0, 3, () => bandWorld(0.1));
+    expect(tickUntilCrossing(engine, context, 12, () => bandWorld(0.7))).not.toBeNull();
+    expect(engine.pitchDiagnostics().padDegree).toBe(1);
+
+    const resetAt = context.currentTime + 0.05;
+    context.currentTime = resetAt;
+    engine.resetPerformance(resetAt, 5);
+    const pitch = engine.pitchDiagnostics();
+    expect(pitch.padDegree, 'the fresh performance starts on the neutral A').toBe(0);
+    expect(pitch.observedBand).toBe(0);
+    expect(pitch.carriers).toEqual(voicingCarriers(0));
+    expect(pitch.acceptedChanges).toBe(0);
+
+    const flushAt = resetAt + AUDIO.declickSeconds + 0.001;
+    context.currentTime = flushAt;
+    engine.consume(bandWorld(0.1));
+    engine.tick(flushAt);
+    for (let i = 0; i < AUDIO.maxVoices; i += 1) {
+      expect(
+        voiceFreqParam(engine, i).cancels.some((time) => Math.abs(time - flushAt) < 1e-9),
+        'pitch automation was cancelled at the reset zero instant',
+      ).toBe(true);
+    }
+    engine.dispose();
+  });
+});
+
+describe('§2/§4 (TAKE-4) the band-selector state machine (findings MAJOR 1/2/3/4)', () => {
+  /** An active supported field with the reaction activity centred in band `x`. */
+  const fieldWorld = (
+    x: number,
+    mark: number,
+    opts: { support?: number; coherence?: number; featureScaleUV?: number; stillness?: 'none' | 'kill-wait' } = {},
+  ): WorldState =>
+    syntheticWorld(
+      {
+        ...ACTIVE_PRESENTATION,
+        reactionActivity: activityForX(x),
+        coherence: opts.coherence ?? ACTIVE_PRESENTATION.coherence,
+        featureScaleUV: opts.featureScaleUV ?? ACTIVE_PRESENTATION.featureScaleUV,
+        supportFraction: opts.support ?? ACTIVE_PRESENTATION.supportFraction,
+      },
+      { sampleSeconds: mark, phase: { stillnessState: opts.stillness ?? 'none' } },
+    );
+
+  function runTicks(
+    engine: AudioEngine,
+    context: FakeAudioContext,
+    from: number,
+    to: number,
+    worldAt: (t: number) => WorldState,
+  ): void {
+    for (let t = from; t <= to + 1e-9; t += AUDIO.tickMs / 1000) {
+      context.currentTime = t;
+      engine.consume(worldAt(t));
+      engine.tick(t);
+    }
+  }
+
+  const markAt = (t: number): number => Math.round(t * 1000);
+
+  it('MAJOR 1: τ advances on elapsed time between *fresh* samples, never on the scheduler tick gap', () => {
+    // Reference cadence: the sample mark advances exactly when the tick does (both every 500 ms).
+    const refCtx = new FakeAudioContext();
+    const ref = new AudioEngine(asBaseAudioContext(refCtx), { unlocked: true, rootSeed: 1 });
+    refCtx.currentTime = 0;
+    ref.consume(fieldWorld(0.1, 0, { support: 0 }));
+    ref.tick(0);
+    for (let k = 1; k <= 3; k += 1) {
+      refCtx.currentTime = 0.5 * k;
+      ref.consume(fieldWorld(0.9, k, { support: 0 }));
+      ref.tick(0.5 * k);
+    }
+    const reference = ref.pitchDiagnostics().activityX!;
+
+    // Production cadence: ticks every 50 ms, but a fresh mark only every 500 ms.
+    const ctx = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+    ctx.currentTime = 0;
+    engine.consume(fieldWorld(0.1, 0, { support: 0 }));
+    engine.tick(0);
+    for (let i = 1; i <= 30; i += 1) {
+      const t = 0.05 * i;
+      ctx.currentTime = t;
+      engine.consume(fieldWorld(0.9, Math.floor(t / 0.5 + 1e-9), { support: 0 }));
+      engine.tick(t);
+    }
+    const production = engine.pitchDiagnostics().activityX!;
+
+    // Three 0.5 s fresh steps under τ = 1.5 s give x ≈ 0.9·(1 − e^{−1}) ≈ 0.606. The tick-gap bug
+    // would leave x ≈ 0.09 (τ effectively 15 s) — the static drone the revision exists to remove.
+    expect(reference, 'the reference run really smoothed with τ = 1.5 s').toBeGreaterThan(0.5);
+    expect(production, 'fresh-sample elapsed, not the tick gap').toBeCloseTo(reference, 3);
+
+    // Duplicate-only control: one mark held while the raw activity steps 0.1 → 0.9 smooths nothing.
+    const dupCtx = new FakeAudioContext();
+    const dup = new AudioEngine(asBaseAudioContext(dupCtx), { unlocked: true, rootSeed: 1 });
+    dupCtx.currentTime = 0;
+    dup.consume(fieldWorld(0.1, 7, { support: 0 }));
+    dup.tick(0);
+    for (let t = 0.05; t <= 3 + 1e-9; t += 0.05) {
+      dupCtx.currentTime = t;
+      dup.consume(fieldWorld(0.9, 7, { support: 0 }));
+      dup.tick(t);
+    }
+    expect(dup.pitchDiagnostics().activityX, 'duplicates never advance the smoothing').toBeCloseTo(0.1, 6);
+
+    ref.dispose();
+    engine.dispose();
+    dup.dispose();
+  });
+
+  it('MAJOR 2: a silent reveal baselines the observed band *and* pad degree from the current activity', () => {
+    const centres = [0.1, 0.3, 0.5, 0.7, 0.9];
+    for (let expected = 0; expected <= 4; expected += 1) {
+      const ctx = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+      // A reset de-clicks the master to exact zero; the support that then re-confirms reveals from that
+      // silence, so the reveal is a *silent preparation*.
+      ctx.currentTime = 0;
+      engine.resetPerformance(0);
+      runTicks(engine, ctx, 0.05, 30, (t) => fieldWorld(centres[expected]!, markAt(t)));
+      const pitch = engine.pitchDiagnostics();
+      expect(pitch.observedBand, `band ${expected}: observed band baselined at the reveal`).toBe(expected);
+      expect(pitch.padDegree, `band ${expected}: pad degree baselined at the reveal`).toBe(expected);
+      expect(pitch.carriers, `band ${expected}: carriers set immediately to that row`).toEqual(
+        voicingCarriers(expected),
+      );
+      expect(pitch.crossings, `band ${expected}: the baseline is not a crossing`).toBe(0);
+      expect(pitch.acceptedChanges, `band ${expected}: the baseline is not a commit`).toBe(0);
+      expect(
+        voiceFreqParam(engine, 0).events.every((event) => event.kind !== 'curve'),
+        `band ${expected}: the baseline is an immediate set, not a glide`,
+      ).toBe(true);
+      engine.dispose();
+    }
+  });
+
+  it('MAJOR 3: only a distinct fresh sample may confirm — a duplicate tick never latches', () => {
+    // (a) The activity band selector.
+    {
+      const ctx = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+      const w = (mark: number) => fieldWorld(0.3, mark, { support: 0 });
+      ctx.currentTime = 0;
+      engine.consume(w(1000));
+      engine.tick(0);
+      ctx.currentTime = 0.05;
+      engine.consume(w(1001));
+      engine.tick(0.05);
+      ctx.currentTime = 0.1;
+      engine.consume(w(1002));
+      engine.tick(0.1);
+      for (let t = 0.15; t <= 1.0 + 1e-9; t += 0.05) {
+        ctx.currentTime = t;
+        engine.consume(w(1002));
+        engine.tick(t);
+      }
+      expect(engine.pitchDiagnostics().crossings, 'the duplicate run confirms nothing').toBe(0);
+      ctx.currentTime = 1.05;
+      engine.consume(w(1003));
+      engine.tick(1.05);
+      expect(engine.pitchDiagnostics().crossings, 'one fresh sample after the window confirms exactly once').toBe(1);
+      engine.dispose();
+    }
+
+    // (b) The coherence latch (bloom degree). Activity parked in band 0 so only coherence can cross.
+    {
+      const ctx = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+      const w = (mark: number) => fieldWorld(0.1, mark, { support: 0, coherence: 0.45 });
+      ctx.currentTime = 0;
+      engine.consume(w(1000));
+      engine.tick(0);
+      ctx.currentTime = 0.05;
+      engine.consume(w(1001));
+      engine.tick(0.05);
+      ctx.currentTime = 0.1;
+      engine.consume(w(1002));
+      engine.tick(0.1);
+      for (let t = 0.15; t <= 1.0 + 1e-9; t += 0.05) {
+        ctx.currentTime = t;
+        engine.consume(w(1002));
+        engine.tick(t);
+      }
+      expect(engine.pitchDiagnostics().bloomDegree, 'the duplicate run latches no coherence band').toBe(0);
+      ctx.currentTime = 1.05;
+      engine.consume(w(1003));
+      engine.tick(1.05);
+      expect(engine.pitchDiagnostics().bloomDegree, 'one fresh sample latches coherence band 2').toBe(2);
+      engine.dispose();
+    }
+
+    // (c) The bloom-register latch.
+    {
+      const ctx = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+      const w = (fsuv: number, mark: number) => fieldWorld(0.1, mark, { support: 0, featureScaleUV: fsuv });
+      ctx.currentTime = 0;
+      engine.consume(w(0.02, 1000));
+      engine.tick(0);
+      ctx.currentTime = 0.05;
+      engine.consume(w(0.66, 1001));
+      engine.tick(0.05);
+      ctx.currentTime = 0.1;
+      engine.consume(w(0.66, 1002));
+      engine.tick(0.1);
+      ctx.currentTime = 0.15;
+      engine.consume(w(0.66, 1003));
+      engine.tick(0.15);
+      for (let t = 0.2; t <= 1.1 + 1e-9; t += 0.05) {
+        ctx.currentTime = t;
+        engine.consume(w(0.66, 1003));
+        engine.tick(t);
+      }
+      expect(engine.pitchDiagnostics().bloomRegister, 'the duplicate run never flips the register').toBe('fine');
+      ctx.currentTime = 1.15;
+      engine.consume(w(0.66, 1004));
+      engine.tick(1.15);
+      expect(engine.pitchDiagnostics().bloomRegister, 'one fresh sample after the window flips it once').toBe('coarse');
+      engine.dispose();
+    }
+  });
+
+  /**
+   * MAJOR 4, cases whose permission *return* is an instant, directly-driven toggle: pause, mute and the
+   * armed stillness (a world-phase `kill-wait` plus `prepareSilence`, released by returning to `none`).
+   * The debt is banked as a two-sample candidate (age well under 1 s) in band 1, then only its *age* is
+   * grown with duplicate ticks — so it can never confirm while prohibited, but it is exactly the kind of
+   * unconfirmed debt that must not survive into the admissible period.
+   */
+  it('MAJOR 4: a candidate built while prohibited cannot commit on permission return (pause/mute/stillness)', () => {
+    const CASES = [
+      {
+        name: 'pause',
+        enter: (engine: AudioEngine, _t: number) => engine.setPaused(true),
+        exit: (engine: AudioEngine) => engine.setPaused(false),
+        world: (x: number, mark: number, _prohibited: boolean) => fieldWorld(x, mark),
+      },
+      {
+        name: 'mute',
+        enter: (engine: AudioEngine, _t: number) => engine.setMuted(true),
+        exit: (engine: AudioEngine) => engine.setMuted(false),
+        world: (x: number, mark: number, _prohibited: boolean) => fieldWorld(x, mark),
+      },
+      {
+        name: 'stillness-armed',
+        enter: (engine: AudioEngine, t: number) => engine.prepareSilence(t),
+        exit: () => {},
+        world: (x: number, mark: number, prohibited: boolean) =>
+          fieldWorld(x, mark, { stillness: prohibited ? 'kill-wait' : 'none' }),
+      },
+    ];
+
+    for (const c of CASES) {
+      const ctx = new FakeAudioContext();
+      const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+      // Settle band 0 behind a supported field so presence/reveal complete and the pad is admissible.
+      runTicks(engine, ctx, 0, 3, (t) => c.world(0.1, 100 + markAt(t), false));
+      expect(engine.pitchDiagnostics().acceptedChanges, `${c.name}: a quiet settled band 0`).toBe(0);
+
+      // Enter the prohibition at t = 3.05 (this transition alone clears the empty candidate set).
+      ctx.currentTime = 3.05;
+      c.enter(engine, 3.05);
+      engine.consume(c.world(0.1, 9000, true));
+      engine.tick(3.05);
+
+      // Bank a two-sample band-1 candidate, then hold the raw inside band 1 (so the candidate can never
+      // shift band) and grow only its age with duplicate ticks.
+      ctx.currentTime = 3.5;
+      engine.consume(c.world(0.7, 9010, true));
+      engine.tick(3.5);
+      ctx.currentTime = 3.6;
+      engine.consume(c.world(0.3, 9011, true));
+      engine.tick(3.6);
+      for (let t = 3.65; t <= 4.6 + 1e-9; t += 0.05) {
+        ctx.currentTime = t;
+        engine.consume(c.world(0.3, 9011, true));
+        engine.tick(t);
+      }
+      expect(engine.pitchDiagnostics().acceptedChanges, `${c.name}: nothing commits while prohibited`).toBe(0);
+
+      // Restore permission with exactly one fresh sample: the banked age must not be spent.
+      const returnAt = 4.65;
+      ctx.currentTime = returnAt;
+      c.exit(engine);
+      engine.consume(c.world(0.3, 9020, false));
+      engine.tick(returnAt);
+      expect(
+        engine.pitchDiagnostics().acceptedChanges,
+        `${c.name}: the debt built while prohibited is not committed on return`,
+      ).toBe(0);
+
+      // A complete *fresh* post-return candidate does commit, exactly once.
+      runTicks(engine, ctx, returnAt + 0.05, returnAt + 10, (t) => c.world(0.3, 20000 + markAt(t), false));
+      expect(engine.pitchDiagnostics().acceptedChanges, `${c.name}: a fresh post-return crossing commits once`).toBe(1);
+      engine.dispose();
+    }
+  });
+
+  it('MAJOR 4: an absent-support interval cannot bank a candidate for the return', () => {
+    const ctx = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+    runTicks(engine, ctx, 0, 3, (t) => fieldWorld(0.1, 100 + markAt(t)));
+    expect(engine.stats().presence, 'presence confirmed before support drops').toBe(true);
+
+    // Drop support: presence clears, which is the absent-support prohibition.
+    ctx.currentTime = 3.05;
+    engine.consume(fieldWorld(0.1, 9000, { support: 0 }));
+    engine.tick(3.05);
+    expect(engine.stats().presence, 'support dropped').toBe(false);
+
+    // Bank a two-sample band-1 candidate while absent, then hold its sample count with duplicates while
+    // its age grows. Its `since` ends up ≈0.7 s before the return, so the pre-return debt matures only
+    // just *after* the return — never confirming (and being consumed) while still prohibited.
+    ctx.currentTime = 3.8;
+    engine.consume(fieldWorld(0.7, 9010, { support: 0 }));
+    engine.tick(3.8);
+    ctx.currentTime = 3.85;
+    engine.consume(fieldWorld(0.3, 9011, { support: 0 }));
+    engine.tick(3.85);
+    for (let t = 3.9; t <= 3.95 + 1e-9; t += 0.05) {
+      ctx.currentTime = t;
+      engine.consume(fieldWorld(0.3, 9011, { support: 0 }));
+      engine.tick(t);
+    }
+
+    // Restore support and detect the presence return (the candidate is unconfirmed at that instant).
+    let returnAt: number | null = null;
+    for (let t = 4.0; t <= 6 && returnAt === null; t += 0.05) {
+      ctx.currentTime = t;
+      engine.consume(fieldWorld(0.3, 20000 + markAt(t)));
+      engine.tick(t);
+      if (engine.stats().presence) returnAt = t;
+    }
+    expect(returnAt, 'support re-confirmed').not.toBeNull();
+    const ret = returnAt!;
+
+    // The pre-return debt would mature just after the return; the fresh post-return candidate cannot
+    // commit until a full second later. Sample the window in between.
+    runTicks(engine, ctx, ret + 0.05, ret + 0.6, (t) => fieldWorld(0.3, 30000 + markAt(t)));
+    const afterReturn = engine.pitchDiagnostics();
+    expect(
+      afterReturn.acceptedChanges,
+      'the absent-support candidate is not committed shortly after the return',
+    ).toBe(0);
+
+    // Hold band 1 through the return's 1.5 s reveal window (which suppresses crossings), then step to a
+    // new band: a complete fresh post-return crossing commits exactly once.
+    runTicks(engine, ctx, ret + 0.65, ret + 1.6, (t) => fieldWorld(0.3, 40000 + markAt(t)));
+    runTicks(engine, ctx, ret + 1.65, ret + 6, (t) => fieldWorld(0.9, 50000 + markAt(t)));
+    expect(engine.pitchDiagnostics().acceptedChanges, 'exactly one fresh post-return commit').toBe(1);
+    engine.dispose();
+  });
+
+  it('MAJOR 4: a candidate built during the reveal window cannot commit when the window expires', () => {
+    const ctx = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(ctx), { unlocked: true, rootSeed: 1 });
+    // Absent support and band 0 until t = 3, so the reveal happens behind an exact-zero master on band 0.
+    runTicks(engine, ctx, 0, 3, (t) => fieldWorld(0.1, 100 + markAt(t), { support: 0 }));
+    let revealUntil: number | null = null;
+    for (let t = 3.0; t <= 6 && revealUntil === null; t += 0.05) {
+      ctx.currentTime = t;
+      engine.consume(fieldWorld(0.1, 20000 + markAt(t)));
+      engine.tick(t);
+      if (engine.stats().revealUntil !== null) revealUntil = engine.stats().revealUntil;
+    }
+    expect(revealUntil, 'the reveal window opened').not.toBeNull();
+    const R = revealUntil!;
+
+    // Bank a two-sample band-1 candidate inside the window; its `since` is ≈0.9 s before the expiry.
+    for (let t = ctx.currentTime + 0.05; t <= R - 0.95 + 1e-9; t += 0.05) {
+      ctx.currentTime = t;
+      engine.consume(fieldWorld(0.1, 25000 + markAt(t)));
+      engine.tick(t);
+    }
+    // Bring the raw into band 1 through the window and bank a multi-sample candidate there; holding the
+    // raw with duplicates then freezes its sample count (MAJOR 3) while its age crosses 1 s only *after*
+    // the window expires, so it is exactly the unconfirmed pre-expiry debt MAJOR 4 must discard.
+    runTicks(engine, ctx, R - 1.4, R - 0.8, (t) => fieldWorld(0.7, 25000 + markAt(t)));
+    for (let t = R - 0.75; t <= R - 0.05 + 1e-9; t += 0.05) {
+      ctx.currentTime = t;
+      engine.consume(fieldWorld(0.3, 26000));
+      engine.tick(t);
+    }
+
+    // The window expires at R; the pre-expiry debt would mature ≈0.1 s later. Sample past that instant,
+    // where the fresh post-expiry candidate (which needs a full second) cannot yet have committed.
+    runTicks(engine, ctx, R + 0.05, R + 0.4, (t) => fieldWorld(0.3, 30020 + markAt(t)));
+    expect(
+      engine.pitchDiagnostics().acceptedChanges,
+      'the debt built during the reveal window is not committed when it expires',
+    ).toBe(0);
+
+    // A complete fresh post-expiry candidate does commit, exactly once.
+    runTicks(engine, ctx, R + 0.45, R + 8, (t) => fieldWorld(0.9, 40000 + markAt(t)));
+    expect(engine.pitchDiagnostics().acceptedChanges, 'exactly one fresh post-expiry commit').toBe(1);
     engine.dispose();
   });
 });

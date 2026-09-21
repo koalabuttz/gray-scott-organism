@@ -1,6 +1,6 @@
 # Capability report — An Organism in Darkness (Phase 1)
 
-Generated: 2026-09-21T20:08:24.170Z
+Generated: 2026-09-21T22:37:46.317Z
 
 Overall: **PASS**
 

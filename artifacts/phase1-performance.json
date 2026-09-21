@@ -9,29 +9,29 @@
     {
       "canvas": "1280x720",
       "scene": "1280x720",
-      "deliveredFps": 60.003934684241564,
-      "deliveredSimulationStepsPerSecond": 119.99999999999989,
+      "deliveredFps": 60.00393468424154,
+      "deliveredSimulationStepsPerSecond": 119.99999999999974,
       "frameMsPercentiles": {
         "p50": 16.69999999999891,
-        "p95": 16.799999999999272,
-        "p99": 50
+        "p95": 16.700000000000728,
+        "p99": 16.80000000000109
       },
-      "simulationMsAvg": 0.1133520793520976,
-      "renderMsAvg": 0.09484373722770457,
+      "simulationMsAvg": 0.17022357702909952,
+      "renderMsAvg": 0.1030225586220672,
       "overload": false
     },
     {
       "canvas": "1920x1080",
       "scene": "1920x1080",
-      "deliveredFps": 59.99803285138193,
-      "deliveredSimulationStepsPerSecond": 120.00000000000306,
+      "deliveredFps": 59.998032851381915,
+      "deliveredSimulationStepsPerSecond": 120.00000000000294,
       "frameMsPercentiles": {
         "p50": 16.700000000000728,
-        "p95": 16.799999999999272,
-        "p99": 49.900000000001455
+        "p95": 16.700000000000728,
+        "p99": 16.799999999999272
       },
-      "simulationMsAvg": 0.12365368084499281,
-      "renderMsAvg": 0.08598591539952327,
+      "simulationMsAvg": 0.13200278766924972,
+      "renderMsAvg": 0.11565009873965709,
       "overload": false
     }
   ],
@@ -41,18 +41,18 @@
       "scene": "1920x1080",
       "count": 120,
       "stepsPerFrame": 2,
-      "totalMs": 949.1000000238419,
-      "msPerFrame": 7.909166666865349,
-      "impliedFps": 126.43557053733595
+      "totalMs": 1045.8999999761581,
+      "msPerFrame": 8.71583333313465,
+      "impliedFps": 114.73372215578495
     },
     "at720": {
       "canvas": "1280x720",
       "scene": "1280x720",
       "count": 120,
       "stepsPerFrame": 2,
-      "totalMs": 791.3999999761581,
-      "msPerFrame": 6.594999999801318,
-      "impliedFps": 151.63002274907146
+      "totalMs": 917.5,
+      "msPerFrame": 7.645833333333333,
+      "impliedFps": 130.79019073569484
     }
   }
 }
