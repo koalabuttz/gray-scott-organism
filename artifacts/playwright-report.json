@@ -1,0 +1,209 @@
+{
+  "config": {
+    "argv": [
+      "/home/david/.nvm/versions/node/v22.23.2/bin/node",
+      "/home/david/projects/vibe2/node_modules/.bin/playwright",
+      "test",
+      "--project=headless-gpu",
+      "nucleation-rescue.spec.ts"
+    ],
+    "configFile": "/home/david/projects/vibe2/playwright.config.ts",
+    "rootDir": "/home/david/projects/vibe2/tests/browser",
+    "failOnFlakyTests": false,
+    "forbidOnly": false,
+    "fullyParallel": false,
+    "globalSetup": null,
+    "globalTeardown": null,
+    "globalTimeout": 0,
+    "grep": {},
+    "grepInvert": null,
+    "maxFailures": 0,
+    "metadata": {
+      "actualWorkers": 1
+    },
+    "preserveOutput": "always",
+    "projects": [
+      {
+        "outputDir": "/home/david/projects/vibe2/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "headless-gpu",
+        "name": "headless-gpu",
+        "testDir": "/home/david/projects/vibe2/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/david/projects/vibe2/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "headed-offscreen",
+        "name": "headed-offscreen",
+        "testDir": "/home/david/projects/vibe2/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      },
+      {
+        "outputDir": "/home/david/projects/vibe2/test-results",
+        "repeatEach": 1,
+        "retries": 0,
+        "metadata": {
+          "actualWorkers": 1
+        },
+        "id": "software-check",
+        "name": "software-check",
+        "testDir": "/home/david/projects/vibe2/tests/browser",
+        "testIgnore": [],
+        "testMatch": [
+          "**/*.@(spec|test).?(c|m)[jt]s?(x)"
+        ],
+        "timeout": 180000
+      }
+    ],
+    "quiet": false,
+    "reporter": [
+      [
+        "list",
+        null
+      ],
+      [
+        "json",
+        {
+          "outputFile": "artifacts/playwright-report.json"
+        }
+      ]
+    ],
+    "reportSlowTests": {
+      "max": 5,
+      "threshold": 300000
+    },
+    "shard": null,
+    "tags": [],
+    "updateSnapshots": "missing",
+    "updateSourceMethod": "patch",
+    "version": "1.63.0",
+    "workers": 1,
+    "webServer": {
+      "command": "npm run dev -- --host 127.0.0.1 --port 5199",
+      "url": "http://127.0.0.1:5199",
+      "reuseExistingServer": true,
+      "timeout": 60000
+    }
+  },
+  "suites": [
+    {
+      "title": "nucleation-rescue.spec.ts",
+      "file": "nucleation-rescue.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "RESCUE=1 §6.4 premature-extinction evidence",
+          "file": "nucleation-rescue.spec.ts",
+          "line": 179,
+          "column": 6,
+          "specs": [
+            {
+              "title": "the retuned field rises through nucleation with no spurious rescue",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 360000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 30610,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[rescue] rising: movements=dormancy>nucleation>cellular-growth rescues=0 growth@72.9 perf s decisions=0\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:01:06.526Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3779272a99bfbb3e5f40-9e810d982639c920d5af",
+              "file": "nucleation-rescue.spec.ts",
+              "line": 182,
+              "column": 3
+            },
+            {
+              "title": "a deliberate dead field still fires its one bounded rescue within the window",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 360000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 23992,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[rescue] dead fixture: rescue @57.10 perf s (deadSeconds=20.01, intention=emerge, occupancyGrowing=false), decisions=1\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T04:01:37.772Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "3779272a99bfbb3e5f40-3befe59f6e59ef43a119",
+              "file": "nucleation-rescue.spec.ts",
+              "line": 281,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "errors": [],
+  "stats": {
+    "startTime": "2026-09-21T04:01:05.734Z",
+    "duration": 56166.647000000004,
+    "expected": 2,
+    "skipped": 0,
+    "unexpected": 0,
+    "flaky": 0
+  }
+}

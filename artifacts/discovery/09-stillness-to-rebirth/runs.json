@@ -1,0 +1,592 @@
+{
+  "transition": {
+    "id": "09-stillness-to-rebirth",
+    "index": 9,
+    "source": {
+      "movement": "stillness",
+      "params": {
+        "F": 0.005,
+        "k": 0.075,
+        "Du": 0.16,
+        "Dv": 0.08
+      }
+    },
+    "destination": {
+      "movement": "rebirth",
+      "params": {
+        "F": 0.026,
+        "k": 0.06,
+        "Du": 0.16,
+        "Dv": 0.08
+      }
+    },
+    "destinationGenesis": {
+      "kind": "single",
+      "center": [
+        0.61,
+        0.43
+      ],
+      "radiusCells": 7,
+      "strength": 1
+    }
+  },
+  "grid": 512,
+  "seeds": [
+    11000011,
+    11000022,
+    11000033
+  ],
+  "settleSteps": 4000,
+  "observationPerformanceSeconds": 60,
+  "observationSliceSteps": 600,
+  "contactSheet": "discovery/09-stillness-to-rebirth/contact-sheet.png",
+  "note": "Descriptors are tier-1 full-domain health fields (occupancy, reaction activity, change rate) plus the coarse occupied centroid; `beta0Approx`/`beta1Approx` are presentation-tier (Phase 3) and are not available here. `entryGenesisCommand` is built by the curator's own construction (`buildEntryGenesisCommand`): a root-seeded perturbation of the destination movement's `enterGenesis` library entry, displaced from the settle-seed origin by `MIN_REBIRTH_DISPLACEMENT`; `entryGenesisSignature` is its stable one-line form.",
+  "runs": [
+    {
+      "seed": 11000011,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 2616404884,
+        "center": [
+          0.6065045737884938,
+          0.43187860372103737
+        ],
+        "radiusCells": 7.180168751184829,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=2616404884|center=[0.606504574,0.431878604]|radiusCells=7.180168751|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.001773834228515625,
+          "max": 0.056598663330078125,
+          "mean": 0.02040386199951172,
+          "first": 0.001773834228515625,
+          "last": 0.056598663330078125
+        },
+        "activity": {
+          "min": 0.000037221998354652897,
+          "max": 0.0013759228168055415,
+          "mean": 0.0004946761246173992,
+          "first": 0.000037221998354652897,
+          "last": 0.0013759228168055415
+        },
+        "changeRate": {
+          "min": 0.0000010362397233620868,
+          "max": 0.00002541001776990015,
+          "mean": 0.000012345014653192266,
+          "first": 0.0000010362397233620868,
+          "last": 0.00002541001776990015
+        },
+        "occupancyTrend": 0.0548248291015625
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0.001773834228515625,
+          "activity": 0.000037221998354652897,
+          "changeRate": 0.0000010362397233620868,
+          "centroidUV": [
+            0.6054939516129032,
+            0.43091397849462365
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0.002216339111328125,
+          "activity": 0.00005233559932094067,
+          "changeRate": 0.0000022376641481969273,
+          "centroidUV": [
+            0.6055864081325302,
+            0.4307665931583477
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0.003200531005859375,
+          "activity": 0.0000713051194907166,
+          "changeRate": 0.00000365935875379364,
+          "centroidUV": [
+            0.605478061680572,
+            0.4310889079261025
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0.0044403076171875,
+          "activity": 0.00010800167365232483,
+          "changeRate": 0.000005163700734556187,
+          "centroidUV": [
+            0.6054939191365979,
+            0.43128490120274915
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0.007450103759765625,
+          "activity": 0.00018294363690074533,
+          "changeRate": 0.000007910372005426325,
+          "centroidUV": [
+            0.6055487551203277,
+            0.43132360471070147
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0.012096405029296875,
+          "activity": 0.00028459422173909843,
+          "changeRate": 0.000009068646249943413,
+          "centroidUV": [
+            0.6055870092242195,
+            0.4308054192289499
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0.01702117919921875,
+          "activity": 0.00040489586535841227,
+          "changeRate": 0.000012936317034473177,
+          "centroidUV": [
+            0.6052779022859704,
+            0.431839351748095
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0.022304534912109375,
+          "activity": 0.0005442497786134481,
+          "changeRate": 0.000014780797755520325,
+          "centroidUV": [
+            0.6054730925047033,
+            0.4321306599538225
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0.03070068359375,
+          "activity": 0.0007520058425143361,
+          "changeRate": 0.00001924068601510953,
+          "centroidUV": [
+            0.6062417001894881,
+            0.4316801825764165
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0.038837432861328125,
+          "activity": 0.0009465106413699687,
+          "changeRate": 0.000024465347451041453,
+          "centroidUV": [
+            0.6061211984947451,
+            0.4286174154061487
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0.048206329345703125,
+          "activity": 0.0011761263012886047,
+          "changeRate": 0.00002223102819698397,
+          "centroidUV": [
+            0.6057967179710374,
+            0.4301615234529556
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0.056598663330078125,
+          "activity": 0.0013759228168055415,
+          "changeRate": 0.00002541001776990015,
+          "centroidUV": [
+            0.6064819739081351,
+            0.4285813390931455
+          ]
+        }
+      ],
+      "file": "discovery/09-stillness-to-rebirth/seed-11000011.png"
+    },
+    {
+      "seed": 11000022,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 3407009060,
+        "center": [
+          0.6113970883190631,
+          0.4303961764164268
+        ],
+        "radiusCells": 7.31163630289957,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=3407009060|center=[0.611397088,0.430396176]|radiusCells=7.311636303|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.001789093017578125,
+          "max": 0.05706787109375,
+          "mean": 0.020172119140625,
+          "first": 0.001789093017578125,
+          "last": 0.05706787109375
+        },
+        "activity": {
+          "min": 0.00003731929973582737,
+          "max": 0.0013840764295309782,
+          "mean": 0.00048732674319277675,
+          "first": 0.00003731929973582737,
+          "last": 0.0013840764295309782
+        },
+        "changeRate": {
+          "min": 0.0000010398404128864058,
+          "max": 0.00002620785016915761,
+          "mean": 0.000012207682487996863,
+          "first": 0.0000010398404128864058,
+          "last": 0.00002620785016915761
+        },
+        "occupancyTrend": 0.055278778076171875
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0.001789093017578125,
+          "activity": 0.00003731929973582737,
+          "changeRate": 0.0000010398404128864058,
+          "centroidUV": [
+            0.6103453158315565,
+            0.4292502332089552
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0.002216339111328125,
+          "activity": 0.00005258191595203243,
+          "changeRate": 0.0000024490491341566667,
+          "centroidUV": [
+            0.6102994567555938,
+            0.4294320137693632
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0.0031890869140625,
+          "activity": 0.00007198705134214833,
+          "changeRate": 0.000004056362740811892,
+          "centroidUV": [
+            0.6106599506578947,
+            0.42968049117822965
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0.004291534423828125,
+          "activity": 0.00010379339073551819,
+          "changeRate": 0.000005129435976414243,
+          "centroidUV": [
+            0.610296875,
+            0.42988194444444444
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0.00731658935546875,
+          "activity": 0.00017897786165121943,
+          "changeRate": 0.000007727569027338177,
+          "centroidUV": [
+            0.6105124560088634,
+            0.4297496171141814
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0.011997222900390625,
+          "activity": 0.00028074198053218424,
+          "changeRate": 0.000008932334822020493,
+          "centroidUV": [
+            0.6106009042130366,
+            0.42971730922098567
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0.01682281494140625,
+          "activity": 0.00040041186730377376,
+          "changeRate": 0.000013316032891452778,
+          "centroidUV": [
+            0.6101292339852608,
+            0.4295869649943311
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0.022037506103515625,
+          "activity": 0.0005382446106523275,
+          "changeRate": 0.000014314180589281023,
+          "centroidUV": [
+            0.6104859518348624,
+            0.4290924679764584
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0.030353546142578125,
+          "activity": 0.0007387884543277323,
+          "changeRate": 0.00001861708369688131,
+          "centroidUV": [
+            0.61020907298605,
+            0.42856574792635416
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0.038143157958984375,
+          "activity": 0.0009255464538000524,
+          "changeRate": 0.00002264262002427131,
+          "centroidUV": [
+            0.6097418335583559,
+            0.4272292463621362
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0.046840667724609375,
+          "activity": 0.0011354516027495265,
+          "changeRate": 0.000022059830371290445,
+          "centroidUV": [
+            0.611634001649157,
+            0.42859585598379346
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0.05706787109375,
+          "activity": 0.0013840764295309782,
+          "changeRate": 0.00002620785016915761,
+          "centroidUV": [
+            0.6108303131266711,
+            0.4291510434074198
+          ]
+        }
+      ],
+      "file": "discovery/09-stillness-to-rebirth/seed-11000022.png"
+    },
+    {
+      "seed": 11000033,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 3251434846,
+        "center": [
+          0.6075699867494404,
+          0.43255231927894044
+        ],
+        "radiusCells": 7.033482748013922,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=3251434846|center=[0.607569987,0.432552319]|radiusCells=7.033482748|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.00177001953125,
+          "max": 0.057483673095703125,
+          "mean": 0.020714759826660156,
+          "first": 0.00177001953125,
+          "last": 0.057483673095703125
+        },
+        "activity": {
+          "min": 0.00003712028410518542,
+          "max": 0.0013994150795042515,
+          "mean": 0.0005012288062668328,
+          "first": 0.00003712028410518542,
+          "last": 0.0013994150795042515
+        },
+        "changeRate": {
+          "min": 0.000001036939579535101,
+          "max": 0.000025900992113747634,
+          "mean": 0.000012433611715323423,
+          "first": 0.000001036939579535101,
+          "last": 0.000025900992113747634
+        },
+        "occupancyTrend": 0.055713653564453125
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0.00177001953125,
+          "activity": 0.00003712028410518542,
+          "changeRate": 0.000001036939579535101,
+          "centroidUV": [
+            0.6065589641702587,
+            0.431640625
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0.002216339111328125,
+          "activity": 0.00005202495231060311,
+          "changeRate": 0.000002020217834797222,
+          "centroidUV": [
+            0.6067495428141136,
+            0.43157003012048195
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0.003200531005859375,
+          "activity": 0.00007173372432589531,
+          "changeRate": 0.000003349214011905133,
+          "centroidUV": [
+            0.6064907069427891,
+            0.4315638036352801
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0.00445556640625,
+          "activity": 0.00011112311767647043,
+          "changeRate": 0.00000541671943210531,
+          "centroidUV": [
+            0.606783096104452,
+            0.4316038366866438
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0.007724761962890625,
+          "activity": 0.00018716153863351792,
+          "changeRate": 0.000008149159839376807,
+          "centroidUV": [
+            0.6070322145061728,
+            0.43173225308641977
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0.012233734130859375,
+          "activity": 0.00028983730589970946,
+          "changeRate": 0.000009026388397614937,
+          "centroidUV": [
+            0.606712976496726,
+            0.43163757990333645
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0.017414093017578125,
+          "activity": 0.00041549874003976583,
+          "changeRate": 0.000012753217561112251,
+          "centroidUV": [
+            0.6067890881708653,
+            0.43161538198247534
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0.023067474365234375,
+          "activity": 0.0005604022881016135,
+          "changeRate": 0.00001555644121253863,
+          "centroidUV": [
+            0.6066638157350752,
+            0.43168616669422855
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0.0313262939453125,
+          "activity": 0.0007575335330329835,
+          "changeRate": 0.000018177019228460267,
+          "centroidUV": [
+            0.6061684691609839,
+            0.43215911166585486
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0.03891754150390625,
+          "activity": 0.0009468964417465031,
+          "changeRate": 0.00002382547245360911,
+          "centroidUV": [
+            0.6031275653670849,
+            0.4316034846108606
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0.04876708984375,
+          "activity": 0.0011859986698254943,
+          "changeRate": 0.00002399155891907867,
+          "centroidUV": [
+            0.6025780211103723,
+            0.43184718202440553
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0.057483673095703125,
+          "activity": 0.0013994150795042515,
+          "changeRate": 0.000025900992113747634,
+          "centroidUV": [
+            0.6038519684451523,
+            0.4308847271302011
+          ]
+        }
+      ],
+      "file": "discovery/09-stillness-to-rebirth/seed-11000033.png"
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+{
+  "name": "gray-scott-organism",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "An autonomous fullscreen Gray–Scott reaction–diffusion artwork",
+  "scripts": {
+    "dev": "vite",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:browser": "playwright test --project=headless-gpu",
+    "test:browser:headed-offscreen": "playwright test --project=headed-offscreen",
+    "test:gate": "GATE=1 playwright test --project=headless-gpu gate.spec.ts",
+    "test:calibrate": "CALIBRATE=1 playwright test --project=headless-gpu calibrate.spec.ts",
+    "test:pacing": "PACING=1 playwright test --project=headless-gpu pacing.spec.ts",
+    "test:genesis": "GENESIS=1 playwright test --project=headless-gpu genesis-sheet.spec.ts",
+    "test:replay": "REPLAY=1 playwright test --project=headless-gpu replay.spec.ts",
+    "test:arcs": "ARCS=1 playwright test --project=headless-gpu arcs.spec.ts",
+    "test:rescue": "RESCUE=1 playwright test --project=headless-gpu nucleation-rescue.spec.ts",
+    "test:soak": "SOAK=1 playwright test --project=headless-gpu soak.spec.ts",
+    "tune": "node --experimental-strip-types scripts/tune.ts",
+    "explore": "node --experimental-strip-types scripts/explore.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.63.0",
+    "@types/node": "^26.6.2",
+    "typescript": "^7.0.2",
+    "vite": "^8.3.0",
+    "vitest": "^5.0.1"
+  }
+}

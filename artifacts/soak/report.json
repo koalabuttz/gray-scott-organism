@@ -1,0 +1,2019 @@
+{
+  "generatedBy": "tests/browser/soak.spec.ts (SOAK=1)",
+  "seed": 7700077,
+  "resolution": 512,
+  "requestedSpeed": 12,
+  "speedCeiling": 12,
+  "expectedDurationSeconds": {
+    "formula": "arcs * nominalArcPerformanceSeconds / deliveredMultiple",
+    "nominalArcPerformanceSeconds": 980,
+    "atCeiling": 245,
+    "measured": 282.884
+  },
+  "wallClockSeconds": 282.884,
+  "deliveredMultiple": 12.156897055562458,
+  "arcs": 3,
+  "arcBoundaries": [
+    {
+      "arc": 1,
+      "performanceSeconds": 1187.3916666667997,
+      "realSeconds": 95.107,
+      "genesisCount": 3,
+      "rescueCount": 0,
+      "stillState": "none",
+      "movement": "rebirth"
+    },
+    {
+      "arc": 2,
+      "performanceSeconds": 2314.791666666753,
+      "realSeconds": 189.14,
+      "genesisCount": 5,
+      "rescueCount": 0,
+      "stillState": "none",
+      "movement": "rebirth"
+    },
+    {
+      "arc": 3,
+      "performanceSeconds": 3438.7916666657306,
+      "realSeconds": 282.869,
+      "genesisCount": 7,
+      "rescueCount": 0,
+      "stillState": "none",
+      "movement": "rebirth"
+    }
+  ],
+  "resourceCounts": {
+    "start": {
+      "textures": 17,
+      "framebuffers": 17,
+      "renderbuffers": 1,
+      "programs": 13,
+      "shaders": 0,
+      "vertexArrays": 4,
+      "buffers": 5
+    },
+    "end": {
+      "textures": 17,
+      "framebuffers": 17,
+      "renderbuffers": 1,
+      "programs": 13,
+      "shaders": 0,
+      "vertexArrays": 4,
+      "buffers": 5
+    }
+  },
+  "resourceSamples": [
+    {
+      "realSeconds": 0,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 0,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 2.167,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 4.243,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 6.31,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 8.373,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 10.505,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 12.571,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 14.639,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 16.704,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 18.762,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 20.905,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 22.971,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 25.031,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 27.094,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 29.155,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 31.275,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 33.331,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 35.395,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 37.463,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 39.53,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 41.651,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 43.716,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 45.776,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 47.846,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 49.91,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 52.03,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 54.092,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 56.152,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 58.22,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 60.281,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 62.404,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 64.465,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 66.521,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 68.59,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 70.659,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 72.801,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 74.871,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 76.933,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 78.999,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 81.058,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 83.182,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 85.247,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 87.309,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 89.381,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 91.489,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 93.559,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 95.634,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 97.704,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 99.788,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 101.919,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 103.99,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 106.053,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 108.109,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 110.184,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 112.295,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 114.369,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 116.431,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 118.5,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 120.567,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 122.671,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 124.74,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 126.798,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 128.858,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 130.922,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 133.027,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 135.098,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 137.163,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 139.235,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 141.308,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 143.427,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 145.5,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 147.556,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 149.625,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 151.702,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 153.81,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 155.886,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 157.944,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 160.003,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 162.073,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 164.215,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 166.287,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 168.353,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 170.423,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 172.557,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 174.62,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 176.693,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 178.761,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 180.829,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 182.941,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 185.007,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 187.075,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 189.14,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 191.205,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 193.318,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 195.382,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 197.451,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 199.511,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 201.568,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 203.688,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 205.755,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 207.845,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 209.918,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 211.986,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 214.118,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 216.183,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 218.251,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 220.317,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 222.379,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 224.487,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 226.547,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 228.622,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 230.687,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 232.749,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 234.882,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 236.947,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 239.013,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 241.072,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 243.139,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 245.248,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 247.319,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 249.397,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 251.465,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 253.567,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 255.643,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 257.704,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 259.782,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 261.848,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 263.948,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 266.018,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 268.09,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 270.16,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 272.224,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 274.334,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 276.406,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 278.469,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 280.539,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    },
+    {
+      "realSeconds": 282.604,
+      "counts": {
+        "textures": 17,
+        "framebuffers": 17,
+        "renderbuffers": 1,
+        "programs": 13,
+        "shaders": 0,
+        "vertexArrays": 4,
+        "buffers": 5
+      }
+    }
+  ],
+  "readbackCadence": {
+    "medianAnalysisRequestsPerSecond": 3.870718018192376,
+    "minAnalysisRequestsPerSecond": 3.6644165863066522,
+    "maxAnalysisRequestsPerSecond": 4.061110036743383,
+    "medianPublicationsPerSecond": 3.868471953578346,
+    "intervals": [
+      {
+        "dt": 5.02,
+        "analysisPerSecond": 3.9840637450199208,
+        "publicationsPerSecond": 3.7848605577689245
+      },
+      {
+        "dt": 5.168000000000001,
+        "analysisPerSecond": 3.8699690402476774,
+        "publicationsPerSecond": 4.063467492260061
+      },
+      {
+        "dt": 5.224,
+        "analysisPerSecond": 3.8284839203675345,
+        "publicationsPerSecond": 3.8284839203675345
+      },
+      {
+        "dt": 5.225,
+        "analysisPerSecond": 4.019138755980862,
+        "publicationsPerSecond": 4.019138755980862
+      },
+      {
+        "dt": 5.166999999999998,
+        "analysisPerSecond": 3.870718018192376,
+        "publicationsPerSecond": 3.870718018192376
+      },
+      {
+        "dt": 5.206000000000003,
+        "analysisPerSecond": 3.841721091048788,
+        "publicationsPerSecond": 3.841721091048788
+      },
+      {
+        "dt": 5.16,
+        "analysisPerSecond": 3.875968992248062,
+        "publicationsPerSecond": 3.875968992248062
+      },
+      {
+        "dt": 5.216000000000001,
+        "analysisPerSecond": 4.026073619631901,
+        "publicationsPerSecond": 4.026073619631901
+      },
+      {
+        "dt": 5.164999999999999,
+        "analysisPerSecond": 3.8722168441432725,
+        "publicationsPerSecond": 3.8722168441432725
+      },
+      {
+        "dt": 5.213999999999999,
+        "analysisPerSecond": 3.835826620636748,
+        "publicationsPerSecond": 3.835826620636748
+      },
+      {
+        "dt": 5.1640000000000015,
+        "analysisPerSecond": 3.8729666924864437,
+        "publicationsPerSecond": 3.8729666924864437
+      },
+      {
+        "dt": 5.207999999999998,
+        "analysisPerSecond": 3.840245775729648,
+        "publicationsPerSecond": 3.840245775729648
+      },
+      {
+        "dt": 5.159000000000006,
+        "analysisPerSecond": 3.8767202946307378,
+        "publicationsPerSecond": 3.8767202946307378
+      },
+      {
+        "dt": 5.239999999999995,
+        "analysisPerSecond": 3.8167938931297747,
+        "publicationsPerSecond": 3.8167938931297747
+      },
+      {
+        "dt": 5.171999999999997,
+        "analysisPerSecond": 3.8669760247486487,
+        "publicationsPerSecond": 3.8669760247486487
+      },
+      {
+        "dt": 5.210000000000008,
+        "analysisPerSecond": 3.8387715930902053,
+        "publicationsPerSecond": 3.8387715930902053
+      },
+      {
+        "dt": 5.167999999999992,
+        "analysisPerSecond": 3.869969040247684,
+        "publicationsPerSecond": 3.869969040247684
+      },
+      {
+        "dt": 5.212000000000003,
+        "analysisPerSecond": 3.8372985418265517,
+        "publicationsPerSecond": 3.8372985418265517
+      },
+      {
+        "dt": 5.185000000000002,
+        "analysisPerSecond": 3.6644165863066522,
+        "publicationsPerSecond": 3.8572806171648972
+      },
+      {
+        "dt": 5.244,
+        "analysisPerSecond": 3.8138825324180017,
+        "publicationsPerSecond": 3.8138825324180017
+      },
+      {
+        "dt": 5.161000000000001,
+        "analysisPerSecond": 3.875217981011431,
+        "publicationsPerSecond": 3.875217981011431
+      },
+      {
+        "dt": 5.214999999999989,
+        "analysisPerSecond": 3.835091083413239,
+        "publicationsPerSecond": 3.835091083413239
+      },
+      {
+        "dt": 5.175000000000011,
+        "analysisPerSecond": 3.8647342995168996,
+        "publicationsPerSecond": 3.8647342995168996
+      },
+      {
+        "dt": 5.198999999999998,
+        "analysisPerSecond": 3.846893633391038,
+        "publicationsPerSecond": 3.846893633391038
+      },
+      {
+        "dt": 5.158999999999992,
+        "analysisPerSecond": 3.8767202946307484,
+        "publicationsPerSecond": 3.8767202946307484
+      },
+      {
+        "dt": 5.197000000000003,
+        "analysisPerSecond": 3.8483740619588205,
+        "publicationsPerSecond": 3.8483740619588205
+      },
+      {
+        "dt": 5.182999999999993,
+        "analysisPerSecond": 4.051707505305813,
+        "publicationsPerSecond": 4.051707505305813
+      },
+      {
+        "dt": 5.2190000000000225,
+        "analysisPerSecond": 3.8321517532094105,
+        "publicationsPerSecond": 3.8321517532094105
+      },
+      {
+        "dt": 5.170999999999992,
+        "analysisPerSecond": 4.061110036743383,
+        "publicationsPerSecond": 4.061110036743383
+      },
+      {
+        "dt": 5.210999999999984,
+        "analysisPerSecond": 3.8380349261178393,
+        "publicationsPerSecond": 3.8380349261178393
+      },
+      {
+        "dt": 5.163000000000011,
+        "analysisPerSecond": 3.8737168312996237,
+        "publicationsPerSecond": 3.8737168312996237
+      },
+      {
+        "dt": 5.240000000000009,
+        "analysisPerSecond": 4.007633587786253,
+        "publicationsPerSecond": 4.007633587786253
+      },
+      {
+        "dt": 5.181999999999988,
+        "analysisPerSecond": 4.052489386337331,
+        "publicationsPerSecond": 4.052489386337331
+      },
+      {
+        "dt": 5.224999999999994,
+        "analysisPerSecond": 3.827751196172253,
+        "publicationsPerSecond": 3.827751196172253
+      },
+      {
+        "dt": 5.177999999999997,
+        "analysisPerSecond": 3.862495171881037,
+        "publicationsPerSecond": 3.862495171881037
+      },
+      {
+        "dt": 5.207000000000022,
+        "analysisPerSecond": 4.033032456308798,
+        "publicationsPerSecond": 4.033032456308798
+      },
+      {
+        "dt": 5.1699999999999875,
+        "analysisPerSecond": 3.6750483558994285,
+        "publicationsPerSecond": 3.868471953578346
+      },
+      {
+        "dt": 5.205999999999989,
+        "analysisPerSecond": 4.033807145601238,
+        "publicationsPerSecond": 3.841721091048798
+      },
+      {
+        "dt": 5.155000000000001,
+        "analysisPerSecond": 3.8797284190106684,
+        "publicationsPerSecond": 4.073714839961202
+      },
+      {
+        "dt": 5.233000000000004,
+        "analysisPerSecond": 4.012994458245745,
+        "publicationsPerSecond": 3.8218994840435667
+      },
+      {
+        "dt": 5.192000000000007,
+        "analysisPerSecond": 3.8520801232665587,
+        "publicationsPerSecond": 4.0446841294298865
+      },
+      {
+        "dt": 5.217999999999989,
+        "analysisPerSecond": 4.024530471445006,
+        "publicationsPerSecond": 3.8328861632809583
+      },
+      {
+        "dt": 5.209000000000003,
+        "analysisPerSecond": 3.8395085429065055,
+        "publicationsPerSecond": 4.031483970051831
+      },
+      {
+        "dt": 5.159999999999997,
+        "analysisPerSecond": 3.8759689922480645,
+        "publicationsPerSecond": 3.8759689922480645
+      },
+      {
+        "dt": 5.234000000000009,
+        "analysisPerSecond": 4.0122277416889505,
+        "publicationsPerSecond": 3.821169277799
+      },
+      {
+        "dt": 5.1580000000000155,
+        "analysisPerSecond": 3.877471888328798,
+        "publicationsPerSecond": 4.0713454827452376
+      },
+      {
+        "dt": 5.207999999999998,
+        "analysisPerSecond": 3.840245775729648,
+        "publicationsPerSecond": 3.840245775729648
+      },
+      {
+        "dt": 5.173999999999978,
+        "analysisPerSecond": 3.865481252415942,
+        "publicationsPerSecond": 3.865481252415942
+      },
+      {
+        "dt": 5.2190000000000225,
+        "analysisPerSecond": 4.023759340869881,
+        "publicationsPerSecond": 4.023759340869881
+      },
+      {
+        "dt": 5.168000000000006,
+        "analysisPerSecond": 3.8699690402476734,
+        "publicationsPerSecond": 3.8699690402476734
+      },
+      {
+        "dt": 5.206999999999994,
+        "analysisPerSecond": 3.8409832917226856,
+        "publicationsPerSecond": 3.8409832917226856
+      },
+      {
+        "dt": 5.171999999999969,
+        "analysisPerSecond": 4.060324825986103,
+        "publicationsPerSecond": 3.86697602474867
+      },
+      {
+        "dt": 5.216000000000008,
+        "analysisPerSecond": 4.026073619631895,
+        "publicationsPerSecond": 4.026073619631895
+      },
+      {
+        "dt": 5.160000000000025,
+        "analysisPerSecond": 3.875968992248043,
+        "publicationsPerSecond": 3.875968992248043
+      }
+    ]
+  },
+  "heap": {
+    "exposed": true,
+    "start": {
+      "usedJSHeapSize": 10858810,
+      "totalJSHeapSize": 13348038,
+      "jsHeapSizeLimit": 4395630592
+    },
+    "end": {
+      "usedJSHeapSize": 8440052,
+      "totalJSHeapSize": 17012020,
+      "jsHeapSizeLimit": 4395630592
+    },
+    "growthFraction": -0.22274613884946878,
+    "note": "Chromium exposes `performance.memory` as a coarse readout; without --enable-precise-memory-info the numbers are quantized but still show a large leak."
+  },
+  "nanViolations": 0,
+  "pageErrors": [],
+  "artifactsDir": "/home/david/projects/vibe2/artifacts"
+}

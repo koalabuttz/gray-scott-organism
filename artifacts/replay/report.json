@@ -1,0 +1,2357 @@
+{
+  "generatedBy": "tests/browser/replay.spec.ts (REPLAY=1)",
+  "seed": 4242042,
+  "chunkSteps": 500,
+  "chunks": 40,
+  "deliveredSteps": 20000,
+  "descriptorTolerance": 0.0000033908420138888887,
+  "toleranceDerivation": {
+    "singleOccupiedCell": 0.0000016954210069444444,
+    "fullDomainCells": 589824,
+    "engineeringMarginCells": 2,
+    "note": "Both runs are asserted to be at exactly the same delivered-step mark and delivered numerical time at every checkpoint — and to have exactly equal solver step/time state and field epoch — before any descriptor delta is computed, so the expected delta is zero. The bound is a stated engineering margin of two occupied cells in the 768² full-domain count; it replaces the previous 2e-3 bound, which was unjustified because the two runs were not aligned (a persistent 3-step offset)."
+  },
+  "measuredMaxDelta": {
+    "healthOccupancy": 0,
+    "healthFlux": 0,
+    "healthChangeRate": 0,
+    "coarseOccupancy": 0,
+    "overall": 0
+  },
+  "stateAlignment": {
+    "stepsAtSetup": [
+      0,
+      0
+    ],
+    "simulationTimeAtSetup": [
+      0,
+      0
+    ],
+    "deliveredMarksExact": true,
+    "stepAdvancePerChunkExact": true,
+    "solverStateEqualBetweenRuns": true,
+    "note": "Delivered step and numerical time are asserted exactly at the intended mark at setup and at every checkpoint; between checkpoints the solver step counter advances by exactly CHUNK_STEPS unless a `replace` genesis (same epoch bump in both runs) reset it; the solver step/time state and field epoch are asserted exactly equal between the two runs."
+  },
+  "commandsByteIdentical": true,
+  "movementDivergences": 0,
+  "runA": {
+    "seed": 4242042,
+    "trajectoryId": "organism-01-candidate",
+    "trajectoryDocument": "{\n  \"version\": 1,\n  \"id\": \"organism-01-candidate\",\n  \"nominalStepsPerSecond\": 120,\n  \"dt\": 1,\n  \"durationScaleRange\": [\n    0.75,\n    1.25\n  ],\n  \"parameterJitter\": {\n    \"F\": 0.0004,\n    \"k\": 0.0004,\n    \"correlationSeconds\": 60\n  },\n  \"genesisLibrary\": {\n    \"first\": {\n      \"kind\": \"single\",\n      \"center\": [\n        0.5,\n        0.5\n      ],\n      \"radiusCells\": 6,\n      \"strength\": 1\n    },\n    \"return\": {\n      \"kind\": \"single\",\n      \"center\": [\n        0.61,\n        0.43\n      ],\n      \"radiusCells\": 7,\n      \"strength\": 1\n    }\n  },\n  \"movements\": [\n    {\n      \"id\": \"dormancy\",\n      \"seconds\": 30,\n      \"intention\": \"quiet\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"nucleation\"\n      ]\n    },\n    {\n      \"id\": \"nucleation\",\n      \"seconds\": 40,\n      \"intention\": \"emerge\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.03,\n            0.062,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"cellular-growth\",\n        \"collapse\"\n      ],\n      \"enterGenesis\": \"first\",\n      \"exitHint\": \"living\"\n    },\n    {\n      \"id\": \"cellular-growth\",\n      \"seconds\": 140,\n      \"intention\": \"expand\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.03,\n            0.062,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.035,\n            0.064,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"replication\"\n      ]\n    },\n    {\n      \"id\": \"replication\",\n      \"seconds\": 150,\n      \"intention\": \"expand\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.035,\n            0.064,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.0367,\n            0.0649,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"connection\"\n      ],\n      \"exitHint\": \"replicating\"\n    },\n    {\n      \"id\": \"connection\",\n      \"seconds\": 140,\n      \"intention\": \"connect\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.0367,\n            0.0649,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.03,\n            0.057,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"labyrinth\"\n      ],\n      \"exitHint\": \"connecting\"\n    },\n    {\n      \"id\": \"labyrinth\",\n      \"seconds\": 200,\n      \"intention\": \"connect\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.03,\n            0.057,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.029,\n            0.057,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"overgrowth\"\n      ],\n      \"exitHint\": \"complex\"\n    },\n    {\n      \"id\": \"overgrowth\",\n      \"seconds\": 120,\n      \"intention\": \"saturate\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.029,\n            0.057,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.045,\n            0.058,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"collapse\"\n      ]\n    },\n    {\n      \"id\": \"collapse\",\n      \"seconds\": 100,\n      \"intention\": \"release\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.045,\n            0.058,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.005,\n            0.075,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"stillness\"\n      ],\n      \"exitHint\": \"empty\"\n    },\n    {\n      \"id\": \"stillness\",\n      \"seconds\": 60,\n      \"intention\": \"quiet\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.005,\n            0.075,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.005,\n            0.075,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"rebirth\"\n      ]\n    },\n    {\n      \"id\": \"rebirth\",\n      \"seconds\": 40,\n      \"intention\": \"emerge\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.03,\n            0.062,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"cellular-growth\",\n        \"collapse\"\n      ],\n      \"enterGenesis\": \"return\"\n    }\n  ]\n}",
+    "movements": [
+      "dormancy",
+      "nucleation",
+      "cellular-growth",
+      "replication",
+      "connection",
+      "labyrinth",
+      "overgrowth",
+      "collapse",
+      "stillness",
+      "rebirth"
+    ],
+    "grid": {
+      "width": 768,
+      "height": 768
+    },
+    "simulationResolution": 768,
+    "speed": 1,
+    "epoch": 2,
+    "stepsAtSetup": 0,
+    "simulationTimeAtSetup": 0,
+    "commands": [
+      {
+        "chunk": 9,
+        "performanceSeconds": 37.5,
+        "signature": "single|replace|1891129771|0.500837397|0.501236975|5.748977872|0.975741923"
+      },
+      {
+        "chunk": 14,
+        "performanceSeconds": 58.333333333333336,
+        "signature": "single|inject|3292013738|0.502238586|0.503250374|6.213124625|0.954739223"
+      }
+    ],
+    "checkpoints": [
+      {
+        "chunk": 1,
+        "steps": 500,
+        "simulationTime": 500,
+        "solverSteps": 500,
+        "solverSimulationTime": 500,
+        "epoch": 1,
+        "performanceSeconds": 4.166666666666667,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02593743001500744,
+          "k": 0.060012307647583085,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 2,
+        "steps": 1000,
+        "simulationTime": 1000,
+        "solverSteps": 1000,
+        "solverSimulationTime": 1000,
+        "epoch": 1,
+        "performanceSeconds": 8.333333333333334,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025886627170013884,
+          "k": 0.06002230067399141,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 3,
+        "steps": 1500,
+        "simulationTime": 1500,
+        "solverSteps": 1500,
+        "solverSimulationTime": 1500,
+        "epoch": 1,
+        "performanceSeconds": 12.5,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02584537849367576,
+          "k": 0.06003041437534037,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 4,
+        "steps": 2000,
+        "simulationTime": 2000,
+        "solverSteps": 2000,
+        "solverSimulationTime": 2000,
+        "epoch": 1,
+        "performanceSeconds": 16.666666666666668,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02581188719412623,
+          "k": 0.0600370021843674,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 5,
+        "steps": 2500,
+        "simulationTime": 2500,
+        "solverSteps": 2500,
+        "solverSimulationTime": 2500,
+        "epoch": 1,
+        "performanceSeconds": 20.833333333333332,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025784694390742154,
+          "k": 0.06004235106595795,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 6,
+        "steps": 3000,
+        "simulationTime": 3000,
+        "solverSteps": 3000,
+        "solverSimulationTime": 3000,
+        "epoch": 1,
+        "performanceSeconds": 25,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025762615565320893,
+          "k": 0.06004669401733257,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 7,
+        "steps": 3500,
+        "simulationTime": 3500,
+        "solverSteps": 3500,
+        "solverSimulationTime": 3500,
+        "epoch": 1,
+        "performanceSeconds": 29.166666666666668,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025744688964481056,
+          "k": 0.06005022021740319,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 8,
+        "steps": 4000,
+        "simulationTime": 4000,
+        "solverSteps": 4000,
+        "solverSimulationTime": 4000,
+        "epoch": 1,
+        "performanceSeconds": 33.333333333333336,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02573013370569626,
+          "k": 0.06005308326740432,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 9,
+        "steps": 4500,
+        "simulationTime": 4500,
+        "solverSteps": 1,
+        "solverSimulationTime": 1,
+        "epoch": 2,
+        "performanceSeconds": 37.5,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025718315762061256,
+          "k": 0.060055407881761086,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.00019327799964230508,
+          "flux": 0.000006014205609972123,
+          "change": 0.00000162265450853738
+        },
+        "coarseOccupancy": 0.0001838235294117647,
+        "coarseCentroid": [
+          0.5052083333333334,
+          0.5052083333333334
+        ]
+      },
+      {
+        "chunk": 10,
+        "steps": 5000,
+        "simulationTime": 5000,
+        "solverSteps": 501,
+        "solverSimulationTime": 501,
+        "epoch": 2,
+        "performanceSeconds": 41.666666666666664,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02574661970545606,
+          "k": 0.060076245001332546,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0006205241079442203,
+          "flux": 0.000013765871699433774,
+          "change": 4.020208166366501e-7
+        },
+        "coarseOccupancy": 0.000628063725490196,
+        "coarseCentroid": [
+          0.5007621951219513,
+          0.5022865853658537
+        ]
+      },
+      {
+        "chunk": 11,
+        "steps": 5500,
+        "simulationTime": 5500,
+        "solverSteps": 1001,
+        "solverSimulationTime": 1001,
+        "epoch": 2,
+        "performanceSeconds": 45.833333333333336,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025955571042555456,
+          "k": 0.060186148584420576,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0009629991836845875,
+          "flux": 0.000020470437448238954,
+          "change": 6.754526111762971e-7
+        },
+        "coarseOccupancy": 0.0009650735294117647,
+        "coarseCentroid": [
+          0.5004960317460316,
+          0.5014880952380951
+        ]
+      },
+      {
+        "chunk": 12,
+        "steps": 6000,
+        "simulationTime": 6000,
+        "solverSteps": 1501,
+        "solverSimulationTime": 1501,
+        "epoch": 2,
+        "performanceSeconds": 50,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02640575261668033,
+          "k": 0.06041564649258049,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0014038087101653218,
+          "flux": 0.00003445935362833552,
+          "change": 0.0000014028948953637155
+        },
+        "coarseOccupancy": 0.001409313725490196,
+        "coarseCentroid": [
+          0.501358695652174,
+          0.501358695652174
+        ]
+      },
+      {
+        "chunk": 13,
+        "steps": 6500,
+        "simulationTime": 6500,
+        "solverSteps": 2001,
+        "solverSimulationTime": 2001,
+        "epoch": 2,
+        "performanceSeconds": 54.166666666666664,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.027060609882007484,
+          "k": 0.060746653427044994,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0022566053085029125,
+          "flux": 0.00005430873352452181,
+          "change": 0.0000017156563671960612
+        },
+        "coarseOccupancy": 0.0022671568627450982,
+        "coarseCentroid": [
+          0.5016891891891891,
+          0.5016891891891891
+        ]
+      },
+      {
+        "chunk": 14,
+        "steps": 7000,
+        "simulationTime": 7000,
+        "solverSteps": 2501,
+        "solverSimulationTime": 2501,
+        "epoch": 2,
+        "performanceSeconds": 58.333333333333336,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.027820920397620297,
+          "k": 0.06112971403814107,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.00261603482067585,
+          "flux": 0.00006687943096039817,
+          "change": 0.000004038660335936584
+        },
+        "coarseOccupancy": 0.002604166666666667,
+        "coarseCentroid": [
+          0.5003676470588235,
+          0.5003676470588235
+        ]
+      },
+      {
+        "chunk": 15,
+        "steps": 7500,
+        "simulationTime": 7500,
+        "solverSteps": 3001,
+        "solverSimulationTime": 3001,
+        "epoch": 2,
+        "performanceSeconds": 62.5,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.028557242182646086,
+          "k": 0.06153994182548356,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.00469970703125,
+          "flux": 0.000121042896353174,
+          "change": 0.000004931370767735643
+        },
+        "coarseOccupancy": 0.0046875,
+        "coarseCentroid": [
+          0.5002042483660131,
+          0.5
+        ]
+      },
+      {
+        "chunk": 16,
+        "steps": 8000,
+        "simulationTime": 8000,
+        "solverSteps": 3501,
+        "solverSimulationTime": 3501,
+        "epoch": 2,
+        "performanceSeconds": 66.66666666666667,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029151026091982044,
+          "k": 0.061895033560059154,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.005725436843931675,
+          "flux": 0.0001492844894528389,
+          "change": 0.0000027934906938753556
+        },
+        "coarseOccupancy": 0.0057444852941176475,
+        "coarseCentroid": [
+          0.5009166666666666,
+          0.5010833333333332
+        ]
+      },
+      {
+        "chunk": 17,
+        "steps": 8500,
+        "simulationTime": 8500,
+        "solverSteps": 4001,
+        "solverSimulationTime": 4001,
+        "epoch": 2,
+        "performanceSeconds": 70.83333333333333,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029519182978411586,
+          "k": 0.062126366519918895,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0072479248046875,
+          "flux": 0.00018883394659496844,
+          "change": 0.000004778974471264519
+        },
+        "coarseOccupancy": 0.007261029411764706,
+        "coarseCentroid": [
+          0.5014504219409283,
+          0.5014504219409283
+        ]
+      },
+      {
+        "chunk": 18,
+        "steps": 9000,
+        "simulationTime": 9000,
+        "solverSteps": 4501,
+        "solverSimulationTime": 4501,
+        "epoch": 2,
+        "performanceSeconds": 75,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029653444272546202,
+          "k": 0.062231864826570026,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0086534284055233,
+          "flux": 0.00022961159993428737,
+          "change": 0.000003927932993974537
+        },
+        "coarseOccupancy": 0.008655024509803922,
+        "coarseCentroid": [
+          0.5008296460176991,
+          0.5009402654867257
+        ]
+      },
+      {
+        "chunk": 19,
+        "steps": 9500,
+        "simulationTime": 9500,
+        "solverSteps": 5001,
+        "solverSimulationTime": 5001,
+        "epoch": 2,
+        "performanceSeconds": 79.16666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029489933042789067,
+          "k": 0.062474222823519644,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.009950426407158375,
+          "flux": 0.0002674163260962814,
+          "change": 0.00000484691554447636
+        },
+        "coarseOccupancy": 0.009972426470588235,
+        "coarseCentroid": [
+          0.5002400153609833,
+          0.5009120583717358
+        ]
+      },
+      {
+        "chunk": 20,
+        "steps": 10000,
+        "simulationTime": 10000,
+        "solverSteps": 5501,
+        "solverSimulationTime": 5501,
+        "epoch": 2,
+        "performanceSeconds": 83.33333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.03382977955602012,
+          "k": 0.06129667039286113,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0150926373898983,
+          "flux": 0.00042535719694569707,
+          "change": 0.000009196075552608818
+        },
+        "coarseOccupancy": 0.015104166666666663,
+        "coarseCentroid": [
+          0.5012043610547667,
+          0.5009508113590265
+        ]
+      },
+      {
+        "chunk": 21,
+        "steps": 10500,
+        "simulationTime": 10500,
+        "solverSteps": 6001,
+        "solverSimulationTime": 6001,
+        "epoch": 2,
+        "performanceSeconds": 87.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.04111763191138811,
+          "k": 0.05933170707993605,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0322672538459301,
+          "flux": 0.0008958910475485027,
+          "change": 0.000018578333765617572
+        },
+        "coarseOccupancy": 0.03227634803921568,
+        "coarseCentroid": [
+          0.5005191029900333,
+          0.500904722354058
+        ]
+      },
+      {
+        "chunk": 22,
+        "steps": 11000,
+        "simulationTime": 11000,
+        "solverSteps": 6501,
+        "solverSimulationTime": 6501,
+        "epoch": 2,
+        "performanceSeconds": 91.66666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.04368283470932467,
+          "k": 0.05873330854305111,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0522291474044323,
+          "flux": 0.0014293866697698832,
+          "change": 0.000020271609173505567
+        },
+        "coarseOccupancy": 0.0522671568627451,
+        "coarseCentroid": [
+          0.5005861664712778,
+          0.5010074736225089
+        ]
+      },
+      {
+        "chunk": 23,
+        "steps": 11500,
+        "simulationTime": 11500,
+        "solverSteps": 7001,
+        "solverSimulationTime": 7001,
+        "epoch": 2,
+        "performanceSeconds": 95.83333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.0427390299266566,
+          "k": 0.059150442648215666,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0640445202589035,
+          "flux": 0.001708668190985918,
+          "change": 0.00001984562914003618
+        },
+        "coarseOccupancy": 0.06404718137254903,
+        "coarseCentroid": [
+          0.5002018057880889,
+          0.501293051901459
+        ]
+      },
+      {
+        "chunk": 24,
+        "steps": 12000,
+        "simulationTime": 12000,
+        "solverSteps": 7501,
+        "solverSimulationTime": 7501,
+        "epoch": 2,
+        "performanceSeconds": 100,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.04136046183864359,
+          "k": 0.059746183601215204,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0693715363740921,
+          "flux": 0.0018458286067470908,
+          "change": 0.000021162590201129206
+        },
+        "coarseOccupancy": 0.06936274509803922,
+        "coarseCentroid": [
+          0.5005797261484097,
+          0.5014355123674911
+        ]
+      },
+      {
+        "chunk": 25,
+        "steps": 12500,
+        "simulationTime": 12500,
+        "solverSteps": 8001,
+        "solverSimulationTime": 8001,
+        "epoch": 2,
+        "performanceSeconds": 104.16666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.0395678479561204,
+          "k": 0.060516041680990305,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0730082243680954,
+          "flux": 0.0019119787029922009,
+          "change": 0.000020419580323505215
+        },
+        "coarseOccupancy": 0.07297794117647055,
+        "coarseCentroid": [
+          0.5005641267842151,
+          0.5013119227539886
+        ]
+      },
+      {
+        "chunk": 26,
+        "steps": 13000,
+        "simulationTime": 13000,
+        "solverSteps": 8501,
+        "solverSimulationTime": 8501,
+        "epoch": 2,
+        "performanceSeconds": 108.33333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.037382994323674305,
+          "k": 0.06145109767564726,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0696004256606102,
+          "flux": 0.0018397736130282283,
+          "change": 0.000021673218725482002
+        },
+        "coarseOccupancy": 0.06956188725490195,
+        "coarseCentroid": [
+          0.5009152719665274,
+          0.5015896828892316
+        ]
+      },
+      {
+        "chunk": 27,
+        "steps": 13500,
+        "simulationTime": 13500,
+        "solverSteps": 9001,
+        "solverSimulationTime": 9001,
+        "epoch": 2,
+        "performanceSeconds": 112.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.03484959504681755,
+          "k": 0.06253306443409844,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0630120262503624,
+          "flux": 0.0016646800795570016,
+          "change": 0.000015033548152132425
+        },
+        "coarseOccupancy": 0.06303615196078431,
+        "coarseCentroid": [
+          0.5012530376670717,
+          0.5013289793438638
+        ]
+      },
+      {
+        "chunk": 28,
+        "steps": 14000,
+        "simulationTime": 14000,
+        "solverSteps": 9501,
+        "solverSimulationTime": 9501,
+        "epoch": 2,
+        "performanceSeconds": 116.66666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.03202924511043472,
+          "k": 0.06373599373889295,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.053215865045785904,
+          "flux": 0.0013999321963638067,
+          "change": 0.00001896777393994853
+        },
+        "coarseOccupancy": 0.05323223039215688,
+        "coarseCentroid": [
+          0.5023471223021581,
+          0.5014838129496401
+        ]
+      },
+      {
+        "chunk": 29,
+        "steps": 14500,
+        "simulationTime": 14500,
+        "solverSteps": 10001,
+        "solverSimulationTime": 10001,
+        "epoch": 2,
+        "performanceSeconds": 120.83333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.0290032506167491,
+          "k": 0.06502005547478859,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0398678258061409,
+          "flux": 0.0011194285470992327,
+          "change": 0.00001216903910972178
+        },
+        "coarseOccupancy": 0.03985906862745098,
+        "coarseCentroid": [
+          0.5017774788624136,
+          0.5020416986933128
+        ]
+      },
+      {
+        "chunk": 30,
+        "steps": 15000,
+        "simulationTime": 15000,
+        "solverSteps": 10501,
+        "solverSimulationTime": 10501,
+        "epoch": 2,
+        "performanceSeconds": 125,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025853294062549652,
+          "k": 0.06633696537075802,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0329115130007267,
+          "flux": 0.000911038659978658,
+          "change": 0.000011776623978221323
+        },
+        "coarseOccupancy": 0.03291973039215686,
+        "coarseCentroid": [
+          0.5024575383899488,
+          0.5036499534667287
+        ]
+      },
+      {
+        "chunk": 31,
+        "steps": 15500,
+        "simulationTime": 15500,
+        "solverSteps": 11001,
+        "solverSimulationTime": 11001,
+        "epoch": 2,
+        "performanceSeconds": 129.16666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.022636927184256417,
+          "k": 0.06768620351173693,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0208350270986557,
+          "flux": 0.0005598789430223405,
+          "change": 0.00003337578527862206
+        },
+        "coarseOccupancy": 0.020848651960784302,
+        "coarseCentroid": [
+          0.5004821822189569,
+          0.49483376193975054
+        ]
+      },
+      {
+        "chunk": 32,
+        "steps": 16000,
+        "simulationTime": 16000,
+        "solverSteps": 11501,
+        "solverSimulationTime": 11501,
+        "epoch": 2,
+        "performanceSeconds": 133.33333333333334,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.019456602396293335,
+          "k": 0.06902345583520218,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0033993194811046124,
+          "flux": 0.00008874942432157695,
+          "change": 0.000008571368198317941
+        },
+        "coarseOccupancy": 0.003446691176470588,
+        "coarseCentroid": [
+          0.5134722222222222,
+          0.4993055555555555
+        ]
+      },
+      {
+        "chunk": 33,
+        "steps": 16500,
+        "simulationTime": 16500,
+        "solverSteps": 12001,
+        "solverSimulationTime": 12001,
+        "epoch": 2,
+        "performanceSeconds": 137.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.01641459227814296,
+          "k": 0.07030462985344971,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 2.198149939792917e-14,
+          "change": 5.414643733381297e-10
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 34,
+        "steps": 17000,
+        "simulationTime": 17000,
+        "solverSteps": 12501,
+        "solverSimulationTime": 12501,
+        "epoch": 2,
+        "performanceSeconds": 141.66666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.013607339496814539,
+          "k": 0.0714882286400525,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 1.672292945265113e-29
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 35,
+        "steps": 17500,
+        "simulationTime": 17500,
+        "solverSteps": 13001,
+        "solverSimulationTime": 13001,
+        "epoch": 2,
+        "performanceSeconds": 145.83333333333334,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.011119778193574886,
+          "k": 0.07253774207748491,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 36,
+        "steps": 18000,
+        "simulationTime": 18000,
+        "solverSteps": 13501,
+        "solverSimulationTime": 13501,
+        "epoch": 2,
+        "performanceSeconds": 150,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.009019683973909782,
+          "k": 0.07342403011643177,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 37,
+        "steps": 18500,
+        "simulationTime": 18500,
+        "solverSteps": 14001,
+        "solverSimulationTime": 14001,
+        "epoch": 2,
+        "performanceSeconds": 154.16666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.007352081663085924,
+          "k": 0.07412768486891447,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 38,
+        "steps": 19000,
+        "simulationTime": 19000,
+        "solverSteps": 14501,
+        "solverSimulationTime": 14501,
+        "epoch": 2,
+        "performanceSeconds": 158.33333333333334,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.006133721508024167,
+          "k": 0.0746413663594879,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 39,
+        "steps": 19500,
+        "simulationTime": 19500,
+        "solverSteps": 15001,
+        "solverSimulationTime": 15001,
+        "epoch": 2,
+        "performanceSeconds": 162.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.00534762319845053,
+          "k": 0.07497211168424465,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 40,
+        "steps": 20000,
+        "simulationTime": 20000,
+        "solverSteps": 15501,
+        "solverSimulationTime": 15501,
+        "epoch": 2,
+        "performanceSeconds": 166.66666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.004937680863412851,
+          "k": 0.07514362006671912,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      }
+    ]
+  },
+  "runB": {
+    "seed": 4242042,
+    "trajectoryId": "organism-01-candidate",
+    "trajectoryDocument": "{\n  \"version\": 1,\n  \"id\": \"organism-01-candidate\",\n  \"nominalStepsPerSecond\": 120,\n  \"dt\": 1,\n  \"durationScaleRange\": [\n    0.75,\n    1.25\n  ],\n  \"parameterJitter\": {\n    \"F\": 0.0004,\n    \"k\": 0.0004,\n    \"correlationSeconds\": 60\n  },\n  \"genesisLibrary\": {\n    \"first\": {\n      \"kind\": \"single\",\n      \"center\": [\n        0.5,\n        0.5\n      ],\n      \"radiusCells\": 6,\n      \"strength\": 1\n    },\n    \"return\": {\n      \"kind\": \"single\",\n      \"center\": [\n        0.61,\n        0.43\n      ],\n      \"radiusCells\": 7,\n      \"strength\": 1\n    }\n  },\n  \"movements\": [\n    {\n      \"id\": \"dormancy\",\n      \"seconds\": 30,\n      \"intention\": \"quiet\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"nucleation\"\n      ]\n    },\n    {\n      \"id\": \"nucleation\",\n      \"seconds\": 40,\n      \"intention\": \"emerge\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.03,\n            0.062,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"cellular-growth\",\n        \"collapse\"\n      ],\n      \"enterGenesis\": \"first\",\n      \"exitHint\": \"living\"\n    },\n    {\n      \"id\": \"cellular-growth\",\n      \"seconds\": 140,\n      \"intention\": \"expand\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.03,\n            0.062,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.035,\n            0.064,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"replication\"\n      ]\n    },\n    {\n      \"id\": \"replication\",\n      \"seconds\": 150,\n      \"intention\": \"expand\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.035,\n            0.064,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.0367,\n            0.0649,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"connection\"\n      ],\n      \"exitHint\": \"replicating\"\n    },\n    {\n      \"id\": \"connection\",\n      \"seconds\": 140,\n      \"intention\": \"connect\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.0367,\n            0.0649,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.03,\n            0.057,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"labyrinth\"\n      ],\n      \"exitHint\": \"connecting\"\n    },\n    {\n      \"id\": \"labyrinth\",\n      \"seconds\": 200,\n      \"intention\": \"connect\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.03,\n            0.057,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.029,\n            0.057,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"overgrowth\"\n      ],\n      \"exitHint\": \"complex\"\n    },\n    {\n      \"id\": \"overgrowth\",\n      \"seconds\": 120,\n      \"intention\": \"saturate\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.029,\n            0.057,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.045,\n            0.058,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"collapse\"\n      ]\n    },\n    {\n      \"id\": \"collapse\",\n      \"seconds\": 100,\n      \"intention\": \"release\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.045,\n            0.058,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.005,\n            0.075,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"stillness\"\n      ],\n      \"exitHint\": \"empty\"\n    },\n    {\n      \"id\": \"stillness\",\n      \"seconds\": 60,\n      \"intention\": \"quiet\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.005,\n            0.075,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.005,\n            0.075,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"rebirth\"\n      ]\n    },\n    {\n      \"id\": \"rebirth\",\n      \"seconds\": 40,\n      \"intention\": \"emerge\",\n      \"waypoints\": [\n        {\n          \"at\": 0,\n          \"p\": [\n            0.026,\n            0.06,\n            0.16,\n            0.08\n          ]\n        },\n        {\n          \"at\": 1,\n          \"p\": [\n            0.03,\n            0.062,\n            0.16,\n            0.08\n          ]\n        }\n      ],\n      \"next\": [\n        \"cellular-growth\",\n        \"collapse\"\n      ],\n      \"enterGenesis\": \"return\"\n    }\n  ]\n}",
+    "movements": [
+      "dormancy",
+      "nucleation",
+      "cellular-growth",
+      "replication",
+      "connection",
+      "labyrinth",
+      "overgrowth",
+      "collapse",
+      "stillness",
+      "rebirth"
+    ],
+    "grid": {
+      "width": 768,
+      "height": 768
+    },
+    "simulationResolution": 768,
+    "speed": 1,
+    "epoch": 2,
+    "stepsAtSetup": 0,
+    "simulationTimeAtSetup": 0,
+    "commands": [
+      {
+        "chunk": 9,
+        "performanceSeconds": 37.5,
+        "signature": "single|replace|1891129771|0.500837397|0.501236975|5.748977872|0.975741923"
+      },
+      {
+        "chunk": 14,
+        "performanceSeconds": 58.333333333333336,
+        "signature": "single|inject|3292013738|0.502238586|0.503250374|6.213124625|0.954739223"
+      }
+    ],
+    "checkpoints": [
+      {
+        "chunk": 1,
+        "steps": 500,
+        "simulationTime": 500,
+        "solverSteps": 500,
+        "solverSimulationTime": 500,
+        "epoch": 1,
+        "performanceSeconds": 4.166666666666667,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02593743001500744,
+          "k": 0.060012307647583085,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 2,
+        "steps": 1000,
+        "simulationTime": 1000,
+        "solverSteps": 1000,
+        "solverSimulationTime": 1000,
+        "epoch": 1,
+        "performanceSeconds": 8.333333333333334,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025886627170013884,
+          "k": 0.06002230067399141,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 3,
+        "steps": 1500,
+        "simulationTime": 1500,
+        "solverSteps": 1500,
+        "solverSimulationTime": 1500,
+        "epoch": 1,
+        "performanceSeconds": 12.5,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02584537849367576,
+          "k": 0.06003041437534037,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 4,
+        "steps": 2000,
+        "simulationTime": 2000,
+        "solverSteps": 2000,
+        "solverSimulationTime": 2000,
+        "epoch": 1,
+        "performanceSeconds": 16.666666666666668,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02581188719412623,
+          "k": 0.0600370021843674,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 5,
+        "steps": 2500,
+        "simulationTime": 2500,
+        "solverSteps": 2500,
+        "solverSimulationTime": 2500,
+        "epoch": 1,
+        "performanceSeconds": 20.833333333333332,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025784694390742154,
+          "k": 0.06004235106595795,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 6,
+        "steps": 3000,
+        "simulationTime": 3000,
+        "solverSteps": 3000,
+        "solverSimulationTime": 3000,
+        "epoch": 1,
+        "performanceSeconds": 25,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025762615565320893,
+          "k": 0.06004669401733257,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 7,
+        "steps": 3500,
+        "simulationTime": 3500,
+        "solverSteps": 3500,
+        "solverSimulationTime": 3500,
+        "epoch": 1,
+        "performanceSeconds": 29.166666666666668,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025744688964481056,
+          "k": 0.06005022021740319,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 8,
+        "steps": 4000,
+        "simulationTime": 4000,
+        "solverSteps": 4000,
+        "solverSimulationTime": 4000,
+        "epoch": 1,
+        "performanceSeconds": 33.333333333333336,
+        "movement": "dormancy",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02573013370569626,
+          "k": 0.06005308326740432,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 0,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 9,
+        "steps": 4500,
+        "simulationTime": 4500,
+        "solverSteps": 1,
+        "solverSimulationTime": 1,
+        "epoch": 2,
+        "performanceSeconds": 37.5,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025718315762061256,
+          "k": 0.060055407881761086,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.00019327799964230508,
+          "flux": 0.000006014205609972123,
+          "change": 0.00000162265450853738
+        },
+        "coarseOccupancy": 0.0001838235294117647,
+        "coarseCentroid": [
+          0.5052083333333334,
+          0.5052083333333334
+        ]
+      },
+      {
+        "chunk": 10,
+        "steps": 5000,
+        "simulationTime": 5000,
+        "solverSteps": 501,
+        "solverSimulationTime": 501,
+        "epoch": 2,
+        "performanceSeconds": 41.666666666666664,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02574661970545606,
+          "k": 0.060076245001332546,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0006205241079442203,
+          "flux": 0.000013765871699433774,
+          "change": 4.020208166366501e-7
+        },
+        "coarseOccupancy": 0.000628063725490196,
+        "coarseCentroid": [
+          0.5007621951219513,
+          0.5022865853658537
+        ]
+      },
+      {
+        "chunk": 11,
+        "steps": 5500,
+        "simulationTime": 5500,
+        "solverSteps": 1001,
+        "solverSimulationTime": 1001,
+        "epoch": 2,
+        "performanceSeconds": 45.833333333333336,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025955571042555456,
+          "k": 0.060186148584420576,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0009629991836845875,
+          "flux": 0.000020470437448238954,
+          "change": 6.754526111762971e-7
+        },
+        "coarseOccupancy": 0.0009650735294117647,
+        "coarseCentroid": [
+          0.5004960317460316,
+          0.5014880952380951
+        ]
+      },
+      {
+        "chunk": 12,
+        "steps": 6000,
+        "simulationTime": 6000,
+        "solverSteps": 1501,
+        "solverSimulationTime": 1501,
+        "epoch": 2,
+        "performanceSeconds": 50,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.02640575261668033,
+          "k": 0.06041564649258049,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0014038087101653218,
+          "flux": 0.00003445935362833552,
+          "change": 0.0000014028948953637155
+        },
+        "coarseOccupancy": 0.001409313725490196,
+        "coarseCentroid": [
+          0.501358695652174,
+          0.501358695652174
+        ]
+      },
+      {
+        "chunk": 13,
+        "steps": 6500,
+        "simulationTime": 6500,
+        "solverSteps": 2001,
+        "solverSimulationTime": 2001,
+        "epoch": 2,
+        "performanceSeconds": 54.166666666666664,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.027060609882007484,
+          "k": 0.060746653427044994,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 1,
+        "health": {
+          "occupiedFraction": 0.0022566053085029125,
+          "flux": 0.00005430873352452181,
+          "change": 0.0000017156563671960612
+        },
+        "coarseOccupancy": 0.0022671568627450982,
+        "coarseCentroid": [
+          0.5016891891891891,
+          0.5016891891891891
+        ]
+      },
+      {
+        "chunk": 14,
+        "steps": 7000,
+        "simulationTime": 7000,
+        "solverSteps": 2501,
+        "solverSimulationTime": 2501,
+        "epoch": 2,
+        "performanceSeconds": 58.333333333333336,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.027820920397620297,
+          "k": 0.06112971403814107,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.00261603482067585,
+          "flux": 0.00006687943096039817,
+          "change": 0.000004038660335936584
+        },
+        "coarseOccupancy": 0.002604166666666667,
+        "coarseCentroid": [
+          0.5003676470588235,
+          0.5003676470588235
+        ]
+      },
+      {
+        "chunk": 15,
+        "steps": 7500,
+        "simulationTime": 7500,
+        "solverSteps": 3001,
+        "solverSimulationTime": 3001,
+        "epoch": 2,
+        "performanceSeconds": 62.5,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.028557242182646086,
+          "k": 0.06153994182548356,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.00469970703125,
+          "flux": 0.000121042896353174,
+          "change": 0.000004931370767735643
+        },
+        "coarseOccupancy": 0.0046875,
+        "coarseCentroid": [
+          0.5002042483660131,
+          0.5
+        ]
+      },
+      {
+        "chunk": 16,
+        "steps": 8000,
+        "simulationTime": 8000,
+        "solverSteps": 3501,
+        "solverSimulationTime": 3501,
+        "epoch": 2,
+        "performanceSeconds": 66.66666666666667,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029151026091982044,
+          "k": 0.061895033560059154,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.005725436843931675,
+          "flux": 0.0001492844894528389,
+          "change": 0.0000027934906938753556
+        },
+        "coarseOccupancy": 0.0057444852941176475,
+        "coarseCentroid": [
+          0.5009166666666666,
+          0.5010833333333332
+        ]
+      },
+      {
+        "chunk": 17,
+        "steps": 8500,
+        "simulationTime": 8500,
+        "solverSteps": 4001,
+        "solverSimulationTime": 4001,
+        "epoch": 2,
+        "performanceSeconds": 70.83333333333333,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029519182978411586,
+          "k": 0.062126366519918895,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0072479248046875,
+          "flux": 0.00018883394659496844,
+          "change": 0.000004778974471264519
+        },
+        "coarseOccupancy": 0.007261029411764706,
+        "coarseCentroid": [
+          0.5014504219409283,
+          0.5014504219409283
+        ]
+      },
+      {
+        "chunk": 18,
+        "steps": 9000,
+        "simulationTime": 9000,
+        "solverSteps": 4501,
+        "solverSimulationTime": 4501,
+        "epoch": 2,
+        "performanceSeconds": 75,
+        "movement": "nucleation",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029653444272546202,
+          "k": 0.062231864826570026,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0086534284055233,
+          "flux": 0.00022961159993428737,
+          "change": 0.000003927932993974537
+        },
+        "coarseOccupancy": 0.008655024509803922,
+        "coarseCentroid": [
+          0.5008296460176991,
+          0.5009402654867257
+        ]
+      },
+      {
+        "chunk": 19,
+        "steps": 9500,
+        "simulationTime": 9500,
+        "solverSteps": 5001,
+        "solverSimulationTime": 5001,
+        "epoch": 2,
+        "performanceSeconds": 79.16666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.029489933042789067,
+          "k": 0.062474222823519644,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.009950426407158375,
+          "flux": 0.0002674163260962814,
+          "change": 0.00000484691554447636
+        },
+        "coarseOccupancy": 0.009972426470588235,
+        "coarseCentroid": [
+          0.5002400153609833,
+          0.5009120583717358
+        ]
+      },
+      {
+        "chunk": 20,
+        "steps": 10000,
+        "simulationTime": 10000,
+        "solverSteps": 5501,
+        "solverSimulationTime": 5501,
+        "epoch": 2,
+        "performanceSeconds": 83.33333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.03382977955602012,
+          "k": 0.06129667039286113,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0150926373898983,
+          "flux": 0.00042535719694569707,
+          "change": 0.000009196075552608818
+        },
+        "coarseOccupancy": 0.015104166666666663,
+        "coarseCentroid": [
+          0.5012043610547667,
+          0.5009508113590265
+        ]
+      },
+      {
+        "chunk": 21,
+        "steps": 10500,
+        "simulationTime": 10500,
+        "solverSteps": 6001,
+        "solverSimulationTime": 6001,
+        "epoch": 2,
+        "performanceSeconds": 87.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.04111763191138811,
+          "k": 0.05933170707993605,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0322672538459301,
+          "flux": 0.0008958910475485027,
+          "change": 0.000018578333765617572
+        },
+        "coarseOccupancy": 0.03227634803921568,
+        "coarseCentroid": [
+          0.5005191029900333,
+          0.500904722354058
+        ]
+      },
+      {
+        "chunk": 22,
+        "steps": 11000,
+        "simulationTime": 11000,
+        "solverSteps": 6501,
+        "solverSimulationTime": 6501,
+        "epoch": 2,
+        "performanceSeconds": 91.66666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.04368283470932467,
+          "k": 0.05873330854305111,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0522291474044323,
+          "flux": 0.0014293866697698832,
+          "change": 0.000020271609173505567
+        },
+        "coarseOccupancy": 0.0522671568627451,
+        "coarseCentroid": [
+          0.5005861664712778,
+          0.5010074736225089
+        ]
+      },
+      {
+        "chunk": 23,
+        "steps": 11500,
+        "simulationTime": 11500,
+        "solverSteps": 7001,
+        "solverSimulationTime": 7001,
+        "epoch": 2,
+        "performanceSeconds": 95.83333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.0427390299266566,
+          "k": 0.059150442648215666,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0640445202589035,
+          "flux": 0.001708668190985918,
+          "change": 0.00001984562914003618
+        },
+        "coarseOccupancy": 0.06404718137254903,
+        "coarseCentroid": [
+          0.5002018057880889,
+          0.501293051901459
+        ]
+      },
+      {
+        "chunk": 24,
+        "steps": 12000,
+        "simulationTime": 12000,
+        "solverSteps": 7501,
+        "solverSimulationTime": 7501,
+        "epoch": 2,
+        "performanceSeconds": 100,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.04136046183864359,
+          "k": 0.059746183601215204,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0693715363740921,
+          "flux": 0.0018458286067470908,
+          "change": 0.000021162590201129206
+        },
+        "coarseOccupancy": 0.06936274509803922,
+        "coarseCentroid": [
+          0.5005797261484097,
+          0.5014355123674911
+        ]
+      },
+      {
+        "chunk": 25,
+        "steps": 12500,
+        "simulationTime": 12500,
+        "solverSteps": 8001,
+        "solverSimulationTime": 8001,
+        "epoch": 2,
+        "performanceSeconds": 104.16666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.0395678479561204,
+          "k": 0.060516041680990305,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0730082243680954,
+          "flux": 0.0019119787029922009,
+          "change": 0.000020419580323505215
+        },
+        "coarseOccupancy": 0.07297794117647055,
+        "coarseCentroid": [
+          0.5005641267842151,
+          0.5013119227539886
+        ]
+      },
+      {
+        "chunk": 26,
+        "steps": 13000,
+        "simulationTime": 13000,
+        "solverSteps": 8501,
+        "solverSimulationTime": 8501,
+        "epoch": 2,
+        "performanceSeconds": 108.33333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.037382994323674305,
+          "k": 0.06145109767564726,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0696004256606102,
+          "flux": 0.0018397736130282283,
+          "change": 0.000021673218725482002
+        },
+        "coarseOccupancy": 0.06956188725490195,
+        "coarseCentroid": [
+          0.5009152719665274,
+          0.5015896828892316
+        ]
+      },
+      {
+        "chunk": 27,
+        "steps": 13500,
+        "simulationTime": 13500,
+        "solverSteps": 9001,
+        "solverSimulationTime": 9001,
+        "epoch": 2,
+        "performanceSeconds": 112.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.03484959504681755,
+          "k": 0.06253306443409844,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0630120262503624,
+          "flux": 0.0016646800795570016,
+          "change": 0.000015033548152132425
+        },
+        "coarseOccupancy": 0.06303615196078431,
+        "coarseCentroid": [
+          0.5012530376670717,
+          0.5013289793438638
+        ]
+      },
+      {
+        "chunk": 28,
+        "steps": 14000,
+        "simulationTime": 14000,
+        "solverSteps": 9501,
+        "solverSimulationTime": 9501,
+        "epoch": 2,
+        "performanceSeconds": 116.66666666666667,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.03202924511043472,
+          "k": 0.06373599373889295,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.053215865045785904,
+          "flux": 0.0013999321963638067,
+          "change": 0.00001896777393994853
+        },
+        "coarseOccupancy": 0.05323223039215688,
+        "coarseCentroid": [
+          0.5023471223021581,
+          0.5014838129496401
+        ]
+      },
+      {
+        "chunk": 29,
+        "steps": 14500,
+        "simulationTime": 14500,
+        "solverSteps": 10001,
+        "solverSimulationTime": 10001,
+        "epoch": 2,
+        "performanceSeconds": 120.83333333333333,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.0290032506167491,
+          "k": 0.06502005547478859,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0398678258061409,
+          "flux": 0.0011194285470992327,
+          "change": 0.00001216903910972178
+        },
+        "coarseOccupancy": 0.03985906862745098,
+        "coarseCentroid": [
+          0.5017774788624136,
+          0.5020416986933128
+        ]
+      },
+      {
+        "chunk": 30,
+        "steps": 15000,
+        "simulationTime": 15000,
+        "solverSteps": 10501,
+        "solverSimulationTime": 10501,
+        "epoch": 2,
+        "performanceSeconds": 125,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.025853294062549652,
+          "k": 0.06633696537075802,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0329115130007267,
+          "flux": 0.000911038659978658,
+          "change": 0.000011776623978221323
+        },
+        "coarseOccupancy": 0.03291973039215686,
+        "coarseCentroid": [
+          0.5024575383899488,
+          0.5036499534667287
+        ]
+      },
+      {
+        "chunk": 31,
+        "steps": 15500,
+        "simulationTime": 15500,
+        "solverSteps": 11001,
+        "solverSimulationTime": 11001,
+        "epoch": 2,
+        "performanceSeconds": 129.16666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.022636927184256417,
+          "k": 0.06768620351173693,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0208350270986557,
+          "flux": 0.0005598789430223405,
+          "change": 0.00003337578527862206
+        },
+        "coarseOccupancy": 0.020848651960784302,
+        "coarseCentroid": [
+          0.5004821822189569,
+          0.49483376193975054
+        ]
+      },
+      {
+        "chunk": 32,
+        "steps": 16000,
+        "simulationTime": 16000,
+        "solverSteps": 11501,
+        "solverSimulationTime": 11501,
+        "epoch": 2,
+        "performanceSeconds": 133.33333333333334,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.019456602396293335,
+          "k": 0.06902345583520218,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0.0033993194811046124,
+          "flux": 0.00008874942432157695,
+          "change": 0.000008571368198317941
+        },
+        "coarseOccupancy": 0.003446691176470588,
+        "coarseCentroid": [
+          0.5134722222222222,
+          0.4993055555555555
+        ]
+      },
+      {
+        "chunk": 33,
+        "steps": 16500,
+        "simulationTime": 16500,
+        "solverSteps": 12001,
+        "solverSimulationTime": 12001,
+        "epoch": 2,
+        "performanceSeconds": 137.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.01641459227814296,
+          "k": 0.07030462985344971,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 2.198149939792917e-14,
+          "change": 5.414643733381297e-10
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 34,
+        "steps": 17000,
+        "simulationTime": 17000,
+        "solverSteps": 12501,
+        "solverSimulationTime": 12501,
+        "epoch": 2,
+        "performanceSeconds": 141.66666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.013607339496814539,
+          "k": 0.0714882286400525,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 1.672292945265113e-29
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 35,
+        "steps": 17500,
+        "simulationTime": 17500,
+        "solverSteps": 13001,
+        "solverSimulationTime": 13001,
+        "epoch": 2,
+        "performanceSeconds": 145.83333333333334,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.011119778193574886,
+          "k": 0.07253774207748491,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 36,
+        "steps": 18000,
+        "simulationTime": 18000,
+        "solverSteps": 13501,
+        "solverSimulationTime": 13501,
+        "epoch": 2,
+        "performanceSeconds": 150,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.009019683973909782,
+          "k": 0.07342403011643177,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 37,
+        "steps": 18500,
+        "simulationTime": 18500,
+        "solverSteps": 14001,
+        "solverSimulationTime": 14001,
+        "epoch": 2,
+        "performanceSeconds": 154.16666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.007352081663085924,
+          "k": 0.07412768486891447,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 38,
+        "steps": 19000,
+        "simulationTime": 19000,
+        "solverSteps": 14501,
+        "solverSimulationTime": 14501,
+        "epoch": 2,
+        "performanceSeconds": 158.33333333333334,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.006133721508024167,
+          "k": 0.0746413663594879,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 39,
+        "steps": 19500,
+        "simulationTime": 19500,
+        "solverSteps": 15001,
+        "solverSimulationTime": 15001,
+        "epoch": 2,
+        "performanceSeconds": 162.5,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.00534762319845053,
+          "k": 0.07497211168424465,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      },
+      {
+        "chunk": 40,
+        "steps": 20000,
+        "simulationTime": 20000,
+        "solverSteps": 15501,
+        "solverSimulationTime": 15501,
+        "epoch": 2,
+        "performanceSeconds": 166.66666666666666,
+        "movement": "collapse",
+        "arc": 0,
+        "parameters": {
+          "F": 0.004937680863412851,
+          "k": 0.07514362006671912,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "genesisCount": 2,
+        "health": {
+          "occupiedFraction": 0,
+          "flux": 0,
+          "change": 0
+        },
+        "coarseOccupancy": 0,
+        "coarseCentroid": [
+          0.5,
+          0.5
+        ]
+      }
+    ]
+  }
+}

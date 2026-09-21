@@ -1,0 +1,58 @@
+{
+  "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+  "softwareRenderer": false,
+  "harness": "headless-gpu",
+  "displayRefreshHz": "synthetic 60 Hz BeginFrame",
+  "note": "simulationMs/renderMs measure GL command submission, not GPU execution, because WebGL submits asynchronously; the frame-time percentiles are rAF intervals and therefore the delivered display cadence, which on this laptop panel is capped at 49.95 Hz. The drainedFrameBenchmark serialises each frame with a one-pixel readback to measure the real per-frame cost (2 simulation steps per frame = the nominal 120 steps/s at 60 fps).",
+  "nominalSimulationStepsPerSecond": 120,
+  "measurements": [
+    {
+      "canvas": "1280x720",
+      "scene": "1280x720",
+      "deliveredFps": 60,
+      "deliveredSimulationStepsPerSecond": 119.99999999999974,
+      "frameMsPercentiles": {
+        "p50": 16.69999999999891,
+        "p95": 16.700000000000728,
+        "p99": 16.799999999999272
+      },
+      "simulationMsAvg": 0.5346315882787754,
+      "renderMsAvg": 0.12263650355895674,
+      "overload": false
+    },
+    {
+      "canvas": "1920x1080",
+      "scene": "1920x1080",
+      "deliveredFps": 60.0039346842415,
+      "deliveredSimulationStepsPerSecond": 120.00000000000325,
+      "frameMsPercentiles": {
+        "p50": 16.700000000000728,
+        "p95": 16.700000000000728,
+        "p99": 16.799999999999272
+      },
+      "simulationMsAvg": 0.19080420084759644,
+      "renderMsAvg": 0.11463099162706268,
+      "overload": false
+    }
+  ],
+  "drainedFrameBenchmark": {
+    "at1080": {
+      "canvas": "1920x1080",
+      "scene": "1920x1080",
+      "count": 120,
+      "stepsPerFrame": 2,
+      "totalMs": 1224.3999999761581,
+      "msPerFrame": 10.203333333134651,
+      "impliedFps": 98.00718719563596
+    },
+    "at720": {
+      "canvas": "1280x720",
+      "scene": "1280x720",
+      "count": 120,
+      "stepsPerFrame": 2,
+      "totalMs": 1082.699999988079,
+      "msPerFrame": 9.022499999900658,
+      "impliedFps": 110.83402604721645
+    }
+  }
+}

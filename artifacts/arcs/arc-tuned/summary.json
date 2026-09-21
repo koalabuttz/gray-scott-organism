@@ -1,0 +1,36 @@
+{
+  "generatedBy": "tests/browser/arcs.spec.ts (ARC_TUNED=1)",
+  "speed": 3,
+  "grid": {
+    "width": 768,
+    "height": 768
+  },
+  "note": "One complete arc at the presentation DEFAULT speed (3×, deviation 44) with the deviation-45 retuned trajectory. Same schema as the 1× `arcs/summary.json`: `descriptors` is a ≈2 Hz log of tier-1 chemistry health + coarse occupancy, `captures` is the 30 s capture strip, and `extinctionDecisions` records why each premature-extinction rescue fired.",
+  "narrative": "One complete arc recorded at the presentation default speed (3×, deviation 44 — ≈5.4 real minutes for the ≈980-performance-second first arc) with the deviation-45 retuned trajectory, i.e. at the pacing the operator will actually see. The arc completes and walks the whole first-arc movement path. Post refinement (deviation 48, added in the round-A review), NO §6.4 injection rescue fires: the nucleation field starts below the dead occupancy/activity thresholds but is rising, so the trend-aware detector keeps it alive (rescueCount 0, extinctionDecisionCount 0). `npm run test:rescue` (RESCUE=1) confirms no spurious rescue while the tuned field rises through nucleation, and separately preserves a deliberate dead fixture that still fires its one bounded rescue.",
+  "arc": {
+    "seed": 8100001,
+    "wallClockSeconds": 272.451,
+    "performanceSeconds": 817.116666666473,
+    "arcReached": 1,
+    "movementsVisited": [
+      "dormancy",
+      "nucleation",
+      "cellular-growth",
+      "replication",
+      "connection",
+      "labyrinth",
+      "overgrowth",
+      "collapse",
+      "stillness",
+      "rebirth"
+    ],
+    "rescueCount": 0,
+    "extinctionDecisionCount": 0,
+    "genesisCount": 2,
+    "captureCount": 9,
+    "descriptorSamples": 623,
+    "holdSeconds": 20.008333333315136,
+    "darkestHoldMax": 0,
+    "pageErrors": []
+  }
+}

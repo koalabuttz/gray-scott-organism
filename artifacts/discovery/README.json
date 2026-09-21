@@ -1,0 +1,14 @@
+{
+  "note": "See descriptors.json (per-run descriptors) and descriptors.csv (per-sample series).",
+  "contactSheets": [
+    "discovery/01-dormancy-to-nucleation/contact-sheet.png",
+    "discovery/02-nucleation-to-cellular-growth/contact-sheet.png",
+    "discovery/03-cellular-growth-to-replication/contact-sheet.png",
+    "discovery/04-replication-to-connection/contact-sheet.png",
+    "discovery/05-connection-to-labyrinth/contact-sheet.png",
+    "discovery/06-labyrinth-to-overgrowth/contact-sheet.png",
+    "discovery/07-overgrowth-to-collapse/contact-sheet.png",
+    "discovery/08-collapse-to-stillness/contact-sheet.png",
+    "discovery/09-stillness-to-rebirth/contact-sheet.png"
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "grid": 256,
+  "steps": 10000,
+  "elapsedSeconds": 2.112,
+  "cellUpdatesPerSecond": 310303030.3030303,
+  "stats": {
+    "meanU": 0.9323370297179281,
+    "meanV": 0.02209655772609094,
+    "minV": 0,
+    "maxV": 0.3881325125694275,
+    "occupiedFraction": 0.075408935546875,
+    "reactionActivity": 0.002041590304574142,
+    "edgeDensity": 0.00957125079636452,
+    "nonFinite": 0,
+    "saturatedCells": 35928
+  },
+  "instrumentation": {
+    "gpu": {
+      "clippedU": 0,
+      "clippedV": 0,
+      "maxExcursion": 0,
+      "significantCellSteps": 0,
+      "steps": 10000,
+      "cells": 65536,
+      "frequency": 0
+    },
+    "cpuReference": {
+      "clippedU": 0,
+      "clippedV": 0,
+      "maxExcursion": 0
+    },
+    "bound": 0.001
+  },
+  "feedbackViolations": 0
+}

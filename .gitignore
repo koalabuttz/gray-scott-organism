@@ -1,0 +1,11 @@
+# Dependencies & build output
+node_modules/
+dist/
+
+# Test runner scratch
+test-results/
+playwright-report/
+
+# Local env / OS noise
+*.local
+.DS_Store

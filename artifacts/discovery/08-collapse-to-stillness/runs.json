@@ -1,0 +1,551 @@
+{
+  "transition": {
+    "id": "08-collapse-to-stillness",
+    "index": 8,
+    "source": {
+      "movement": "collapse",
+      "params": {
+        "F": 0.005,
+        "k": 0.075,
+        "Du": 0.16,
+        "Dv": 0.08
+      }
+    },
+    "destination": {
+      "movement": "stillness",
+      "params": {
+        "F": 0.005,
+        "k": 0.075,
+        "Du": 0.16,
+        "Dv": 0.08
+      }
+    },
+    "destinationGenesis": null
+  },
+  "grid": 512,
+  "seeds": [
+    11000011,
+    11000022,
+    11000033
+  ],
+  "settleSteps": 4000,
+  "observationPerformanceSeconds": 60,
+  "observationSliceSteps": 600,
+  "contactSheet": "discovery/08-collapse-to-stillness/contact-sheet.png",
+  "note": "Descriptors are tier-1 full-domain health fields (occupancy, reaction activity, change rate) plus the coarse occupied centroid; `beta0Approx`/`beta1Approx` are presentation-tier (Phase 3) and are not available here. `entryGenesisCommand` is built by the curator's own construction (`buildEntryGenesisCommand`): a root-seeded perturbation of the destination movement's `enterGenesis` library entry, displaced from the settle-seed origin by `MIN_REBIRTH_DISPLACEMENT`; `entryGenesisSignature` is its stable one-line form.",
+  "runs": [
+    {
+      "seed": 11000011,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "activity": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "changeRate": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "occupancyTrend": 0
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        }
+      ],
+      "file": "discovery/08-collapse-to-stillness/seed-11000011.png"
+    },
+    {
+      "seed": 11000022,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "activity": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "changeRate": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "occupancyTrend": 0
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        }
+      ],
+      "file": "discovery/08-collapse-to-stillness/seed-11000022.png"
+    },
+    {
+      "seed": 11000033,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "activity": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "changeRate": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "occupancyTrend": 0
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0,
+          "activity": 0,
+          "changeRate": 0,
+          "centroidUV": [
+            0,
+            0
+          ]
+        }
+      ],
+      "file": "discovery/08-collapse-to-stillness/seed-11000033.png"
+    }
+  ]
+}

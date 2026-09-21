@@ -1,0 +1,1495 @@
+{
+  "schemaVersion": 4,
+  "updatedAt": "2026-09-20T07:10:20.196Z",
+  "nominalStepsPerSecond": 120,
+  "presentation": {
+    "grid": "768x768",
+    "viewport": "1920x1080",
+    "safetyMargin": 0.15,
+    "frameBudget60fpsMs": 16.666666666666668,
+    "panelHz": 49.95,
+    "panelPeriodMs": 20.02002002002002,
+    "policyFloors": {
+      "fixedMs": 10.5,
+      "perStepMs": 0.5,
+      "rounding": "fixed rounded up to the nearest 0.05 ms; per-step rounded down to the nearest 0.05 ms"
+    },
+    "derivation": {
+      "basedOn": "the retained observed maxima across 11 run(s) in `history`",
+      "isPolicyChoice": true,
+      "rounding": "fixed rounded up to the nearest 0.05 ms; per-step rounded down to the nearest 0.05 ms",
+      "fixed": {
+        "observedMaxMs": 7.44315873039147,
+        "floorMs": 10.5,
+        "marginMs": 3.0568412696085296
+      },
+      "perStep": {
+        "observedMaxMs": 0.26306349206420176,
+        "floorMs": 0.5,
+        "multiplier": 1.9006818318901235
+      },
+      "consistency": {
+        "floorsAtOrAboveObservedMaxima": true,
+        "capWithinFlooredBudget": true
+      },
+      "text": "fixed 10.5 ms = observed max 7.44 + 3.06 ms; per-step 0.5 ms = observed max 0.2631 x 1.90"
+    },
+    "observed": {
+      "runs": 11,
+      "fixedMs": {
+        "min": 7.062523809292965,
+        "max": 7.44315873039147
+      },
+      "perStepMs": {
+        "min": 0.2248968254053401,
+        "max": 0.26306349206420176
+      },
+      "maxPredictedMsAtChosenCap": 16.5
+    },
+    "chosenCap": 12,
+    "capAt60fps": 7,
+    "capOnPanel": 13,
+    "predictedMsAtCap": 16.5,
+    "speedCeiling": 6,
+    "deliveredSpeedOnPanel": 4.995000000000001,
+    "samples": [
+      {
+        "stepsPerFrame": 0,
+        "count": 90,
+        "msPerFrame": 7.144444444444445,
+        "repeatsMsPerFrame": [
+          7.151111111376021,
+          7.13444444404708,
+          7.144444444444445
+        ],
+        "msPerStep": null,
+        "impliedFps": 139.96889580093313
+      },
+      {
+        "stepsPerFrame": 8,
+        "count": 90,
+        "msPerFrame": 9.420000000132454,
+        "repeatsMsPerFrame": [
+          9.420000000132454,
+          9.047777777910232,
+          9.546666666534211
+        ],
+        "msPerStep": 0.28444444446100114,
+        "impliedFps": 106.15711252504661
+      },
+      {
+        "stepsPerFrame": 16,
+        "count": 90,
+        "msPerFrame": 10.736666666799122,
+        "repeatsMsPerFrame": [
+          10.995555555158191,
+          10.736666666799122,
+          10.657777777645324
+        ],
+        "msPerStep": 0.22451388889716734,
+        "impliedFps": 93.13877677624929
+      },
+      {
+        "stepsPerFrame": 24,
+        "count": 90,
+        "msPerFrame": 12.543333333730697,
+        "repeatsMsPerFrame": [
+          12.09555555515819,
+          12.543333333730697,
+          12.62555555568801
+        ],
+        "msPerStep": 0.2249537037202605,
+        "impliedFps": 79.72362476494717
+      },
+      {
+        "stepsPerFrame": 32,
+        "count": 90,
+        "msPerFrame": 14.547777777910232,
+        "repeatsMsPerFrame": [
+          14.608888889021344,
+          14.547777777910232,
+          14.522222222222222
+        ],
+        "msPerStep": 0.23135416667080586,
+        "impliedFps": 68.73902085021047
+      },
+      {
+        "stepsPerFrame": 48,
+        "count": 90,
+        "msPerFrame": 18.788888888888888,
+        "repeatsMsPerFrame": [
+          18.642222222354675,
+          18.788888888888888,
+          18.805555555555557
+        ],
+        "msPerStep": 0.24259259259259255,
+        "impliedFps": 53.222945002956834
+      }
+    ],
+    "fit": {
+      "fixedMs": 7.134206349338805,
+      "perStepMs": 0.23731150793650785
+    },
+    "history": [
+      {
+        "measuredAt": "2026-09-20T06:25:51.032Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.2772380950905005,
+        "perStepMs": 0.26306349206420176,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.413333333200878,
+            "repeatsMsPerFrame": [
+              7.326666667064031,
+              7.413333333200878,
+              7.424444444311989
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.4355555554231,
+            "repeatsMsPerFrame": [
+              9.4355555554231,
+              9.4355555554231,
+              9.34000000026491
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 11.248888888623979,
+            "repeatsMsPerFrame": [
+              11.248888888623979,
+              11.447777777910233,
+              11.234444444709354
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 13.488888888888889,
+            "repeatsMsPerFrame": [
+              13.3355555554231,
+              13.513333333200878,
+              13.488888888888889
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 15.779999999867545,
+            "repeatsMsPerFrame": [
+              15.897777777910232,
+              15.779999999867545,
+              15.71111111111111
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 19.968888888756435,
+            "repeatsMsPerFrame": [
+              20.143333333068423,
+              19.968888888756435,
+              19.51777777804269
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:26:16.652Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.087269840902756,
+        "perStepMs": 0.24009325397511308,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 6.897777777247959,
+            "repeatsMsPerFrame": [
+              6.8455555551581915,
+              7.016666666666667,
+              6.897777777247959
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.496666666534212,
+            "repeatsMsPerFrame": [
+              9.496666666534212,
+              9.15999999973509,
+              9.505555555555556
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.842222221692403,
+            "repeatsMsPerFrame": [
+              10.621111110846202,
+              10.843333333068424,
+              10.842222221692403
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.528888889153798,
+            "repeatsMsPerFrame": [
+              12.528888889153798,
+              12.556666666931577,
+              12.390000000264909
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.771111110846201,
+            "repeatsMsPerFrame": [
+              14.91999999947018,
+              14.422222222222222,
+              14.771111110846201
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.718888888756435,
+            "repeatsMsPerFrame": [
+              18.653333332803513,
+              18.718888888756435,
+              18.721111111508474
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:26:42.343Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.389238095056451,
+        "perStepMs": 0.2248968254053401,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.239999999602635,
+            "repeatsMsPerFrame": [
+              6.841111110978656,
+              7.239999999602635,
+              7.563333333863152
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.687777777512869,
+            "repeatsMsPerFrame": [
+              9.364444444576899,
+              9.687777777512869,
+              9.737777778175142
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.884444444709354,
+            "repeatsMsPerFrame": [
+              10.531111110581293,
+              11.032222222619586,
+              10.884444444709354
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.55,
+            "repeatsMsPerFrame": [
+              12.55,
+              12.506666666931576,
+              12.617777778042687
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.346666667196486,
+            "repeatsMsPerFrame": [
+              14.206666666269303,
+              14.677777777777777,
+              14.346666667196486
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.413333333200878,
+            "repeatsMsPerFrame": [
+              18.413333333200878,
+              18.27444444431199,
+              18.52333333293597
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:27:08.467Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.44315873039147,
+        "perStepMs": 0.22595436507983818,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.121111111508475,
+            "repeatsMsPerFrame": [
+              7.042222221692403,
+              7.121111111508475,
+              7.607777777645323
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.954444444841808,
+            "repeatsMsPerFrame": [
+              9.946666666534211,
+              9.976666666401757,
+              9.954444444841808
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 11.024444444311989,
+            "repeatsMsPerFrame": [
+              11.024444444311989,
+              10.816666666666666,
+              11.024444444311989
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.431111111243565,
+            "repeatsMsPerFrame": [
+              12.71111111111111,
+              12.431111111243565,
+              12.348888889286254
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.60111111137602,
+            "repeatsMsPerFrame": [
+              14.618888888756434,
+              14.60111111137602,
+              14.576666666401756
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.448888889286252,
+            "repeatsMsPerFrame": [
+              18.522222222222222,
+              18.448888889286252,
+              18.34777777791023
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:38:42.871Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.082634920686007,
+        "perStepMs": 0.24590079365150339,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.177777777777778,
+            "repeatsMsPerFrame": [
+              7.2444444444444445,
+              7.177777777777778,
+              7.068888888756434
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.058888889021343,
+            "repeatsMsPerFrame": [
+              8.826666666401756,
+              9.058888889021343,
+              9.3144444445769
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.987777777512868,
+            "repeatsMsPerFrame": [
+              11.143333333068425,
+              10.987777777512868,
+              10.663333333200878
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.852222222752042,
+            "repeatsMsPerFrame": [
+              12.852222222752042,
+              12.920000000132454,
+              12.844444444444445
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.9,
+            "repeatsMsPerFrame": [
+              14.9,
+              14.803333333465789,
+              15.218888888756434
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.994444444444444,
+            "repeatsMsPerFrame": [
+              18.8933333337307,
+              18.994444444444444,
+              19.22333333293597
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:50:54.316Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.062523809292965,
+        "perStepMs": 0.24515079365954498,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.1933333330684235,
+            "repeatsMsPerFrame": [
+              7.1933333330684235,
+              6.9944444444444445,
+              7.2444444444444445
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 8.848888888623978,
+            "repeatsMsPerFrame": [
+              9.082222221957313,
+              8.815555555290645,
+              8.848888888623978
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 11.055555555555555,
+            "repeatsMsPerFrame": [
+              11.055555555555555,
+              11.1855555554231,
+              10.970000000132455
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.897777777910232,
+            "repeatsMsPerFrame": [
+              12.57666666706403,
+              12.897777777910232,
+              12.971111110846202
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.883333333333333,
+            "repeatsMsPerFrame": [
+              15.047777777247958,
+              14.841111110978657,
+              14.883333333333333
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.87555555568801,
+            "repeatsMsPerFrame": [
+              18.87555555568801,
+              18.366666666666667,
+              19.01333333320088
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:52:17.459Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.346920634905501,
+        "perStepMs": 0.23269642857213801,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.27444444431199,
+            "repeatsMsPerFrame": [
+              7.27444444431199,
+              7.27444444431199,
+              7.624444444311989
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.705555555555556,
+            "repeatsMsPerFrame": [
+              9.608888889021344,
+              9.705555555555556,
+              10.139999999602635
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.732222222619587,
+            "repeatsMsPerFrame": [
+              11.45111111137602,
+              10.732222222619587,
+              10.432222221957312
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.657777777645324,
+            "repeatsMsPerFrame": [
+              12.527777777777779,
+              12.782222221957312,
+              12.657777777645324
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.854444444179535,
+            "repeatsMsPerFrame": [
+              14.854444444179535,
+              14.747777777910233,
+              14.893333333068425
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.642222222354675,
+            "repeatsMsPerFrame": [
+              18.920000000132454,
+              18.642222222354675,
+              18.5
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:59:06.936Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.1867142859243165,
+        "perStepMs": 0.23821825396565238,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.226666667064031,
+            "repeatsMsPerFrame": [
+              7.093333333730698,
+              7.226666667064031,
+              7.381111111243566
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.268888888756434,
+            "repeatsMsPerFrame": [
+              9.268888888756434,
+              9.297777777910232,
+              9.230000000529818
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.644444444444444,
+            "repeatsMsPerFrame": [
+              11.040000000264909,
+              10.644444444444444,
+              10.59555555515819
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.95111111137602,
+            "repeatsMsPerFrame": [
+              12.702222222089768,
+              12.962222222487132,
+              12.95111111137602
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.885555556085375,
+            "repeatsMsPerFrame": [
+              14.91555555595292,
+              14.885555556085375,
+              14.8355555554231
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.6355555554231,
+            "repeatsMsPerFrame": [
+              18.958888889021345,
+              18.6355555554231,
+              18.634444444709352
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T06:59:54.506Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.1408571429195815,
+        "perStepMs": 0.2355674603155683,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.207777777645323,
+            "repeatsMsPerFrame": [
+              6.948888888623979,
+              7.24888888862398,
+              7.207777777645323
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 8.934444444709355,
+            "repeatsMsPerFrame": [
+              8.907777777645324,
+              9.155555555555555,
+              8.934444444709355
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 11.053333333465789,
+            "repeatsMsPerFrame": [
+              11.053333333465789,
+              11.077777777777778,
+              10.904444444179536
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.787777777512868,
+            "repeatsMsPerFrame": [
+              12.787777777512868,
+              12.823333333598242,
+              12.482222222619587
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.428888889153798,
+            "repeatsMsPerFrame": [
+              14.428888889153798,
+              14.397777777910232,
+              14.634444444709354
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.585555555423102,
+            "repeatsMsPerFrame": [
+              18.265555555290646,
+              18.85111111137602,
+              18.585555555423102
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T07:09:15.702Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.3921269844921795,
+        "perStepMs": 0.22891071426963053,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.0566666669315765,
+            "repeatsMsPerFrame": [
+              7.0566666669315765,
+              7.023333333598243,
+              7.388888888888889
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.78888888888889,
+            "repeatsMsPerFrame": [
+              9.814444443914626,
+              9.531111111243566,
+              9.78888888888889
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 11.065555555952919,
+            "repeatsMsPerFrame": [
+              10.982222222619587,
+              11.065555555952919,
+              11.248888888623979
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.578888889153799,
+            "repeatsMsPerFrame": [
+              12.578888889153799,
+              12.803333333465789,
+              12.472222222222221
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.748888888623979,
+            "repeatsMsPerFrame": [
+              14.748888888623979,
+              15.018888888756434,
+              14.656666666269302
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.414444443914626,
+            "repeatsMsPerFrame": [
+              18.414444443914626,
+              18.683333333333334,
+              18.332222221957313
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      },
+      {
+        "measuredAt": "2026-09-20T07:10:20.196Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "768x768",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.134206349338805,
+        "perStepMs": 0.23731150793650785,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 7.144444444444445,
+            "repeatsMsPerFrame": [
+              7.151111111376021,
+              7.13444444404708,
+              7.144444444444445
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 9.420000000132454,
+            "repeatsMsPerFrame": [
+              9.420000000132454,
+              9.047777777910232,
+              9.546666666534211
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.736666666799122,
+            "repeatsMsPerFrame": [
+              10.995555555158191,
+              10.736666666799122,
+              10.657777777645324
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 12.543333333730697,
+            "repeatsMsPerFrame": [
+              12.09555555515819,
+              12.543333333730697,
+              12.62555555568801
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 14.547777777910232,
+            "repeatsMsPerFrame": [
+              14.608888889021344,
+              14.547777777910232,
+              14.522222222222222
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 18.788888888888888,
+            "repeatsMsPerFrame": [
+              18.642222222354675,
+              18.788888888888888,
+              18.805555555555557
+            ]
+          }
+        ],
+        "capAt60fps": 7,
+        "capOnPanel": 13,
+        "chosenCap": 12,
+        "predictedMsAtCap": 16.5,
+        "speedCeiling": 6,
+        "deliveredSpeedOnPanel": 4.995000000000001
+      }
+    ],
+    "note": "Presentation grid. The floors are a policy choice (see `derivation`), not an observation: the measurement drifts with thermal/driver state, so a floor equal to today's fit would move the cap every run."
+  },
+  "exploration": {
+    "grid": "512x512",
+    "viewport": "1920x1080",
+    "safetyMargin": 0.15,
+    "frameBudget60fpsMs": 16.666666666666668,
+    "panelHz": 49.95,
+    "panelPeriodMs": 20.02002002002002,
+    "policyFloors": {
+      "fixedMs": 11,
+      "perStepMs": 0.22,
+      "rounding": "fixed rounded up to the nearest 0.5 ms; per-step rounded up to the nearest 0.01 ms"
+    },
+    "derivation": {
+      "basedOn": "the retained observed maxima across 5 run(s) in `history`",
+      "isPolicyChoice": true,
+      "rounding": "fixed rounded up to the nearest 0.5 ms; per-step rounded up to the nearest 0.01 ms",
+      "fixed": {
+        "observedMaxMs": 7.775748502950388,
+        "floorMs": 11,
+        "marginMs": 3.224251497049612
+      },
+      "perStep": {
+        "observedMaxMs": 0.11992182301274347,
+        "floorMs": 0.22,
+        "multiplier": 1.8345284825817045
+      },
+      "consistency": {
+        "floorsAtOrAboveObservedMaxima": true,
+        "capWithinFlooredBudget": true
+      },
+      "text": "fixed 11 ms = observed max 7.78 + 3.22 ms; per-step 0.22 ms = observed max 0.1199 x 1.83"
+    },
+    "observed": {
+      "runs": 5,
+      "fixedMs": {
+        "min": 7.11579507680552,
+        "max": 7.775748502950388
+      },
+      "perStepMs": {
+        "min": 0.09083208583062362,
+        "max": 0.11992182301274347
+      },
+      "maxPredictedMsAtChosenCap": 16.28
+    },
+    "chosenCap": 24,
+    "capAt60fps": 14,
+    "capOnPanel": 27,
+    "predictedMsAtCap": 16.28,
+    "speedCeiling": 12,
+    "deliveredSpeedOnPanel": 9.990000000000002,
+    "samples": [
+      {
+        "stepsPerFrame": 0,
+        "count": 90,
+        "msPerFrame": 6.372222222222222,
+        "repeatsMsPerFrame": [
+          5.841111110978656,
+          6.372222222222222,
+          6.95
+        ],
+        "msPerStep": null,
+        "impliedFps": 156.93112467306017
+      },
+      {
+        "stepsPerFrame": 8,
+        "count": 90,
+        "msPerFrame": 8.36111111111111,
+        "repeatsMsPerFrame": [
+          8.206666666269303,
+          8.36111111111111,
+          8.512222221824858
+        ],
+        "msPerStep": 0.24861111111111112,
+        "impliedFps": 119.60132890365449
+      },
+      {
+        "stepsPerFrame": 16,
+        "count": 90,
+        "msPerFrame": 9.694444444444445,
+        "repeatsMsPerFrame": [
+          9.65999999973509,
+          9.694444444444445,
+          10.231111111243566
+        ],
+        "msPerStep": 0.20763888888888893,
+        "impliedFps": 103.15186246418338
+      },
+      {
+        "stepsPerFrame": 24,
+        "count": 90,
+        "msPerFrame": 11.101111110713747,
+        "repeatsMsPerFrame": [
+          10.09000000026491,
+          11.101111110713747,
+          11.331111111243565
+        ],
+        "msPerStep": 0.19703703702048023,
+        "impliedFps": 90.08107296889355
+      },
+      {
+        "stepsPerFrame": 32,
+        "count": 90,
+        "msPerFrame": 11.304444444179534,
+        "repeatsMsPerFrame": [
+          11.591111110978657,
+          11.304444444179534,
+          11.184444444709355
+        ],
+        "msPerStep": 0.154131944436166,
+        "impliedFps": 88.46078238854834
+      },
+      {
+        "stepsPerFrame": 48,
+        "count": 90,
+        "msPerFrame": 12.096666666534212,
+        "repeatsMsPerFrame": [
+          13.775555555025736,
+          12.096666666534212,
+          11.25
+        ],
+        "msPerStep": 0.11925925925649979,
+        "impliedFps": 82.66740148891841
+      },
+      {
+        "stepsPerFrame": 64,
+        "count": 90,
+        "msPerFrame": 13.154444444179536,
+        "repeatsMsPerFrame": [
+          13.154444444179536,
+          13.117777777380413,
+          13.482222221957313
+        ],
+        "msPerStep": 0.10597222221808303,
+        "impliedFps": 76.01993411758802
+      }
+    ],
+    "fit": {
+      "fixedMs": 7.643406520251508,
+      "perStepMs": 0.09677395209179299
+    },
+    "history": [
+      {
+        "measuredAt": "2026-09-20T06:52:17.459Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "512x512",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.775748502950388,
+        "perStepMs": 0.09083208583062362,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 6.332222221957313,
+            "repeatsMsPerFrame": [
+              5.7555555555555555,
+              6.332222221957313,
+              6.542222222354677
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 8.542222222354678,
+            "repeatsMsPerFrame": [
+              8.167777777380413,
+              9.047777777247958,
+              8.542222222354678
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.036666666799121,
+            "repeatsMsPerFrame": [
+              10.036666666799121,
+              9.637777777512868,
+              10.061111111111112
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 11.036666666799121,
+            "repeatsMsPerFrame": [
+              11.036666666799121,
+              11.472222222222221,
+              10.065555555290645
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 11.139999999602635,
+            "repeatsMsPerFrame": [
+              11.139999999602635,
+              11.246666666534212,
+              11.089999999602636
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 11.730000000529818,
+            "repeatsMsPerFrame": [
+              11.730000000529818,
+              11.695555555820466,
+              11.862222221824858
+            ]
+          },
+          {
+            "stepsPerFrame": 64,
+            "msPerFrame": 13.052222222089767,
+            "repeatsMsPerFrame": [
+              13.052222222089767,
+              12.857777777645323,
+              13.144444444444444
+            ]
+          }
+        ],
+        "capAt60fps": 14,
+        "capOnPanel": 27,
+        "chosenCap": 24,
+        "predictedMsAtCap": 16.28,
+        "speedCeiling": 12,
+        "deliveredSpeedOnPanel": 9.990000000000002
+      },
+      {
+        "measuredAt": "2026-09-20T06:59:06.936Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "512x512",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.54224218247893,
+        "perStepMs": 0.09598885562322941,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 5.968888888756434,
+            "repeatsMsPerFrame": [
+              5.968888888756434,
+              5.835555555423101,
+              6.112222222487132
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 7.752222222752041,
+            "repeatsMsPerFrame": [
+              7.332222222619587,
+              7.752222222752041,
+              8.378888888491524
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 10.185555556085374,
+            "repeatsMsPerFrame": [
+              10.055555555555555,
+              10.185555556085374,
+              10.458888889021344
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 11.592222222354676,
+            "repeatsMsPerFrame": [
+              12.389999999602635,
+              11.592222222354676,
+              11.008888889021344
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 11.12444444431199,
+            "repeatsMsPerFrame": [
+              12.441111110978657,
+              10.545555555158192,
+              11.12444444431199
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 11.686666666799121,
+            "repeatsMsPerFrame": [
+              13.53888888888889,
+              11.578888888491525,
+              11.686666666799121
+            ]
+          },
+          {
+            "stepsPerFrame": 64,
+            "msPerFrame": 12.91555555595292,
+            "repeatsMsPerFrame": [
+              13.97666666706403,
+              12.91555555595292,
+              12.441111110978657
+            ]
+          }
+        ],
+        "capAt60fps": 14,
+        "capOnPanel": 27,
+        "chosenCap": 24,
+        "predictedMsAtCap": 16.28,
+        "speedCeiling": 12,
+        "deliveredSpeedOnPanel": 9.990000000000002
+      },
+      {
+        "measuredAt": "2026-09-20T06:59:54.506Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "512x512",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.490798403264201,
+        "perStepMs": 0.1057347804372381,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 6.467777778042687,
+            "repeatsMsPerFrame": [
+              6.046666666534212,
+              6.467777778042687,
+              6.905555555555556
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 8.244444444444444,
+            "repeatsMsPerFrame": [
+              8.244444444444444,
+              8.225555555688011,
+              8.405555555555555
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 9.877777777777778,
+            "repeatsMsPerFrame": [
+              9.860000000397365,
+              9.877777777777778,
+              10.238888888888889
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 10.594444444444445,
+            "repeatsMsPerFrame": [
+              12.584444444709353,
+              10.594444444444445,
+              10.531111111243566
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 11.072222222222223,
+            "repeatsMsPerFrame": [
+              11.87444444431199,
+              10.90444444484181,
+              11.072222222222223
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 13.08444444404708,
+            "repeatsMsPerFrame": [
+              13.08444444404708,
+              13.364444444576899,
+              11.677777777777777
+            ]
+          },
+          {
+            "stepsPerFrame": 64,
+            "msPerFrame": 13.395555555820465,
+            "repeatsMsPerFrame": [
+              13.395555555820465,
+              13.0355555554231,
+              13.57444444431199
+            ]
+          }
+        ],
+        "capAt60fps": 14,
+        "capOnPanel": 27,
+        "chosenCap": 24,
+        "predictedMsAtCap": 16.28,
+        "speedCeiling": 12,
+        "deliveredSpeedOnPanel": 9.990000000000002
+      },
+      {
+        "measuredAt": "2026-09-20T07:09:15.702Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "512x512",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.11579507680552,
+        "perStepMs": 0.11992182301274347,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 5.651111111376021,
+            "repeatsMsPerFrame": [
+              5.740000000264909,
+              5.487777777512869,
+              5.651111111376021
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 7.9366666667991215,
+            "repeatsMsPerFrame": [
+              7.424444444311989,
+              7.9366666667991215,
+              8.210000000397365
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 9.420000000132454,
+            "repeatsMsPerFrame": [
+              9.420000000132454,
+              9.313333333863152,
+              9.598888889286254
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 11.005555555555556,
+            "repeatsMsPerFrame": [
+              11.005555555555556,
+              10.764444444576899,
+              11.262222221824858
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 11.728888889153799,
+            "repeatsMsPerFrame": [
+              11.172222222222222,
+              11.78444444404708,
+              11.728888889153799
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 13.978888889153799,
+            "repeatsMsPerFrame": [
+              14.331111111243565,
+              13.978888889153799,
+              11.374444444974264
+            ]
+          },
+          {
+            "stepsPerFrame": 64,
+            "msPerFrame": 13.114444443914625,
+            "repeatsMsPerFrame": [
+              13.114444443914625,
+              12.966666666666667,
+              13.333333333333334
+            ]
+          }
+        ],
+        "capAt60fps": 14,
+        "capOnPanel": 27,
+        "chosenCap": 24,
+        "predictedMsAtCap": 16.28,
+        "speedCeiling": 12,
+        "deliveredSpeedOnPanel": 9.990000000000002
+      },
+      {
+        "measuredAt": "2026-09-20T07:10:20.196Z",
+        "harness": "headless-gpu",
+        "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+        "softwareRenderer": false,
+        "grid": "512x512",
+        "viewport": "1920x1080",
+        "repeats": 3,
+        "fixedMs": 7.643406520251508,
+        "perStepMs": 0.09677395209179299,
+        "bursts": [
+          {
+            "stepsPerFrame": 0,
+            "msPerFrame": 6.372222222222222,
+            "repeatsMsPerFrame": [
+              5.841111110978656,
+              6.372222222222222,
+              6.95
+            ]
+          },
+          {
+            "stepsPerFrame": 8,
+            "msPerFrame": 8.36111111111111,
+            "repeatsMsPerFrame": [
+              8.206666666269303,
+              8.36111111111111,
+              8.512222221824858
+            ]
+          },
+          {
+            "stepsPerFrame": 16,
+            "msPerFrame": 9.694444444444445,
+            "repeatsMsPerFrame": [
+              9.65999999973509,
+              9.694444444444445,
+              10.231111111243566
+            ]
+          },
+          {
+            "stepsPerFrame": 24,
+            "msPerFrame": 11.101111110713747,
+            "repeatsMsPerFrame": [
+              10.09000000026491,
+              11.101111110713747,
+              11.331111111243565
+            ]
+          },
+          {
+            "stepsPerFrame": 32,
+            "msPerFrame": 11.304444444179534,
+            "repeatsMsPerFrame": [
+              11.591111110978657,
+              11.304444444179534,
+              11.184444444709355
+            ]
+          },
+          {
+            "stepsPerFrame": 48,
+            "msPerFrame": 12.096666666534212,
+            "repeatsMsPerFrame": [
+              13.775555555025736,
+              12.096666666534212,
+              11.25
+            ]
+          },
+          {
+            "stepsPerFrame": 64,
+            "msPerFrame": 13.154444444179536,
+            "repeatsMsPerFrame": [
+              13.154444444179536,
+              13.117777777380413,
+              13.482222221957313
+            ]
+          }
+        ],
+        "capAt60fps": 14,
+        "capOnPanel": 27,
+        "chosenCap": 24,
+        "predictedMsAtCap": 16.28,
+        "speedCeiling": 12,
+        "deliveredSpeedOnPanel": 9.990000000000002
+      }
+    ],
+    "note": "§10 lab-only exploration grid. Same drained-frame method and the same policy-floor structure as the presentation grid, with its own floors derived from its own retained maxima: the coarser grid is cheaper per step, so the same frame budget buys more steps and the measured cap (and its 60 fps ceiling) is higher. Reached by toggling exploration mode through the verification hook, which restarts the organism."
+  },
+  "note": "Drained-frame cost: N simulation steps, one publish, one full render, one-pixel readback to serialise the GPU queue, each burst repeated and reduced by median. `fit` is the least-squares slope/intercept; `fit` for every past run is in that section's `history`. Each cap is derived against the panel frame period with the safety margin using that grid's `policyFloors` (not the day's fit) and rounded down to a multiple of 4; speedCeiling = chosenCap * 60 / 120, and `deliveredSpeedOnPanel` = chosenCap * panelHz / 120. `derivation` recomputes each floor's margin from the retained observed maxima, so every figure quoted in prose is derivable from `history`."
+}

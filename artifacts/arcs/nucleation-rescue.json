@@ -1,0 +1,150 @@
+{
+  "generatedBy": "tests/browser/nucleation-rescue.spec.ts (RESCUE=1)",
+  "seed": 8100001,
+  "note": "Post-refinement (deviation 48) §6.4 evidence. `risingSuppression` shows the tuned arc rising through nucleation with zero rescues; `deadFixture` shows a deliberate dead `k` still firing its one bounded rescue. The legacy pre-refinement 1× arcs in arcs/summary.json are preserved, not re-run.",
+  "risingSuppression": {
+    "speed": 3,
+    "movementTimeline": [
+      {
+        "movement": "dormancy",
+        "intention": "quiet",
+        "arc": 0,
+        "performanceSeconds": 0.05,
+        "realSeconds": 0.016
+      },
+      {
+        "movement": "nucleation",
+        "intention": "emerge",
+        "arc": 0,
+        "performanceSeconds": 36.29166666666674,
+        "realSeconds": 12.075
+      },
+      {
+        "movement": "cellular-growth",
+        "intention": "expand",
+        "arc": 0,
+        "performanceSeconds": 72.89166666666466,
+        "realSeconds": 24.273
+      }
+    ],
+    "rescues": 0,
+    "extinctionDecisions": [],
+    "cellularGrowthEnteredAt": 72.89166666666466,
+    "nucleationOccupancySamples": [
+      0.0004018147592432797,
+      0.00043741861009038985,
+      0.0004967583226971328,
+      0.0005255804862827063,
+      0.0005560981226153672,
+      0.0005781385698355734,
+      0.0006917318096384406,
+      0.0007985433330759406,
+      0.0008799234637990594,
+      0.0009816488018259406,
+      0.0010664197616279125,
+      0.0012240939540788531,
+      0.0012868244666606188,
+      0.0013512505684047937,
+      0.0014241535682231188,
+      0.0015496148262172937,
+      0.0018497043056413531,
+      0.0019972058944404125,
+      0.0022040472831577063,
+      0.0023413763847202063,
+      0.0030025907326489687,
+      0.0031094022560864687,
+      0.0034230549354106188,
+      0.0037468804512172937,
+      0.004114787094295025,
+      0.004323323257267475,
+      0.0045623779296875,
+      0.005008274223655462,
+      0.0053575304336845875,
+      0.00557454489171505,
+      0.005867852363735437,
+      0.00624762661755085,
+      0.006539239082485437,
+      0.0068037249147892,
+      0.007419161964207888,
+      0.00852457620203495,
+      0.00879923440515995
+    ],
+    "nucleationOccupancyRising": true
+  },
+  "deadFixture": {
+    "parameters": {
+      "F": 0.03,
+      "k": 0.07,
+      "Du": 0.16,
+      "Dv": 0.08
+    },
+    "movementTimeline": [
+      {
+        "movement": "dormancy",
+        "intention": "quiet",
+        "arc": 0,
+        "performanceSeconds": 0.09166666666666667,
+        "realSeconds": 0.013
+      },
+      {
+        "movement": "nucleation",
+        "intention": "emerge",
+        "arc": 0,
+        "performanceSeconds": 36.34166666666674,
+        "realSeconds": 12.088
+      }
+    ],
+    "rescues": [
+      {
+        "performanceSeconds": 57.0999999999974,
+        "arc": 0,
+        "movement": "nucleation",
+        "intention": "emerge",
+        "parameters": {
+          "F": 0.028119294648803465,
+          "k": 0.0615785796402823,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "healthValid": true,
+        "healthAgeSeconds": 0.29999999999998295,
+        "healthOccupiedFraction": 0,
+        "healthReactionActivity": 0,
+        "occupancyGrowing": false,
+        "deadSeconds": 20.00833333333284,
+        "action": "rescue",
+        "recoveryMovement": null
+      }
+    ],
+    "extinctionDecisions": [
+      {
+        "performanceSeconds": 57.0999999999974,
+        "arc": 0,
+        "movement": "nucleation",
+        "intention": "emerge",
+        "parameters": {
+          "F": 0.028119294648803465,
+          "k": 0.0615785796402823,
+          "Du": 0.16,
+          "Dv": 0.08
+        },
+        "healthValid": true,
+        "healthAgeSeconds": 0.29999999999998295,
+        "healthOccupiedFraction": 0,
+        "healthReactionActivity": 0,
+        "occupancyGrowing": false,
+        "deadSeconds": 20.00833333333284,
+        "action": "rescue",
+        "recoveryMovement": null
+      }
+    ],
+    "observations": {
+      "rescueAt": 57.0999999999974,
+      "rescueDeadSeconds": 20.00833333333284,
+      "rescueIntention": "emerge",
+      "rescueOccupancyGrowing": false,
+      "hOccupiedFraction": 0,
+      "rescuesAfterGrace": 1
+    }
+  }
+}

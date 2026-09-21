@@ -1,0 +1,134 @@
+/* Presentation mode is blackness and a single canvas. No chrome, no panels, no borders. */
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+  background: #000;
+  color: #000;
+}
+
+#stage {
+  display: block;
+  width: 100vw;
+  height: 100vh;
+  background: #000;
+}
+
+/* Cursor auto-hide after inactivity (applied to the root element by the app). */
+html.cursor-idle,
+html.cursor-idle body,
+html.cursor-idle #stage {
+  cursor: none;
+}
+
+/* The laboratory is only ever attached to the DOM while it is open; presentation mode
+   contains zero UI nodes (AC.15). */
+.lab-host {
+  position: fixed;
+  inset: auto auto 0 0;
+  z-index: 10;
+  font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  color: #cfd3d8;
+  background: rgba(8, 9, 11, 0.82);
+  border: 1px solid rgba(120, 130, 145, 0.25);
+  padding: 8px 10px;
+  max-height: 100vh;
+  overflow: auto;
+  width: 320px;
+}
+
+.lab-host h2 {
+  margin: 0 0 6px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #8fa0b5;
+}
+
+.lab-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 4px 0;
+}
+
+.lab-row label {
+  flex: 0 0 128px;
+  color: #8fa0b5;
+}
+
+.lab-row input[type='range'] {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.lab-row .value {
+  flex: 0 0 62px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.lab-host button {
+  font: inherit;
+  color: #dfe5ec;
+  background: rgba(120, 130, 145, 0.18);
+  border: 1px solid rgba(120, 130, 145, 0.35);
+  padding: 3px 8px;
+  cursor: pointer;
+}
+
+.lab-host pre {
+  margin: 6px 0 0;
+  white-space: pre-wrap;
+  color: #93a1b0;
+}
+
+/* §10 diagnostic overlays (reduced field / label-hole / spectrum) — laboratory-only. */
+.lab-overlay {
+  display: block;
+  width: 256px;
+  max-width: 100%;
+  margin: 6px 0 0;
+  border: 1px solid #2a3746;
+  image-rendering: pixelated;
+}
+
+/* Parameter/panel explanations and the regime + tempo readouts (§10). */
+.lab-help {
+  margin: 0 0 6px;
+  color: #6f7c8b;
+  font-size: 11px;
+}
+
+.lab-regime {
+  margin: 6px 0 2px;
+  color: #b9c6d6;
+}
+
+.lab-tempo {
+  margin: 4px 0 6px;
+  color: #b9c6d6;
+  font-variant-numeric: tabular-nums;
+}
+
+.lab-resolution {
+  margin: 4px 0 2px;
+  color: #b9c6d6;
+}
+
+.artwork-error {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  color: #d9d3cc;
+  background: #000;
+  font: 13px/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  text-align: center;
+}

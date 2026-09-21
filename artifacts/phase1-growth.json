@@ -1,0 +1,175 @@
+{
+  "note": "Single-seed growth at 768x768. symmetryAtQuarter is 1 - mean|V(p)-V(p+192 cells)| / mean|V(p)-mean(V)|: near 1 would mean the field repeats at a 4x4 lattice period (wallpaper), near 0 means it does not.",
+  "genesis": {
+    "id": 1,
+    "kind": "single",
+    "mode": "replace",
+    "seed": 2026031,
+    "center": [
+      0.4415287826303393,
+      0.5260110033582897
+    ],
+    "radiusCells": 6.2059755484107875,
+    "strength": 0.9718132889363914
+  },
+  "parameters": {
+    "F": 0.029,
+    "k": 0.057,
+    "Du": 0.16,
+    "Dv": 0.08
+  },
+  "rows": [
+    {
+      "steps": 2000,
+      "seconds": 0.017,
+      "occupiedFraction": 0.011630588107638888,
+      "extentUV": [
+        0.14583333333333331,
+        0.14583333333333337
+      ],
+      "centroidUV": [
+        0.4408947172619047,
+        0.5253579780126336
+      ],
+      "maxV": 0.38002005219459534,
+      "symmetryAtQuarter": -0.020285778270108912,
+      "imageMax": 245,
+      "imageMean": 0.33526041666666667,
+      "litFraction": 0.0067717978395061725,
+      "imageP50": 0
+    },
+    {
+      "steps": 4000,
+      "seconds": 0.008,
+      "occupiedFraction": 0.0462799072265625,
+      "extentUV": [
+        0.2955729166666667,
+        0.29427083333333337
+      ],
+      "centroidUV": [
+        0.4408767256169787,
+        0.5253260622351662
+      ],
+      "maxV": 0.38872119784355164,
+      "symmetryAtQuarter": -0.0779755286683872,
+      "imageMax": 252,
+      "imageMean": 1.3576948302469136,
+      "litFraction": 0.027054398148148147,
+      "imageP50": 0
+    },
+    {
+      "steps": 8000,
+      "seconds": 0.022,
+      "occupiedFraction": 0.18610636393229166,
+      "extentUV": [
+        0.5885416666666667,
+        0.59375
+      ],
+      "centroidUV": [
+        0.4410540813557135,
+        0.5254057726762017
+      ],
+      "maxV": 0.3938015401363373,
+      "symmetryAtQuarter": -0.10925930035627585,
+      "imageMax": 254,
+      "imageMean": 5.595135513117284,
+      "litFraction": 0.10898630401234567,
+      "imageP50": 0
+    },
+    {
+      "steps": 16000,
+      "seconds": 0.05,
+      "occupiedFraction": 0.6315765380859375,
+      "extentUV": [
+        1,
+        1
+      ],
+      "centroidUV": [
+        0.49445554357070826,
+        0.5025762877754781
+      ],
+      "maxV": 0.3792256712913513,
+      "symmetryAtQuarter": -0.23793257507866938,
+      "imageMax": 246,
+      "imageMean": 10.760909047067901,
+      "litFraction": 0.2499098186728395,
+      "imageP50": 0
+    },
+    {
+      "steps": 24000,
+      "seconds": 0.051,
+      "occupiedFraction": 0.6412760416666666,
+      "extentUV": [
+        1,
+        1
+      ],
+      "centroidUV": [
+        0.49952693106559326,
+        0.4994696688665486
+      ],
+      "maxV": 0.3468500077724457,
+      "symmetryAtQuarter": -0.23424932243269647,
+      "imageMax": 246,
+      "imageMean": 10.77205680941358,
+      "litFraction": 0.2515022183641975,
+      "imageP50": 0
+    },
+    {
+      "steps": 32000,
+      "seconds": 0.043,
+      "occupiedFraction": 0.6406012641059028,
+      "extentUV": [
+        1,
+        1
+      ],
+      "centroidUV": [
+        0.499339081795433,
+        0.4995305129469902
+      ],
+      "maxV": 0.3471161127090454,
+      "symmetryAtQuarter": -0.2504325123525253,
+      "imageMax": 247,
+      "imageMean": 10.762925347222222,
+      "litFraction": 0.2518426890432099,
+      "imageP50": 0
+    },
+    {
+      "steps": 40000,
+      "seconds": 0.041,
+      "occupiedFraction": 0.6408860948350694,
+      "extentUV": [
+        1,
+        1
+      ],
+      "centroidUV": [
+        0.49927784166313943,
+        0.49966994438528967
+      ],
+      "maxV": 0.34741243720054626,
+      "symmetryAtQuarter": -0.2505620616815727,
+      "imageMax": 248,
+      "imageMean": 10.765542534722222,
+      "litFraction": 0.25145447530864196,
+      "imageP50": 0
+    },
+    {
+      "steps": 50000,
+      "seconds": 0.152,
+      "occupiedFraction": 0.6400214301215278,
+      "extentUV": [
+        1,
+        1
+      ],
+      "centroidUV": [
+        0.499406508692053,
+        0.4995015142108168
+      ],
+      "maxV": 0.3609045743942261,
+      "symmetryAtQuarter": -0.23969308718915627,
+      "imageMax": 246,
+      "imageMean": 10.763238811728396,
+      "litFraction": 0.25102912808641975,
+      "imageP50": 0
+    }
+  ]
+}

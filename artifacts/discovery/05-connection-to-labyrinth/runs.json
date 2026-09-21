@@ -1,0 +1,551 @@
+{
+  "transition": {
+    "id": "05-connection-to-labyrinth",
+    "index": 5,
+    "source": {
+      "movement": "connection",
+      "params": {
+        "F": 0.03,
+        "k": 0.057,
+        "Du": 0.16,
+        "Dv": 0.08
+      }
+    },
+    "destination": {
+      "movement": "labyrinth",
+      "params": {
+        "F": 0.03,
+        "k": 0.057,
+        "Du": 0.16,
+        "Dv": 0.08
+      }
+    },
+    "destinationGenesis": null
+  },
+  "grid": 512,
+  "seeds": [
+    11000011,
+    11000022,
+    11000033
+  ],
+  "settleSteps": 4000,
+  "observationPerformanceSeconds": 60,
+  "observationSliceSteps": 600,
+  "contactSheet": "discovery/05-connection-to-labyrinth/contact-sheet.png",
+  "note": "Descriptors are tier-1 full-domain health fields (occupancy, reaction activity, change rate) plus the coarse occupied centroid; `beta0Approx`/`beta1Approx` are presentation-tier (Phase 3) and are not available here. `entryGenesisCommand` is built by the curator's own construction (`buildEntryGenesisCommand`): a root-seeded perturbation of the destination movement's `enterGenesis` library entry, displaced from the settle-seed origin by `MIN_REBIRTH_DISPLACEMENT`; `entryGenesisSignature` is its stable one-line form.",
+  "runs": [
+    {
+      "seed": 11000011,
+      "sourceOccupancy": 0.10723876953125,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.143096923828125,
+          "max": 0.6646080017089844,
+          "mean": 0.4310620625813802,
+          "first": 0.143096923828125,
+          "last": 0.6646080017089844
+        },
+        "activity": {
+          "min": 0.003153574885800481,
+          "max": 0.014738775789737701,
+          "mean": 0.009550338281163325,
+          "first": 0.003153574885800481,
+          "last": 0.014738775789737701
+        },
+        "changeRate": {
+          "min": 0.000028982667572563514,
+          "max": 0.00014713805285282433,
+          "mean": 0.00009309737470175605,
+          "first": 0.00006830919301137328,
+          "last": 0.000028982667572563514
+        },
+        "occupancyTrend": 0.5215110778808594
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0.143096923828125,
+          "activity": 0.003153574885800481,
+          "changeRate": 0.00006830919301137328,
+          "centroidUV": [
+            0.49673000473181916,
+            0.5015163376886063
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0.1862030029296875,
+          "activity": 0.004120978526771069,
+          "changeRate": 0.00009005453466670588,
+          "centroidUV": [
+            0.4969073786927395,
+            0.5013435236852618
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0.23204421997070312,
+          "activity": 0.005139039363712072,
+          "changeRate": 0.00009244509419659153,
+          "centroidUV": [
+            0.4968956585777343,
+            0.5011082874225288
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0.28903961181640625,
+          "activity": 0.00637917872518301,
+          "changeRate": 0.00010210746404482052,
+          "centroidUV": [
+            0.4975447386003695,
+            0.5004991978190577
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0.3427581787109375,
+          "activity": 0.007601301185786724,
+          "changeRate": 0.00011603958409978077,
+          "centroidUV": [
+            0.4975030771087455,
+            0.5013209873945488
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0.405517578125,
+          "activity": 0.00899550225585699,
+          "changeRate": 0.0001239654520759359,
+          "centroidUV": [
+            0.4969449901638226,
+            0.501302665145479
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0.47209930419921875,
+          "activity": 0.010481446050107479,
+          "changeRate": 0.0001342835748801008,
+          "centroidUV": [
+            0.4966956681588261,
+            0.5015155270265357
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0.5449981689453125,
+          "activity": 0.012094845063984394,
+          "changeRate": 0.00014713805285282433,
+          "centroidUV": [
+            0.4976898747882661,
+            0.5008882488993337
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0.6010589599609375,
+          "activity": 0.013319697231054306,
+          "changeRate": 0.00009928827785188332,
+          "centroidUV": [
+            0.4979814378006715,
+            0.5006636192277424
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0.635650634765625,
+          "activity": 0.014066681265830994,
+          "changeRate": 0.00006769283208996058,
+          "centroidUV": [
+            0.4977669261456383,
+            0.5001330589262567
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0.655670166015625,
+          "activity": 0.014513039030134678,
+          "changeRate": 0.000046861769078532234,
+          "centroidUV": [
+            0.4981674169478706,
+            0.49946351560681873
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0.6646080017089844,
+          "activity": 0.014738775789737701,
+          "changeRate": 0.000028982667572563514,
+          "centroidUV": [
+            0.49896900497135854,
+            0.4992369132340449
+          ]
+        }
+      ],
+      "file": "discovery/05-connection-to-labyrinth/seed-11000011.png"
+    },
+    {
+      "seed": 11000022,
+      "sourceOccupancy": 0.10744857788085938,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.14194869995117188,
+          "max": 0.6630706787109375,
+          "mean": 0.4308621088663737,
+          "first": 0.14194869995117188,
+          "last": 0.6630706787109375
+        },
+        "activity": {
+          "min": 0.003152675461024046,
+          "max": 0.014703987166285515,
+          "mean": 0.009556305788767835,
+          "first": 0.003152675461024046,
+          "last": 0.014703987166285515
+        },
+        "changeRate": {
+          "min": 0.000029390106647042558,
+          "max": 0.0001455244200769812,
+          "mean": 0.00009254621788083266,
+          "first": 0.00006730385211994871,
+          "last": 0.000029390106647042558
+        },
+        "occupancyTrend": 0.5211219787597656
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0.14194869995117188,
+          "activity": 0.003152675461024046,
+          "changeRate": 0.00006730385211994871,
+          "centroidUV": [
+            0.49556393774690277,
+            0.5020378403731424
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0.18642807006835938,
+          "activity": 0.004126502200961113,
+          "changeRate": 0.00008077760139713064,
+          "centroidUV": [
+            0.4954320909895439,
+            0.501850854801416
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0.23214340209960938,
+          "activity": 0.005174778401851654,
+          "changeRate": 0.00009232266165781766,
+          "centroidUV": [
+            0.4954184126201627,
+            0.5019672466826883
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0.2874412536621094,
+          "activity": 0.006369767244905233,
+          "changeRate": 0.00010459859913680702,
+          "centroidUV": [
+            0.4956290238765909,
+            0.5018108740676965
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0.34349822998046875,
+          "activity": 0.007609764579683542,
+          "changeRate": 0.00012000420247204602,
+          "centroidUV": [
+            0.49557825826522,
+            0.5019855303122849
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0.405670166015625,
+          "activity": 0.00900265108793974,
+          "changeRate": 0.00012421041901689023,
+          "centroidUV": [
+            0.49515605017678477,
+            0.5018999183957252
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0.47234344482421875,
+          "activity": 0.010521123185753822,
+          "changeRate": 0.0001342800969723612,
+          "centroidUV": [
+            0.49579201583220267,
+            0.5017910507371469
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0.5449256896972656,
+          "activity": 0.01210849266499281,
+          "changeRate": 0.0001455244200769812,
+          "centroidUV": [
+            0.49583301248171147,
+            0.5016685423725402
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0.6030235290527344,
+          "activity": 0.013340921141207218,
+          "changeRate": 0.00009880204743240029,
+          "centroidUV": [
+            0.49649237139737096,
+            0.5016378158824069
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0.6356430053710938,
+          "activity": 0.014068707823753357,
+          "changeRate": 0.00006742216646671295,
+          "centroidUV": [
+            0.49670663483466365,
+            0.5013653706940527
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0.6542091369628906,
+          "activity": 0.014496298506855965,
+          "changeRate": 0.00004591844117385335,
+          "centroidUV": [
+            0.4964577095371931,
+            0.5007887801973212
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0.6630706787109375,
+          "activity": 0.014703987166285515,
+          "changeRate": 0.000029390106647042558,
+          "centroidUV": [
+            0.496898360642475,
+            0.5005006863242147
+          ]
+        }
+      ],
+      "file": "discovery/05-connection-to-labyrinth/seed-11000022.png"
+    },
+    {
+      "seed": 11000033,
+      "sourceOccupancy": 0.10786056518554688,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.14197540283203125,
+          "max": 0.66357421875,
+          "mean": 0.43110307057698566,
+          "first": 0.14197540283203125,
+          "last": 0.66357421875
+        },
+        "activity": {
+          "min": 0.0031543655786663294,
+          "max": 0.014707551337778568,
+          "mean": 0.009556678958081951,
+          "first": 0.0031543655786663294,
+          "last": 0.014707551337778568
+        },
+        "changeRate": {
+          "min": 0.000029881917726015672,
+          "max": 0.0001451096177333966,
+          "mean": 0.00009272271684797791,
+          "first": 0.00006710523302899674,
+          "last": 0.000029881917726015672
+        },
+        "occupancyTrend": 0.5215988159179688
+      },
+      "samples": [
+        {
+          "performanceSeconds": 5,
+          "steps": 4600,
+          "occupiedFraction": 0.14197540283203125,
+          "activity": 0.0031543655786663294,
+          "changeRate": 0.00006710523302899674,
+          "centroidUV": [
+            0.5019447810031437,
+            0.5019900694892256
+          ]
+        },
+        {
+          "performanceSeconds": 10,
+          "steps": 5200,
+          "occupiedFraction": 0.18648910522460938,
+          "activity": 0.0041282894089818,
+          "changeRate": 0.00008087006426649168,
+          "centroidUV": [
+            0.502080411523002,
+            0.5023015049374067
+          ]
+        },
+        {
+          "performanceSeconds": 15,
+          "steps": 5800,
+          "occupiedFraction": 0.23233413696289062,
+          "activity": 0.005176232662051916,
+          "changeRate": 0.00009194028825731948,
+          "centroidUV": [
+            0.5021444129176587,
+            0.5023484319842377
+          ]
+        },
+        {
+          "performanceSeconds": 20,
+          "steps": 6400,
+          "occupiedFraction": 0.2881050109863281,
+          "activity": 0.006370106246322393,
+          "changeRate": 0.00010324667528038844,
+          "centroidUV": [
+            0.502044361345581,
+            0.5020486542121814
+          ]
+        },
+        {
+          "performanceSeconds": 25,
+          "steps": 7000,
+          "occupiedFraction": 0.3428192138671875,
+          "activity": 0.007605121936649084,
+          "changeRate": 0.0001197071687784046,
+          "centroidUV": [
+            0.5018997698360373,
+            0.5020827204552789
+          ]
+        },
+        {
+          "performanceSeconds": 30,
+          "steps": 7600,
+          "occupiedFraction": 0.40641021728515625,
+          "activity": 0.00900720339268446,
+          "changeRate": 0.0001242599537363276,
+          "centroidUV": [
+            0.5021256903346694,
+            0.5020818202777413
+          ]
+        },
+        {
+          "performanceSeconds": 35,
+          "steps": 8200,
+          "occupiedFraction": 0.47333526611328125,
+          "activity": 0.010529035702347755,
+          "changeRate": 0.00013594016490969807,
+          "centroidUV": [
+            0.5018896116832015,
+            0.5026469706021018
+          ]
+        },
+        {
+          "performanceSeconds": 40,
+          "steps": 8800,
+          "occupiedFraction": 0.545166015625,
+          "activity": 0.012095392681658268,
+          "changeRate": 0.0001451096177333966,
+          "centroidUV": [
+            0.5017657965435023,
+            0.5022662410915458
+          ]
+        },
+        {
+          "performanceSeconds": 45,
+          "steps": 9400,
+          "occupiedFraction": 0.6032905578613281,
+          "activity": 0.013341709040105343,
+          "changeRate": 0.00010120135266333818,
+          "centroidUV": [
+            0.5014511013940967,
+            0.5019833205157794
+          ]
+        },
+        {
+          "performanceSeconds": 50,
+          "steps": 10000,
+          "occupiedFraction": 0.6363639831542969,
+          "activity": 0.014076000079512596,
+          "changeRate": 0.00006853898230474442,
+          "centroidUV": [
+            0.5012991016835612,
+            0.5012220744302208
+          ]
+        },
+        {
+          "performanceSeconds": 55,
+          "steps": 10600,
+          "occupiedFraction": 0.6533737182617188,
+          "activity": 0.014489139430224895,
+          "changeRate": 0.000044871183490613475,
+          "centroidUV": [
+            0.5013419338735856,
+            0.5011943872863123
+          ]
+        },
+        {
+          "performanceSeconds": 60,
+          "steps": 11200,
+          "occupiedFraction": 0.66357421875,
+          "activity": 0.014707551337778568,
+          "changeRate": 0.000029881917726015672,
+          "centroidUV": [
+            0.5009711281704148,
+            0.5007616482384508
+          ]
+        }
+      ],
+      "file": "discovery/05-connection-to-labyrinth/seed-11000033.png"
+    }
+  ]
+}

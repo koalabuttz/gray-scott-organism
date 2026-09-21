@@ -1,0 +1,655 @@
+{
+  "generatedBy": "tests/browser/genesis-sheet.spec.ts (GENESIS=1)",
+  "resolution": {
+    "grid": 512,
+    "note": "512² lab exploration grid; §4.2 seed radii are in chemical cells"
+  },
+  "seed": 20260921,
+  "parameters": {
+    "F": 0.029,
+    "k": 0.057,
+    "Du": 0.16,
+    "Dv": 0.08
+  },
+  "stepsPerKind": {
+    "single": 4000,
+    "competing": 4000,
+    "line": 4000,
+    "ring": 4000,
+    "sparse": 4000,
+    "radial": 4000,
+    "structured": 4000
+  },
+  "note": "One representative field per §4.4 genesis kind at a single recorded seed. `radial` is the near-threshold kind and is allowed to be near-dead. `alive` = finite field with nonzero occupancy and nonzero reaction activity.",
+  "rejectedRuns": {
+    "steps": 8000,
+    "note": "Metrics-only record of the rejected longer growth budget (no PNGs): at 8000 delivered steps every kind is alive but has grown toward the same mature labyrinth, so the shapes are no longer distinctive and the sheet uses 4000 steps.",
+    "rows": [
+      {
+        "kind": "single",
+        "steps": 8000,
+        "occupancy": 0.4197883605957031,
+        "maxV": 0.38147997856140137,
+        "activity": 0.009256524647850173,
+        "nonFinite": 0
+      },
+      {
+        "kind": "competing",
+        "steps": 8000,
+        "occupancy": 0.6123847961425781,
+        "maxV": 0.38302797079086304,
+        "activity": 0.013468634387828552,
+        "nonFinite": 0
+      },
+      {
+        "kind": "line",
+        "steps": 8000,
+        "occupancy": 0.4881706237792969,
+        "maxV": 0.3998243808746338,
+        "activity": 0.010791287870158225,
+        "nonFinite": 0
+      },
+      {
+        "kind": "ring",
+        "steps": 8000,
+        "occupancy": 0.4829750061035156,
+        "maxV": 0.3936966061592102,
+        "activity": 0.01066683847664269,
+        "nonFinite": 0
+      },
+      {
+        "kind": "sparse",
+        "steps": 8000,
+        "occupancy": 0.6388206481933594,
+        "maxV": 0.3469994068145752,
+        "activity": 0.014086686181601324,
+        "nonFinite": 0
+      },
+      {
+        "kind": "radial",
+        "steps": 8000,
+        "occupancy": 0.4174957275390625,
+        "maxV": 0.3897446095943451,
+        "activity": 0.009242476348265694,
+        "nonFinite": 0
+      },
+      {
+        "kind": "structured",
+        "steps": 8000,
+        "occupancy": 0.4170875549316406,
+        "maxV": 0.39619016647338867,
+        "activity": 0.009223030967322538,
+        "nonFinite": 0
+      }
+    ]
+  },
+  "rows": [
+    {
+      "kind": "single",
+      "file": "genesis-sheet/single.png",
+      "steps": 4000,
+      "command": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.507906439602375,
+          0.5087790313409641
+        ],
+        "radiusCells": 5.877377115190029,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.9229412190480843,
+        "meanV": 0.026301106154190002,
+        "minV": 0,
+        "maxV": 0.3876100182533264,
+        "occupiedFraction": 0.10421371459960938,
+        "reactionActivity": 0.00227530955389855,
+        "edgeDensity": 0.007161618951405478,
+        "nonFinite": 0,
+        "saturatedCells": 198901
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.10421371459960938,
+        "meanU": 0.9229412190480843,
+        "meanV": 0.026301106154190002,
+        "maxV": 0.3876100182533264,
+        "centroidUV": [
+          0.5067062844311652,
+          0.5077997027023317
+        ],
+        "boundsUV": [
+          0.287109375,
+          0.287109375,
+          0.728515625,
+          0.73046875
+        ],
+        "extentUV": [
+          0.44140625,
+          0.443359375
+        ],
+        "symmetry": {
+          "score": -0.0878905481630059,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.04820823376776089,
+          "meanAbsoluteDeviation": 0.04431349628799011
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 201,
+        "mean": 2.7643782552083334,
+        "nonBlackFraction": 0.06354600694444444,
+        "anyNonZeroFraction": 0.06916015625,
+        "aboveThresholdFraction": 0.04394422743055556,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          19,
+          64
+        ],
+        "channelMean": [
+          2.608503689236111,
+          2.685857204861111,
+          2.7607020399305555
+        ]
+      },
+      "alive": true,
+      "nearThreshold": false
+    },
+    {
+      "kind": "competing",
+      "file": "genesis-sheet/competing.png",
+      "steps": 4000,
+      "command": {
+        "id": 2,
+        "kind": "competing",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.5384682539943605,
+          0.4419278745679185
+        ],
+        "radiusCells": 5.430615028240116,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.8156829030464792,
+        "meanV": 0.06265357144220182,
+        "minV": 0,
+        "maxV": 0.4007042348384857,
+        "occupiedFraction": 0.24710464477539062,
+        "reactionActivity": 0.005409484388932892,
+        "edgeDensity": 0.017022045541795466,
+        "nonFinite": 0,
+        "saturatedCells": 127796
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.24710464477539062,
+        "meanU": 0.8156829030464792,
+        "meanV": 0.06265357144220182,
+        "maxV": 0.4007042348384857,
+        "centroidUV": [
+          0.5095601122408416,
+          0.4192594159578245
+        ],
+        "boundsUV": [
+          0.11328125,
+          0.083984375,
+          0.904296875,
+          0.755859375
+        ],
+        "extentUV": [
+          0.791015625,
+          0.671875
+        ],
+        "symmetry": {
+          "score": -0.06593511093018334,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.08769736806099324,
+          "meanAbsoluteDeviation": 0.0822727079366628
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 202,
+        "mean": 5.9777224392361115,
+        "nonBlackFraction": 0.14899739583333332,
+        "anyNonZeroFraction": 0.16248046875,
+        "aboveThresholdFraction": 0.09464518229166667,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          47,
+          81
+        ],
+        "channelMean": [
+          5.621548394097222,
+          5.799826388888889,
+          5.973383246527778
+        ]
+      },
+      "alive": true,
+      "nearThreshold": false
+    },
+    {
+      "kind": "line",
+      "file": "genesis-sheet/line.png",
+      "steps": 4000,
+      "command": {
+        "id": 3,
+        "kind": "line",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.49732504970859737,
+          0.4963334467681124
+        ],
+        "radiusCells": 2.768161030335887,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.8975341051320811,
+        "meanV": 0.034904720411753985,
+        "minV": 0,
+        "maxV": 0.3929760158061981,
+        "occupiedFraction": 0.13771820068359375,
+        "reactionActivity": 0.0030181304283674612,
+        "edgeDensity": 0.009572871236776503,
+        "nonFinite": 0,
+        "saturatedCells": 181741
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.13771820068359375,
+        "meanU": 0.8975341051320811,
+        "meanV": 0.034904720411753985,
+        "maxV": 0.3929760158061981,
+        "centroidUV": [
+          0.4936175843789818,
+          0.4916332435703008
+        ],
+        "boundsUV": [
+          0.23046875,
+          0.23828125,
+          0.7578125,
+          0.748046875
+        ],
+        "extentUV": [
+          0.52734375,
+          0.509765625
+        ],
+        "symmetry": {
+          "score": -0.1230130817885493,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.062265733542008775,
+          "meanAbsoluteDeviation": 0.05544524329390912
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 206,
+        "mean": 3.6819921875,
+        "nonBlackFraction": 0.08350151909722223,
+        "anyNonZeroFraction": 0.09150824652777778,
+        "aboveThresholdFraction": 0.05760525173611111,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          41,
+          74
+        ],
+        "channelMean": [
+          3.472668185763889,
+          3.576799045138889,
+          3.6778266059027778
+        ]
+      },
+      "alive": true,
+      "nearThreshold": false
+    },
+    {
+      "kind": "ring",
+      "file": "genesis-sheet/ring.png",
+      "steps": 4000,
+      "command": {
+        "id": 4,
+        "kind": "ring",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.5070330436620861,
+          0.4931432834267616
+        ],
+        "radiusCells": 28.76581233710765,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.900049524707697,
+        "meanV": 0.034043745144915365,
+        "minV": 0,
+        "maxV": 0.3969324231147766,
+        "occupiedFraction": 0.1339111328125,
+        "reactionActivity": 0.0029434344686806693,
+        "edgeDensity": 0.009301564394321301,
+        "nonFinite": 0,
+        "saturatedCells": 182960
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.1339111328125,
+        "meanU": 0.900049524707697,
+        "meanV": 0.034043745144915365,
+        "maxV": 0.3969324231147766,
+        "centroidUV": [
+          0.5150115326957042,
+          0.48458041640553784
+        ],
+        "boundsUV": [
+          0.259765625,
+          0.232421875,
+          0.765625,
+          0.740234375
+        ],
+        "extentUV": [
+          0.505859375,
+          0.5078125
+        ],
+        "symmetry": {
+          "score": -0.08531264376947001,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.0590370303037257,
+          "meanAbsoluteDeviation": 0.054396335141439385
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 199,
+        "mean": 3.5542957899305554,
+        "nonBlackFraction": 0.08236436631944444,
+        "anyNonZeroFraction": 0.08968858506944444,
+        "aboveThresholdFraction": 0.05636284722222222,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          39,
+          70
+        ],
+        "channelMean": [
+          3.351099175347222,
+          3.4521473524305555,
+          3.550268012152778
+        ]
+      },
+      "alive": true,
+      "nearThreshold": false
+    },
+    {
+      "kind": "sparse",
+      "file": "genesis-sheet/sparse.png",
+      "steps": 4000,
+      "command": {
+        "id": 5,
+        "kind": "sparse",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.5714919148152694,
+          0.3870674311136827
+        ],
+        "radiusCells": 2.687011328583334,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.5782333870817524,
+        "meanV": 0.14280972856158045,
+        "minV": 6.27418052636282e-33,
+        "maxV": 0.40063342452049255,
+        "occupiedFraction": 0.5608100891113281,
+        "reactionActivity": 0.012304871110464102,
+        "edgeDensity": 0.03908605230129497,
+        "nonFinite": 0,
+        "saturatedCells": 0
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.5608100891113281,
+        "meanU": 0.5782333870817524,
+        "meanV": 0.14280972856158045,
+        "maxV": 0.40063342452049255,
+        "centroidUV": [
+          0.49416606652132805,
+          0.46968806808326474
+        ],
+        "boundsUV": [
+          0,
+          0,
+          1,
+          1
+        ],
+        "extentUV": [
+          1,
+          1
+        ],
+        "symmetry": {
+          "score": -0.283219812908434,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.12436337892430108,
+          "meanAbsoluteDeviation": 0.0969151018970241
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 191,
+        "mean": 9.081501736111111,
+        "nonBlackFraction": 0.25397135416666666,
+        "anyNonZeroFraction": 0.28054253472222224,
+        "aboveThresholdFraction": 0.13397026909722223,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          51,
+          89
+        ],
+        "channelMean": [
+          8.505159505208333,
+          8.795642361111112,
+          9.08046875
+        ]
+      },
+      "alive": true,
+      "nearThreshold": false
+    },
+    {
+      "kind": "radial",
+      "file": "genesis-sheet/radial.png",
+      "steps": 4000,
+      "command": {
+        "id": 6,
+        "kind": "radial",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.5032991825090721,
+          0.5005691957566887
+        ],
+        "radiusCells": 4.613754875796017,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.9233463751858721,
+        "meanV": 0.02617124663381859,
+        "minV": 0,
+        "maxV": 0.3939949572086334,
+        "occupiedFraction": 0.10294723510742188,
+        "reactionActivity": 0.002262770685077703,
+        "edgeDensity": 0.00716162512369022,
+        "nonFinite": 0,
+        "saturatedCells": 199126
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.10294723510742188,
+        "meanU": 0.9233463751858721,
+        "meanV": 0.02617124663381859,
+        "maxV": 0.3939949572086334,
+        "centroidUV": [
+          0.5054985965464853,
+          0.5002630751611887
+        ],
+        "boundsUV": [
+          0.28515625,
+          0.279296875,
+          0.7265625,
+          0.72265625
+        ],
+        "extentUV": [
+          0.44140625,
+          0.443359375
+        ],
+        "symmetry": {
+          "score": -0.0873762036692387,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.04797693363390543,
+          "meanAbsoluteDeviation": 0.04412174321270984
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 203,
+        "mean": 2.721213107638889,
+        "nonBlackFraction": 0.06330186631944444,
+        "anyNonZeroFraction": 0.06876085069444444,
+        "aboveThresholdFraction": 0.04289496527777778,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          17,
+          64
+        ],
+        "channelMean": [
+          2.567839626736111,
+          2.6439973958333334,
+          2.7173556857638888
+        ]
+      },
+      "alive": true,
+      "nearThreshold": true
+    },
+    {
+      "kind": "structured",
+      "file": "genesis-sheet/structured.png",
+      "steps": 4000,
+      "command": {
+        "id": 7,
+        "kind": "structured",
+        "mode": "replace",
+        "seed": 20260921,
+        "center": [
+          0.49271923713386057,
+          0.5088896385161206
+        ],
+        "radiusCells": 6.226976176304742,
+        "strength": 1
+      },
+      "field": {
+        "meanU": 0.9231098278459626,
+        "meanV": 0.02625255558182872,
+        "minV": 0,
+        "maxV": 0.38819777965545654,
+        "occupiedFraction": 0.10368728637695312,
+        "reactionActivity": 0.002271294369902273,
+        "edgeDensity": 0.007161170179401635,
+        "nonFinite": 0,
+        "saturatedCells": 198943
+      },
+      "summary": {
+        "threshold": 0.1,
+        "occupiedFraction": 0.10368728637695312,
+        "meanU": 0.9231098278459626,
+        "meanV": 0.02625255558182872,
+        "maxV": 0.38819777965545654,
+        "centroidUV": [
+          0.484461155655605,
+          0.5168336222913065
+        ],
+        "boundsUV": [
+          0.263671875,
+          0.296875,
+          0.70703125,
+          0.740234375
+        ],
+        "extentUV": [
+          0.443359375,
+          0.443359375
+        ],
+        "symmetry": {
+          "score": -0.09205848950140583,
+          "periodCells": [
+            128,
+            128
+          ],
+          "meanAbsoluteDifference": 0.04832664477260583,
+          "meanAbsoluteDeviation": 0.044252798945475916
+        }
+      },
+      "image": {
+        "width": 1280,
+        "height": 720,
+        "min": 0,
+        "max": 205,
+        "mean": 2.770591362847222,
+        "nonBlackFraction": 0.06326931423611111,
+        "anyNonZeroFraction": 0.06865776909722222,
+        "aboveThresholdFraction": 0.04344835069444444,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          19,
+          64
+        ],
+        "channelMean": [
+          2.615414496527778,
+          2.6924110243055557,
+          2.766762152777778
+        ]
+      },
+      "alive": true,
+      "nearThreshold": false
+    }
+  ]
+}

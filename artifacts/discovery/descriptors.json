@@ -1,0 +1,1279 @@
+{
+  "generatedBy": "scripts/explore.ts (§6.5 discovery driver)",
+  "trajectoryId": "organism-01-candidate",
+  "grid": 512,
+  "seeds": [
+    11000011,
+    11000022,
+    11000033
+  ],
+  "settleSteps": 4000,
+  "observationPerformanceSeconds": 60,
+  "transitions": [
+    {
+      "id": "01-dormancy-to-nucleation",
+      "index": 1,
+      "source": {
+        "movement": "dormancy",
+        "params": {
+          "F": 0.026,
+          "k": 0.06,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "nucleation",
+        "params": {
+          "F": 0.026,
+          "k": 0.06,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "02-nucleation-to-cellular-growth",
+      "index": 2,
+      "source": {
+        "movement": "nucleation",
+        "params": {
+          "F": 0.03,
+          "k": 0.062,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "cellular-growth",
+        "params": {
+          "F": 0.03,
+          "k": 0.06,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "03-cellular-growth-to-replication",
+      "index": 3,
+      "source": {
+        "movement": "cellular-growth",
+        "params": {
+          "F": 0.035,
+          "k": 0.0608,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "replication",
+        "params": {
+          "F": 0.035,
+          "k": 0.0608,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "04-replication-to-connection",
+      "index": 4,
+      "source": {
+        "movement": "replication",
+        "params": {
+          "F": 0.0367,
+          "k": 0.061,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "connection",
+        "params": {
+          "F": 0.0367,
+          "k": 0.061,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "05-connection-to-labyrinth",
+      "index": 5,
+      "source": {
+        "movement": "connection",
+        "params": {
+          "F": 0.03,
+          "k": 0.057,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "labyrinth",
+        "params": {
+          "F": 0.03,
+          "k": 0.057,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "06-labyrinth-to-overgrowth",
+      "index": 6,
+      "source": {
+        "movement": "labyrinth",
+        "params": {
+          "F": 0.029,
+          "k": 0.057,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "overgrowth",
+        "params": {
+          "F": 0.029,
+          "k": 0.057,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "07-overgrowth-to-collapse",
+      "index": 7,
+      "source": {
+        "movement": "overgrowth",
+        "params": {
+          "F": 0.045,
+          "k": 0.058,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "collapse",
+        "params": {
+          "F": 0.045,
+          "k": 0.058,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "08-collapse-to-stillness",
+      "index": 8,
+      "source": {
+        "movement": "collapse",
+        "params": {
+          "F": 0.005,
+          "k": 0.075,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "stillness",
+        "params": {
+          "F": 0.005,
+          "k": 0.075,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    },
+    {
+      "id": "09-stillness-to-rebirth",
+      "index": 9,
+      "source": {
+        "movement": "stillness",
+        "params": {
+          "F": 0.005,
+          "k": 0.075,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      },
+      "destination": {
+        "movement": "rebirth",
+        "params": {
+          "F": 0.026,
+          "k": 0.06,
+          "Du": 0.16,
+          "Dv": 0.08
+        }
+      }
+    }
+  ],
+  "runs": [
+    {
+      "transition": "01-dormancy-to-nucleation",
+      "seed": 11000011,
+      "sourceOccupancy": 0.01932525634765625,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 2616404884,
+        "center": [
+          0.3955101944333066,
+          0.43972462197358597
+        ],
+        "radiusCells": 6.154430358158425,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=2616404884|center=[0.395510194,0.439724622]|radiusCells=6.154430358|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.00170135498046875,
+          "max": 0.06353759765625,
+          "mean": 0.023538589477539062,
+          "first": 0.00170135498046875,
+          "last": 0.06353759765625
+        },
+        "activity": {
+          "min": 0.00003668195859063417,
+          "max": 0.0015554241836071014,
+          "mean": 0.0005723849926653202,
+          "first": 0.00003668195859063417,
+          "last": 0.0015554241836071014
+        },
+        "changeRate": {
+          "min": 0.000001118222598961438,
+          "max": 0.000027100526494905353,
+          "mean": 0.000013652443811906778,
+          "first": 0.000001118222598961438,
+          "last": 0.000027100526494905353
+        },
+        "occupancyTrend": 0.06183624267578125
+      }
+    },
+    {
+      "transition": "01-dormancy-to-nucleation",
+      "seed": 11000022,
+      "sourceOccupancy": 0.019542694091796875,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 3407009060,
+        "center": [
+          0.6040120097873996,
+          0.44978623503198256
+        ],
+        "radiusCells": 6.267116831056774,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=3407009060|center=[0.604012010,0.449786235]|radiusCells=6.267116831|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.0016937255859375,
+          "max": 0.06261825561523438,
+          "mean": 0.023397127787272137,
+          "first": 0.0016937255859375,
+          "last": 0.06261825561523438
+        },
+        "activity": {
+          "min": 0.000036721176002174616,
+          "max": 0.0015274618053808808,
+          "mean": 0.0005675891710173649,
+          "first": 0.000036721176002174616,
+          "last": 0.0015274618053808808
+        },
+        "changeRate": {
+          "min": 0.0000011041378229492693,
+          "max": 0.000026724228519015014,
+          "mean": 0.000013551731607700882,
+          "first": 0.0000011041378229492693,
+          "last": 0.000026293855626136065
+        },
+        "occupancyTrend": 0.060924530029296875
+      }
+    },
+    {
+      "transition": "01-dormancy-to-nucleation",
+      "seed": 11000033,
+      "sourceOccupancy": 0.01912689208984375,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 3251434846,
+        "center": [
+          0.38378999585828,
+          0.4896688030872707
+        ],
+        "radiusCells": 6.028699498297647,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=3251434846|center=[0.383789996,0.489668803]|radiusCells=6.028699498|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.001674652099609375,
+          "max": 0.06654739379882812,
+          "mean": 0.0247348149617513,
+          "first": 0.001674652099609375,
+          "last": 0.06654739379882812
+        },
+        "activity": {
+          "min": 0.00003666546399472281,
+          "max": 0.0016130631556734443,
+          "mean": 0.0005964671515054457,
+          "first": 0.00003666546399472281,
+          "last": 0.0016130631556734443
+        },
+        "changeRate": {
+          "min": 0.0000011391218777134782,
+          "max": 0.00003109630415565334,
+          "mean": 0.000014843885622894959,
+          "first": 0.0000011391218777134782,
+          "last": 0.00003109630415565334
+        },
+        "occupancyTrend": 0.06487274169921875
+      }
+    },
+    {
+      "transition": "02-nucleation-to-cellular-growth",
+      "seed": 11000011,
+      "sourceOccupancy": 0.014186859130859375,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.019763946533203125,
+          "max": 0.15840530395507812,
+          "mean": 0.07611083984375,
+          "first": 0.019763946533203125,
+          "last": 0.15840530395507812
+        },
+        "activity": {
+          "min": 0.00048005167627707124,
+          "max": 0.003869355423375964,
+          "mean": 0.0018581276138623555,
+          "first": 0.00048005167627707124,
+          "last": 0.003869355423375964
+        },
+        "changeRate": {
+          "min": 0.000008816215085971635,
+          "max": 0.000040491791878594086,
+          "mean": 0.000023939232733027893,
+          "first": 0.000008816215085971635,
+          "last": 0.000040491791878594086
+        },
+        "occupancyTrend": 0.138641357421875
+      }
+    },
+    {
+      "transition": "02-nucleation-to-cellular-growth",
+      "seed": 11000022,
+      "sourceOccupancy": 0.014125823974609375,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.019374847412109375,
+          "max": 0.15436553955078125,
+          "mean": 0.07414944966634114,
+          "first": 0.019374847412109375,
+          "last": 0.15436553955078125
+        },
+        "activity": {
+          "min": 0.00047275563701987267,
+          "max": 0.0037707160227000713,
+          "mean": 0.0018158275682556753,
+          "first": 0.00047275563701987267,
+          "last": 0.0037707160227000713
+        },
+        "changeRate": {
+          "min": 0.000008335270649695303,
+          "max": 0.00004138241638429463,
+          "mean": 0.00002387948082590204,
+          "first": 0.000008335270649695303,
+          "last": 0.00004138241638429463
+        },
+        "occupancyTrend": 0.13499069213867188
+      }
+    },
+    {
+      "transition": "02-nucleation-to-cellular-growth",
+      "seed": 11000033,
+      "sourceOccupancy": 0.01403045654296875,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.0194854736328125,
+          "max": 0.15201950073242188,
+          "mean": 0.07330703735351562,
+          "first": 0.0194854736328125,
+          "last": 0.15201950073242188
+        },
+        "activity": {
+          "min": 0.00047382962657138705,
+          "max": 0.0037256539799273014,
+          "mean": 0.0017956580947308491,
+          "first": 0.00047382962657138705,
+          "last": 0.0037256539799273014
+        },
+        "changeRate": {
+          "min": 0.0000084083703768556,
+          "max": 0.000039168426155811176,
+          "mean": 0.00002280447824887233,
+          "first": 0.0000084083703768556,
+          "last": 0.000039168426155811176
+        },
+        "occupancyTrend": 0.13253402709960938
+      }
+    },
+    {
+      "transition": "03-cellular-growth-to-replication",
+      "seed": 11000011,
+      "sourceOccupancy": 0.026294708251953125,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.035449981689453125,
+          "max": 0.21789169311523438,
+          "mean": 0.11535072326660156,
+          "first": 0.035449981689453125,
+          "last": 0.21789169311523438
+        },
+        "activity": {
+          "min": 0.0009330985485576093,
+          "max": 0.005723271053284407,
+          "mean": 0.003028270230667355,
+          "first": 0.0009330985485576093,
+          "last": 0.005723271053284407
+        },
+        "changeRate": {
+          "min": 0.000015757592336740345,
+          "max": 0.00004117568096262403,
+          "mean": 0.00002778322762727233,
+          "first": 0.000015757592336740345,
+          "last": 0.00004117568096262403
+        },
+        "occupancyTrend": 0.18244171142578125
+      }
+    },
+    {
+      "transition": "03-cellular-growth-to-replication",
+      "seed": 11000022,
+      "sourceOccupancy": 0.026401519775390625,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.0355987548828125,
+          "max": 0.22058868408203125,
+          "mean": 0.1159655253092448,
+          "first": 0.0355987548828125,
+          "last": 0.22058868408203125
+        },
+        "activity": {
+          "min": 0.000936301366891712,
+          "max": 0.005785192362964153,
+          "mean": 0.003045180487485292,
+          "first": 0.000936301366891712,
+          "last": 0.005785192362964153
+        },
+        "changeRate": {
+          "min": 0.000015789762983331457,
+          "max": 0.000042796917114173993,
+          "mean": 0.000028266136875269392,
+          "first": 0.000015789762983331457,
+          "last": 0.000042796917114173993
+        },
+        "occupancyTrend": 0.18498992919921875
+      }
+    },
+    {
+      "transition": "03-cellular-growth-to-replication",
+      "seed": 11000033,
+      "sourceOccupancy": 0.02620697021484375,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.035480499267578125,
+          "max": 0.22036361694335938,
+          "mean": 0.11606884002685547,
+          "first": 0.035480499267578125,
+          "last": 0.22036361694335938
+        },
+        "activity": {
+          "min": 0.0009360021213069558,
+          "max": 0.005777197424322367,
+          "mean": 0.0030411629219694683,
+          "first": 0.0009360021213069558,
+          "last": 0.005777197424322367
+        },
+        "changeRate": {
+          "min": 0.000015830781194381416,
+          "max": 0.00004371478644316085,
+          "mean": 0.000028349804172952037,
+          "first": 0.000015830781194381416,
+          "last": 0.00004239334521116689
+        },
+        "occupancyTrend": 0.18488311767578125
+      }
+    },
+    {
+      "transition": "04-replication-to-connection",
+      "seed": 11000011,
+      "sourceOccupancy": 0.02773284912109375,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.036144256591796875,
+          "max": 0.2267303466796875,
+          "mean": 0.11630090077718098,
+          "first": 0.036144256591796875,
+          "last": 0.2267303466796875
+        },
+        "activity": {
+          "min": 0.0009713190956972539,
+          "max": 0.006114738993346691,
+          "mean": 0.0031404342783692605,
+          "first": 0.0009713190956972539,
+          "last": 0.006114738993346691
+        },
+        "changeRate": {
+          "min": 0.000015598387108184397,
+          "max": 0.00004453859946806915,
+          "mean": 0.000029325705175627565,
+          "first": 0.000015598387108184397,
+          "last": 0.00004453859946806915
+        },
+        "occupancyTrend": 0.19058609008789062
+      }
+    },
+    {
+      "transition": "04-replication-to-connection",
+      "seed": 11000022,
+      "sourceOccupancy": 0.02787017822265625,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.03632354736328125,
+          "max": 0.22762298583984375,
+          "mean": 0.1179339090983073,
+          "first": 0.03632354736328125,
+          "last": 0.22762298583984375
+        },
+        "activity": {
+          "min": 0.0009766628500074148,
+          "max": 0.006146276835352182,
+          "mean": 0.0031838215848741433,
+          "first": 0.0009766628500074148,
+          "last": 0.006146276835352182
+        },
+        "changeRate": {
+          "min": 0.000015688232451793738,
+          "max": 0.00004413125498103909,
+          "mean": 0.000029678907139896182,
+          "first": 0.000015688232451793738,
+          "last": 0.00004413125498103909
+        },
+        "occupancyTrend": 0.1912994384765625
+      }
+    },
+    {
+      "transition": "04-replication-to-connection",
+      "seed": 11000033,
+      "sourceOccupancy": 0.027797698974609375,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.036228179931640625,
+          "max": 0.22579193115234375,
+          "mean": 0.11740461985270183,
+          "first": 0.036228179931640625,
+          "last": 0.22579193115234375
+        },
+        "activity": {
+          "min": 0.0009757785592228174,
+          "max": 0.006080848630517721,
+          "mean": 0.003170518893360471,
+          "first": 0.0009757785592228174,
+          "last": 0.006080848630517721
+        },
+        "changeRate": {
+          "min": 0.000015816478480701335,
+          "max": 0.00004597767474479042,
+          "mean": 0.000029573488366925933,
+          "first": 0.000015816478480701335,
+          "last": 0.00004597767474479042
+        },
+        "occupancyTrend": 0.18956375122070312
+      }
+    },
+    {
+      "transition": "05-connection-to-labyrinth",
+      "seed": 11000011,
+      "sourceOccupancy": 0.10723876953125,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.143096923828125,
+          "max": 0.6646080017089844,
+          "mean": 0.4310620625813802,
+          "first": 0.143096923828125,
+          "last": 0.6646080017089844
+        },
+        "activity": {
+          "min": 0.003153574885800481,
+          "max": 0.014738775789737701,
+          "mean": 0.009550338281163325,
+          "first": 0.003153574885800481,
+          "last": 0.014738775789737701
+        },
+        "changeRate": {
+          "min": 0.000028982667572563514,
+          "max": 0.00014713805285282433,
+          "mean": 0.00009309737470175605,
+          "first": 0.00006830919301137328,
+          "last": 0.000028982667572563514
+        },
+        "occupancyTrend": 0.5215110778808594
+      }
+    },
+    {
+      "transition": "05-connection-to-labyrinth",
+      "seed": 11000022,
+      "sourceOccupancy": 0.10744857788085938,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.14194869995117188,
+          "max": 0.6630706787109375,
+          "mean": 0.4308621088663737,
+          "first": 0.14194869995117188,
+          "last": 0.6630706787109375
+        },
+        "activity": {
+          "min": 0.003152675461024046,
+          "max": 0.014703987166285515,
+          "mean": 0.009556305788767835,
+          "first": 0.003152675461024046,
+          "last": 0.014703987166285515
+        },
+        "changeRate": {
+          "min": 0.000029390106647042558,
+          "max": 0.0001455244200769812,
+          "mean": 0.00009254621788083266,
+          "first": 0.00006730385211994871,
+          "last": 0.000029390106647042558
+        },
+        "occupancyTrend": 0.5211219787597656
+      }
+    },
+    {
+      "transition": "05-connection-to-labyrinth",
+      "seed": 11000033,
+      "sourceOccupancy": 0.10786056518554688,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.14197540283203125,
+          "max": 0.66357421875,
+          "mean": 0.43110307057698566,
+          "first": 0.14197540283203125,
+          "last": 0.66357421875
+        },
+        "activity": {
+          "min": 0.0031543655786663294,
+          "max": 0.014707551337778568,
+          "mean": 0.009556678958081951,
+          "first": 0.0031543655786663294,
+          "last": 0.014707551337778568
+        },
+        "changeRate": {
+          "min": 0.000029881917726015672,
+          "max": 0.0001451096177333966,
+          "mean": 0.00009272271684797791,
+          "first": 0.00006710523302899674,
+          "last": 0.000029881917726015672
+        },
+        "occupancyTrend": 0.5215988159179688
+      }
+    },
+    {
+      "transition": "06-labyrinth-to-overgrowth",
+      "seed": 11000011,
+      "sourceOccupancy": 0.10400772094726562,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.13694000244140625,
+          "max": 0.6385955810546875,
+          "mean": 0.4071073532104492,
+          "first": 0.13694000244140625,
+          "last": 0.6385955810546875
+        },
+        "activity": {
+          "min": 0.003008344443514943,
+          "max": 0.014018479734659195,
+          "mean": 0.008958007383625954,
+          "first": 0.003008344443514943,
+          "last": 0.014018479734659195
+        },
+        "changeRate": {
+          "min": 0.000028828888389398344,
+          "max": 0.00014440137601923198,
+          "mean": 0.00009102104453025579,
+          "first": 0.0000682258396409452,
+          "last": 0.000028828888389398344
+        },
+        "occupancyTrend": 0.5016555786132812
+      }
+    },
+    {
+      "transition": "06-labyrinth-to-overgrowth",
+      "seed": 11000022,
+      "sourceOccupancy": 0.10375595092773438,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.13690185546875,
+          "max": 0.6387062072753906,
+          "mean": 0.4075482686360677,
+          "first": 0.13690185546875,
+          "last": 0.6387062072753906
+        },
+        "activity": {
+          "min": 0.0030039323028177023,
+          "max": 0.014024795033037663,
+          "mean": 0.008968150437188646,
+          "first": 0.0030039323028177023,
+          "last": 0.014024795033037663
+        },
+        "changeRate": {
+          "min": 0.000028110735001973808,
+          "max": 0.00014582174480892718,
+          "mean": 0.00009123826142361698,
+          "first": 0.00006878737622173503,
+          "last": 0.000028110735001973808
+        },
+        "occupancyTrend": 0.5018043518066406
+      }
+    },
+    {
+      "transition": "06-labyrinth-to-overgrowth",
+      "seed": 11000033,
+      "sourceOccupancy": 0.1037445068359375,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.1368408203125,
+          "max": 0.6378059387207031,
+          "mean": 0.4073804219563802,
+          "first": 0.1368408203125,
+          "last": 0.6378059387207031
+        },
+        "activity": {
+          "min": 0.0030038654804229736,
+          "max": 0.014016673900187016,
+          "mean": 0.008966396368729571,
+          "first": 0.0030038654804229736,
+          "last": 0.014016673900187016
+        },
+        "changeRate": {
+          "min": 0.00002643653169798199,
+          "max": 0.00014560639101546258,
+          "mean": 0.00009094872575587942,
+          "first": 0.00006840604328317568,
+          "last": 0.00002643653169798199
+        },
+        "occupancyTrend": 0.5009651184082031
+      }
+    },
+    {
+      "transition": "07-overgrowth-to-collapse",
+      "seed": 11000011,
+      "sourceOccupancy": 0.16376876831054688,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.21216201782226562,
+          "max": 0.9686698913574219,
+          "mean": 0.5989761352539062,
+          "first": 0.21216201782226562,
+          "last": 0.9686698913574219
+        },
+        "activity": {
+          "min": 0.006027920637279749,
+          "max": 0.027050906792283058,
+          "mean": 0.016841116865786415,
+          "first": 0.006027920637279749,
+          "last": 0.027050906792283058
+        },
+        "changeRate": {
+          "min": 0.000023150938432081603,
+          "max": 0.00008618093852419406,
+          "mean": 0.00006052920146733717,
+          "first": 0.00004675100717577152,
+          "last": 0.000023150938432081603
+        },
+        "occupancyTrend": 0.7565078735351562
+      }
+    },
+    {
+      "transition": "07-overgrowth-to-collapse",
+      "seed": 11000022,
+      "sourceOccupancy": 0.16310882568359375,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.21142196655273438,
+          "max": 0.9683685302734375,
+          "mean": 0.5980154673258463,
+          "first": 0.21142196655273438,
+          "last": 0.9683685302734375
+        },
+        "activity": {
+          "min": 0.006006554234772921,
+          "max": 0.027042508125305176,
+          "mean": 0.016814649337902665,
+          "first": 0.006006554234772921,
+          "last": 0.027042508125305176
+        },
+        "changeRate": {
+          "min": 0.000023276328647625633,
+          "max": 0.00008706341759534553,
+          "mean": 0.00006059854983201755,
+          "first": 0.00004665197411668487,
+          "last": 0.000023276328647625633
+        },
+        "occupancyTrend": 0.7569465637207031
+      }
+    },
+    {
+      "transition": "07-overgrowth-to-collapse",
+      "seed": 11000033,
+      "sourceOccupancy": 0.16337966918945312,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.21160507202148438,
+          "max": 0.9684295654296875,
+          "mean": 0.5983155568440756,
+          "first": 0.21160507202148438,
+          "last": 0.9684295654296875
+        },
+        "activity": {
+          "min": 0.006013164762407541,
+          "max": 0.027045248076319695,
+          "mean": 0.016822926001623273,
+          "first": 0.006013164762407541,
+          "last": 0.027045248076319695
+        },
+        "changeRate": {
+          "min": 0.00002324146953469608,
+          "max": 0.00008681413601152599,
+          "mean": 0.00006058018561816425,
+          "first": 0.000046687517169630155,
+          "last": 0.00002324146953469608
+        },
+        "occupancyTrend": 0.7568244934082031
+      }
+    },
+    {
+      "transition": "08-collapse-to-stillness",
+      "seed": 11000011,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "activity": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "changeRate": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "occupancyTrend": 0
+      }
+    },
+    {
+      "transition": "08-collapse-to-stillness",
+      "seed": 11000022,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "activity": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "changeRate": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "occupancyTrend": 0
+      }
+    },
+    {
+      "transition": "08-collapse-to-stillness",
+      "seed": 11000033,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": null,
+      "entryGenesisSignature": null,
+      "entryGenesisIssued": false,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "activity": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "changeRate": {
+          "min": 0,
+          "max": 0,
+          "mean": 0,
+          "first": 0,
+          "last": 0
+        },
+        "occupancyTrend": 0
+      }
+    },
+    {
+      "transition": "09-stillness-to-rebirth",
+      "seed": 11000011,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4977075689025223,
+        0.502618951221928
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 2616404884,
+        "center": [
+          0.6065045737884938,
+          0.43187860372103737
+        ],
+        "radiusCells": 7.180168751184829,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=2616404884|center=[0.606504574,0.431878604]|radiusCells=7.180168751|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.001773834228515625,
+          "max": 0.056598663330078125,
+          "mean": 0.02040386199951172,
+          "first": 0.001773834228515625,
+          "last": 0.056598663330078125
+        },
+        "activity": {
+          "min": 0.000037221998354652897,
+          "max": 0.0013759228168055415,
+          "mean": 0.0004946761246173992,
+          "first": 0.000037221998354652897,
+          "last": 0.0013759228168055415
+        },
+        "changeRate": {
+          "min": 0.0000010362397233620868,
+          "max": 0.00002541001776990015,
+          "mean": 0.000012345014653192266,
+          "first": 0.0000010362397233620868,
+          "last": 0.00002541001776990015
+        },
+        "occupancyTrend": 0.0548248291015625
+      }
+    },
+    {
+      "transition": "09-stillness-to-rebirth",
+      "seed": 11000022,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.4963897197972983,
+        0.5028658233620227
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 3407009060,
+        "center": [
+          0.6113970883190631,
+          0.4303961764164268
+        ],
+        "radiusCells": 7.31163630289957,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=3407009060|center=[0.611397088,0.430396176]|radiusCells=7.311636303|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.001789093017578125,
+          "max": 0.05706787109375,
+          "mean": 0.020172119140625,
+          "first": 0.001789093017578125,
+          "last": 0.05706787109375
+        },
+        "activity": {
+          "min": 0.00003731929973582737,
+          "max": 0.0013840764295309782,
+          "mean": 0.00048732674319277675,
+          "first": 0.00003731929973582737,
+          "last": 0.0013840764295309782
+        },
+        "changeRate": {
+          "min": 0.0000010398404128864058,
+          "max": 0.00002620785016915761,
+          "mean": 0.000012207682487996863,
+          "first": 0.0000010398404128864058,
+          "last": 0.00002620785016915761
+        },
+        "occupancyTrend": 0.055278778076171875
+      }
+    },
+    {
+      "transition": "09-stillness-to-rebirth",
+      "seed": 11000033,
+      "sourceOccupancy": 0,
+      "priorOrigin": [
+        0.5030280284304172,
+        0.5031703433077782
+      ],
+      "entryGenesisCommand": {
+        "id": 1,
+        "kind": "single",
+        "mode": "replace",
+        "seed": 3251434846,
+        "center": [
+          0.6075699867494404,
+          0.43255231927894044
+        ],
+        "radiusCells": 7.033482748013922,
+        "strength": 1
+      },
+      "entryGenesisSignature": "kind=single|mode=replace|seed=3251434846|center=[0.607569987,0.432552319]|radiusCells=7.033482748|strength=1.000000000",
+      "entryGenesisIssued": true,
+      "descriptors": {
+        "samples": 12,
+        "occupancy": {
+          "min": 0.00177001953125,
+          "max": 0.057483673095703125,
+          "mean": 0.020714759826660156,
+          "first": 0.00177001953125,
+          "last": 0.057483673095703125
+        },
+        "activity": {
+          "min": 0.00003712028410518542,
+          "max": 0.0013994150795042515,
+          "mean": 0.0005012288062668328,
+          "first": 0.00003712028410518542,
+          "last": 0.0013994150795042515
+        },
+        "changeRate": {
+          "min": 0.000001036939579535101,
+          "max": 0.000025900992113747634,
+          "mean": 0.000012433611715323423,
+          "first": 0.000001036939579535101,
+          "last": 0.000025900992113747634
+        },
+        "occupancyTrend": 0.055713653564453125
+      }
+    }
+  ]
+}
