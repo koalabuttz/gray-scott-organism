@@ -318,9 +318,18 @@ export const AUDIO = {
   eventRatios: [1, 2, 3] as const,
   /** Per-voice relative weight so the upper partials never dominate the fundamental. */
   voiceWeights: [1, 0.72, 0.6, 0.45] as const,
-  /** §8.2 fundamental maps logarithmically into this range (deep resonant tones). */
-  fundamentalMinHz: 38,
-  fundamentalMaxHz: 82,
+  /**
+   * §8.2 fundamental maps logarithmically into this range (deep resonant tones).
+   *
+   * Deviation 57 (audibility recalibration): the band was raised from the literal §8.2 "≈38–82 Hz"
+   * to 55–110 Hz after instrumenting the live path (`browser/audio-audible.spec.ts`). At 38–82 Hz the
+   * mature organism's fundamental sat at 41–53 Hz with all composite energy below ~150 Hz — below the
+   * reproduction floor of ordinary laptop speakers — so the piece measured as real signal at the
+   * destination yet was effectively inaudible. 55 Hz is still a deep sub-bass fundamental; the upper
+   * partials (2f, 3f ⇒ 110–330 Hz) now land in a band real speakers reproduce.
+   */
+  fundamentalMinHz: 55,
+  fundamentalMaxHz: 110,
   maxVoices: 4,
   /** §8.2 granular layer bounds: 0–3 grains/s, ≤ 12 concurrent, 0.15–0.8 s windows. */
   maxGrainsPerSecond: 3,
@@ -350,11 +359,22 @@ export const AUDIO = {
   eventRefractorySeconds: 15,
   /** Non-just detuning ceiling (cents) at zero coherence; coherence tightens it toward the ratios. */
   maxDetuneCents: 18,
-  /** Conservative levels (linear, pre-compressor). */
-  masterLevel: 0.9,
-  voiceLevelMax: 0.085,
-  textureLevelMax: 0.06,
-  eventLevelMax: 0.12,
+  /**
+   * Conservative levels (linear, pre-compressor). Recalibrated for audibility in deviation 57: the
+   * per-voice ceiling rose 0.085 → 0.2, texture 0.06 → 0.15 and events 0.12 → 0.28 (the same ≈ 2.35×
+   * lift), because at 0.085 a sounding voice was ≈ −21 dBFS on its own and the whole drone measured
+   * −17 dBFS RMS — present at the destination but inaudible on real speakers once the fundamental was
+   * also below their band. `masterLevel` stays the single overall-output trim (post-compressor) and is
+   * the headroom knob if the offline peak approaches −6 dBFS. Deviation 57 trimmed it 0.9 → 0.75: the
+   * louder drone plus Chromium's non-bit-identical compressor/convolver DSP made a 0.9 (or even 0.82)
+   * trim sit within run-to-run variation of the −6 dBFS ceiling, so the post-compressor trim was
+   * lowered to leave ~10% headroom (offline `active` peak 0.5046 → ≈ 0.41); events were set to 0.24
+   * rather than a strict 2.35× lift because the three Q = 8 resonances spike on a rare excitation.
+   */
+  masterLevel: 0.75,
+  voiceLevelMax: 0.2,
+  textureLevelMax: 0.15,
+  eventLevelMax: 0.24,
   /** Descriptor reference scales for the six normalized mappings (calibration defaults). */
   intensityOccupancyRef: 0.3,
   intensityActivityRef: 0.02,

@@ -54,8 +54,8 @@ export function featureScaleNorm(featureScaleUV: number): number {
 
 /**
  * (1) Scale: large-scale structure and low-band energy pull the fundamental **down**. Logarithmic in
- * the 38–82 Hz band so equal ratio changes are equal perceptions. Bounded, monotone decreasing in
- * both inputs.
+ * the 55–110 Hz band (deviation 57: raised from §8.2's literal 38–82 Hz for audibility on real
+ * speakers) so equal ratio changes are equal perceptions. Bounded, monotone decreasing in both inputs.
  */
 export function mapFundamentalHz(featureScaleUV: number, lowBandEnergy: number): number {
   const size = clamp01(0.65 * featureScaleNorm(featureScaleUV) + 0.35 * clamp01(lowBandEnergy));

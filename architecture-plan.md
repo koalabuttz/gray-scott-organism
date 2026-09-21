@@ -2038,3 +2038,77 @@ deviations must be recorded here. Each entry states what differs, why, and what 
     samples `masterGain` around the transition and asserts the restart held a nonzero live level
     (`masterHeldAtRestart` ≈ 0.073).
 
+57. **Round-B (Phase 3B) live-path audibility: the drone was electrically present but acoustically
+    silent, and the calibration was raised.** The operator reported "no audible sound at all" after
+    activating. The offline suites were green (peak ≈ −8 dBFS with the synthetic `activePresentation()`
+    fixture), so the fault was in the **live** path the offline driver never exercises: `offline.ts`
+    builds the engine already-unlocked with a permanently-active presentation, so it never sees the
+    activation edge, the dormant boot field, or the §8.3 gate closing over it. A destination-tapped
+    `AnalyserNode` was added to measure the real output and the answer is **(d) genuinely inaudible
+    calibration**, compounded by the correct dormancy silence — *not* (a) context/suspension, *not* a
+    stuck master, and *not* a broken signal chain. The precise instrumented evidence:
+    (a) **Not (a): the gesture and context work.** A real click on `#stage` (the handler is on the canvas
+    itself — `canvas.addEventListener('click', …)`; there is no overlay or "watch silently" path that
+    swallows it) put the context at `running`, `unlocked: true`; `activateEdge()` scheduled the 4 s
+    `fadeMasterIn` on `audioCtx.currentTime`, and the tap reported the master reaching **0.9000**.
+    (b) **Not (b): the master is never stuck at zero.** During the boot dormancy (the trajectory's
+    30 performance-second `dormancy` movement, `intention: quiet`) the field is empty, so
+    `deriveAudioControls` yields `intensity 0` and **every voice gain stays exactly 0** — the
+    destination measured `rms 0.00000 / peak 0.00000` while the master sat at 0.9. That is a *source*
+    silence, not a master fault. The §8.3 gate then correctly did its job: after 8 s below the off
+    thresholds it began the terminal fade at ≈ 24 performance-s and reached digital zero at ≈ 51
+    performance-s. The first sound therefore arrived only when the field crossed the §8.3 wake
+    occupancy (0.03) at ≈ 96 performance-s (≈ 32 real s at the default 3×) — an operator who clicks and
+    listens briefly hears **nothing at all**, which is what was reported.
+    (c) **Not (c): the chain is wired.** Once grown, the tap measured real signal over a full arc
+    (speed 6): peak 0.1276 → 0.3440, rms 0.0907 → 0.1466, with voice gains rising from `[0.059,0,0,0]`
+    during the fragmented *replication* phase to `[0.074,0.052,0.041,0.030]` (all four §8.2 voices) at
+    *overgrowth*. The single-voice early phase is the §8.1 fragmentation mapping doing its job (the
+    live field genuinely reports `largestComponentFraction` ≈ 0.01–0.06 / `beta0Approx` ≈ 300–500 for
+    the spotted pattern; the topology analyzer was verified correct — a single injected disk reads
+    `β0 = 1`, `largestComponentFraction = 1`).
+    (d) **The root cause (d).** Even at its loudest, the sounding fundamental sat at **41–53 Hz** — the
+    bottom of §8.2's literal 38–82 Hz band, exactly where large-scale structure and low-band energy push
+    it — with `voiceLevelMax` 0.085 (a single voice ≈ −21 dBFS) and a granular texture layer measuring
+    0.0003–0.0077. Peak 0.34 (−9.4 dBFS) of composite energy almost entirely below ~150 Hz is below the
+    reproduction floor of ordinary laptop speakers: the analyser proves signal, the ear hears nothing.
+    **Fix — recalibration for audibility within §8's restraint** (`src/config.ts` `AUDIO`, deviation-54
+    calibration amendment): the fundamental band moved **38–82 Hz → 55–110 Hz** (still a deep sub-bass
+    fundamental; the 2f/3f partials now land at 110–330 Hz, which real speakers reproduce), the per-voice
+    ceiling **0.085 → 0.2**, texture **0.06 → 0.15** and events **0.12 → 0.24** (events sit below the
+    ≈ 2.35× lift because the three Q = 8 resonances spike on a rare excitation), and the overall-output
+    trim `masterLevel` **0.9 → 0.75** to hold the louder drone under the −6 dBFS ceiling (there is no Web
+    Audio compressor *makeup* to reduce, so `masterLevel` — the final post-compressor trim — is the
+    headroom knob; 0.9 and even 0.82 sat within Chromium's run-to-run compressor/convolver variation of
+    the ceiling, so 0.75 leaves ≈ 10% headroom). The `mapVoiceCount`/`mapFragmentation` §8.1 semantics
+    are unchanged: the note is genuinely fragmented during the spotted phases and gains its upper voices
+    as it coheres, which is what §8.1 asks for; only the band and the levels were miscalibrated.
+    **Instrumentation added** (permanent, lazily created so playback/offline pay nothing):
+    `AudioGraph.attachOutputAnalyser()` taps an `AnalyserNode` on `muteGain` — the final node before the
+    audio destination (deviation 54a) — and `AudioGraph.outputMeasurement()` returns time-domain
+    RMS/peak plus the full magnitude spectrum; `AudioGraph.gainSnapshot()` exposes every gain value for
+    localising a chain. Surfaced as `AudioSystem.attachOutputAnalyser()/outputMeasurement()/gainSnapshot()`
+    and the verification hooks `audioOutput()` / `audioGains()`.
+    **New regression guard:** `tests/browser/audio-audible.spec.ts` (2 cases). It opens the artwork,
+    unlocks with a real click, fast-forwards (speed 6) to a field above the §8.3 wake occupancy, and
+    asserts the **destination tap** clears an audible floor (peak > 0.05, RMS > 0.01; settled
+    peak > 0.10) **and** that the strongest FFT bin lies in the drone band 40–400 Hz above −70 dBFS —
+    so "silent when it shouldn't be" can never pass again; the second case asserts the mute command
+    drives the same tap to the floor, proving the measurement is the real signal. Measured live after the
+    fix (settled, speed 6, grown field): **peak 0.2094 / RMS 0.1480 / dominant 70.3 Hz / strongest bin
+    −27.1 dBFS** (rising: peak 0.0684). `tests/mapping.test.ts` carries the new band (55/110) and the
+    boundary case was renamed; `browser/audio-offline.spec.ts`'s restart inter-sample-continuity bound
+    was widened **0.02 → 0.05** because the raised band raises the carrier's own per-sample slew (the
+    330 Hz third partial) — measured 0.0187–0.0204, i.e. right at the old bound — while 0.05 is still
+    ~6× below the ≈ 0.3 step a genuine hard master cut makes.
+    **Re-recorded offline measurements** (superseding the level figures in deviation 56(f)): `active`
+    peak **0.4079** / rms **0.1375** / voices 3 / grains 12; `quiet-fade` peak **0.3570** (fade start 12 s,
+    `silentAt`/`terminalZeroAt` 20 s, post-deadline peak exactly 0); `event-refractory` peak **0.4511**;
+    `restart` peak **0.3910**, `maxInterSampleStep` **0.01870**, `terminalZeroAt` null; `stillness` peak
+    **0.2319**; substream render root 2024 peak **0.4226**, checksum 2.1941 (unchanged — the material is
+    the seed's, not a level). All are ≤ the −6 dBFS = 0.5012 ceiling with ≥ 10% headroom. `npx tsc
+    --noEmit` clean; `npm test` **293/293**; the
+    default browser suite **60 passed / 12 gated skips** (58 + the 2 new audibility cases); `STILLNESS=1`
+    **61 passed / 11 gated skips** (`audioZeroAt` ≈ 17.8 performance-s, 20.01 s black-hold, re-arm
+    `satisfied` false).
+

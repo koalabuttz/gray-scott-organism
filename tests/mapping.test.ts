@@ -50,8 +50,10 @@ describe('§8.2 voice ratios', () => {
     expect(AUDIO.grainMinSeconds).toBe(0.15);
     expect(AUDIO.grainMaxSeconds).toBe(0.8);
     expect(AUDIO.eventRefractorySeconds).toBeGreaterThanOrEqual(15);
-    expect(AUDIO.fundamentalMinHz).toBe(38);
-    expect(AUDIO.fundamentalMaxHz).toBe(82);
+    // Deviation 57 (audibility recalibration): the band moved from §8.2's literal ≈38–82 Hz to
+    // 55–110 Hz after the live path proved a 38–82 Hz drone is below laptop-speaker reproduction.
+    expect(AUDIO.fundamentalMinHz).toBe(55);
+    expect(AUDIO.fundamentalMaxHz).toBe(110);
     expect(AUDIO.wetMin).toBeGreaterThanOrEqual(0.12);
     expect(AUDIO.wetMax).toBeLessThanOrEqual(0.2);
     expect(AUDIO.fadeSeconds).toBeGreaterThanOrEqual(8);
@@ -62,7 +64,7 @@ describe('§8.2 voice ratios', () => {
 });
 
 describe('§8.1 (1) scale — fundamental', () => {
-  it('stays inside the 38–82 Hz logarithmic band for any input', () => {
+  it('stays inside the 55–110 Hz logarithmic band for any input', () => {
     const samples = [
       [0, 0],
       [1, 1],

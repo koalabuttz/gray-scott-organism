@@ -127,6 +127,27 @@ function masterSegmentValue(segment: MasterSegment, t: number): number {
 }
 
 /**
+ * §8 live-path instrumentation: the default FFT size for the destination-tapped analyser. 8192 gives a
+ * 5.9 Hz bin at 48 kHz — fine enough to resolve the deep fundamental band (≈55–110 Hz) — over a 170 ms
+ * window that is short enough to catch a drone as it rises.
+ */
+const OUTPUT_FFT_SIZE = 8192;
+
+/** One destination-tapped output sample (see `AudioGraph.outputMeasurement`). */
+export interface OutputMeasurement {
+  /** Time-domain RMS of the last FFT window (linear, 1.0 = full scale). */
+  rms: number;
+  /** Time-domain peak of the last FFT window (linear). */
+  peak: number;
+  /** Frequency of the strongest magnitude bin, i.e. an estimate of the sounding fundamental. */
+  dominantHz: number;
+  /** Width of one FFT bin in Hz (`sampleRate / fftSize`). */
+  binHz: number;
+  /** The full magnitude spectrum in dBFS, index * `binHz` = frequency. */
+  spectrumDb: number[];
+}
+
+/**
  * The fixed §8.2 node graph. Constructed once; the engine drives its parameters and schedules its
  * one-shot grains and events. `realtime` contexts also get a `MediaStreamAudioDestinationNode` for
  * the recorder; an `OfflineAudioContext` does not (and needs none).
@@ -170,6 +191,8 @@ export class AudioGraph {
   // the graph's zero so `masterLevelAt` is correct before any scheduling.
   private masterAnchor = { time: Number.NEGATIVE_INFINITY, level: 0 };
   private masterSegments: MasterSegment[] = [];
+  /** §8 live-path instrumentation: lazily-created destination tap (`attachOutputAnalyser`). */
+  private analyser: AnalyserNode | null = null;
 
   constructor(context: BaseAudioContext, options: AudioGraphOptions = {}) {
     this.context = context;
@@ -506,6 +529,97 @@ export class AudioGraph {
       sum(this.convolver.buffer ?? this.noiseBuffer, 0, 64) +
       sum(this.convolver.buffer ?? this.noiseBuffer, 1, 64);
     return { ...this.soundSeeds, checksum };
+  }
+
+  // --- live-path instrumentation --------------------------------------------
+
+  /**
+   * §8 verification instrumentation: a destination-tapped `AnalyserNode`. `muteGain` is the **final**
+   * node before the audio destination (deviation 54a), so an analyser connected to it measures exactly
+   * what the hardware would receive — after the compressor, master envelope and mute. Created lazily on
+   * first use, so normal playback and the offline render pay nothing for it.
+   */
+  attachOutputAnalyser(fftSize = OUTPUT_FFT_SIZE): AnalyserNode {
+    if (!this.analyser) {
+      const analyser = this.context.createAnalyser();
+      analyser.fftSize = fftSize;
+      // No smoothing: the caller averages over its own sampling window, and a smoothed spectrum would
+      // make a just-started drone read as present before it really is.
+      analyser.smoothingTimeConstant = 0;
+      analyser.minDecibels = -140;
+      this.muteGain.connect(analyser);
+      this.analyser = analyser;
+    }
+    return this.analyser;
+  }
+
+  /**
+   * The most recent destination-tapped output measurement: time-domain RMS/peak and the full magnitude
+   * spectrum plus its dominant bin. Null until `attachOutputAnalyser()` has run. This is the live
+   * analogue of `offline.ts`'s `measure()` — it is how `audio-audible.spec.ts` proves real sound
+   * reaches the destination rather than trusting a gain *value*.
+   */
+  outputMeasurement(): OutputMeasurement | null {
+    const analyser = this.analyser;
+    if (!analyser) return null;
+    const time = new Float32Array(analyser.fftSize);
+    analyser.getFloatTimeDomainData(time);
+    let peak = 0;
+    let sumSquares = 0;
+    for (let i = 0; i < time.length; i += 1) {
+      const value = time[i]!;
+      const magnitude = Math.abs(value);
+      if (magnitude > peak) peak = magnitude;
+      sumSquares += value * value;
+    }
+    const spectrum = new Float32Array(analyser.frequencyBinCount);
+    analyser.getFloatFrequencyData(spectrum);
+    let bestBin = 0;
+    let bestDb = Number.NEGATIVE_INFINITY;
+    for (let i = 1; i < spectrum.length; i += 1) {
+      const db = spectrum[i]!;
+      if (db > bestDb) {
+        bestDb = db;
+        bestBin = i;
+      }
+    }
+    const binHz = this.context.sampleRate / analyser.fftSize;
+    return {
+      rms: Math.sqrt(sumSquares / Math.max(1, time.length)),
+      peak,
+      dominantHz: bestBin * binHz,
+      binHz,
+      spectrumDb: Array.from(spectrum),
+    };
+  }
+
+  /**
+   * §8 verification: the live `AudioParam.value` of every gain in the graph — master, mute, each voice,
+   * texture, event, wet, dry and the mix/send buses. Read straight from the scheduled params, so a
+   * caller can see *where* a chain is losing signal (e.g. master at 0, or voices never opened).
+   */
+  gainSnapshot(): {
+    master: number;
+    mute: number;
+    voices: number[];
+    texture: number;
+    event: number;
+    wet: number;
+    dry: number;
+    mix: number;
+    send: number;
+  } {
+    return {
+      master: this.master.gain.value,
+      mute: this.muteGain.gain.value,
+      voices: this.voices.map((voice) => voice.gain.gain.value),
+      texture: this.textureGain.gain.value,
+      event: this.eventGain.gain.value,
+      wet: this.wetGain.gain.value,
+      dry: this.dryBus.gain.value,
+      mix: this.mixBus.gain.value,
+      send: this.sendGain.gain.value,
+    };
   }
 
   // --- one-shot sources -----------------------------------------------------
@@ -1240,6 +1354,30 @@ export class AudioSystem {
 
   stats(): ReturnType<AudioEngine['stats']> | null {
     return this.engine?.stats() ?? null;
+  }
+
+  /**
+   * §8 live-path verification: attach the destination-tapped analyser (idempotent). Returns whether an
+   * audio graph exists to tap.
+   */
+  attachOutputAnalyser(): boolean {
+    if (!this.engine) return false;
+    this.engine.graph.attachOutputAnalyser();
+    return true;
+  }
+
+  /**
+   * The most recent destination-tapped output measurement (RMS/peak/spectrum), or null when audio is
+   * unavailable or the analyser has not been attached. `audio-audible.spec.ts` uses this to prove real
+   * sound reaches the destination.
+   */
+  outputMeasurement(): OutputMeasurement | null {
+    return this.engine?.graph.outputMeasurement() ?? null;
+  }
+
+  /** §8 verification: every live gain value in the graph (see `AudioGraph.gainSnapshot`). */
+  gainSnapshot(): ReturnType<AudioGraph['gainSnapshot']> | null {
+    return this.engine?.graph.gainSnapshot() ?? null;
   }
 
   dispose(): void {

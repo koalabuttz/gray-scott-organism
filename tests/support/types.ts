@@ -293,6 +293,33 @@ export interface AudioStatsShape {
   masterGain: number;
 }
 
+/** §8 live-path audibility: a destination-tapped output measurement (`audioOutput()`). */
+export interface AudioOutputShape {
+  /** Time-domain RMS over the analyser window (linear). */
+  rms: number;
+  /** Time-domain peak over the analyser window (linear). */
+  peak: number;
+  /** Strongest magnitude bin — an estimate of the sounding fundamental. */
+  dominantHz: number;
+  /** Width of one FFT bin in Hz. */
+  binHz: number;
+  /** The full magnitude spectrum in dBFS. */
+  spectrumDb: number[];
+}
+
+/** §8 the live value of every gain in the graph (`audioGains()`). */
+export interface AudioGainsShape {
+  master: number;
+  mute: number;
+  voices: number[];
+  texture: number;
+  event: number;
+  wet: number;
+  dry: number;
+  mix: number;
+  send: number;
+}
+
 /** §12.3 AC.12 offline audio measurements (`audioOfflineProbe`). */
 export interface OfflineAudioShape {
   scenario: string;

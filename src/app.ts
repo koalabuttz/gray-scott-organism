@@ -267,6 +267,30 @@ export interface ArtworkTestHook {
     armed: boolean;
     masterGain: number;
   } | null;
+  /**
+   * §8 verification-only: the destination-tapped output measurement (RMS/peak/spectrum). Attaches the
+   * analyser on first call. Null when audio is unavailable. This is how a spec proves real sound
+   * reaches the destination rather than trusting a gain *value*.
+   */
+  audioOutput(): {
+    rms: number;
+    peak: number;
+    dominantHz: number;
+    binHz: number;
+    spectrumDb: number[];
+  } | null;
+  /** §8 verification-only: the live value of every gain in the graph, to localise a chain that is losing signal. */
+  audioGains(): {
+    master: number;
+    mute: number;
+    voices: number[];
+    texture: number;
+    event: number;
+    wet: number;
+    dry: number;
+    mix: number;
+    send: number;
+  } | null;
   /** §12.3 AC.12: render a deterministic offline scenario and return its measurements. */
   audioOfflineProbe(options: {
     scenario: OfflineScenarioName;
@@ -1875,6 +1899,11 @@ export class App {
       audioRecordingTrackCount: () => this.audio.recordingStream()?.getAudioTracks().length ?? 0,
       audioSoundSignature: () => this.audio.soundSignature(),
       audioStats: () => this.audio.stats(),
+      audioOutput: () => {
+        this.audio.attachOutputAnalyser();
+        return this.audio.outputMeasurement();
+      },
+      audioGains: () => this.audio.gainSnapshot(),
       audioOfflineProbe: (options) =>
         renderOfflineScenario({
           scenario: options.scenario,

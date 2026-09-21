@@ -199,7 +199,10 @@ test.describe('AC.12 offline audio', () => {
     expect(m.finite).toBe(true);
     expect(m.peak, 'the restarted field is audible').toBeGreaterThan(0.0005);
     // The restart holds the live level and ramps to zero: a bounded inter-sample step, never a hard cut.
-    expect(m.maxInterSampleStep, 'the restart de-clicks (no hard master cut)').toBeLessThan(0.02);
+    // Deviation 57: with the fundamental band raised to 55–110 Hz the carrier's own sample-to-sample
+    // slew grew (the highest partial is now ≈ 330 Hz), so the bound was widened from 0.02 to 0.05 —
+    // still ~6× below the ≈ 0.3 step a genuine hard master cut would produce.
+    expect(m.maxInterSampleStep, 'the restart de-clicks (no hard master cut)').toBeLessThan(0.05);
     // The abandoned kill-wait deadline (≈ 10 s) never fires: the fresh performance does not go silent.
     expect(m.terminalZeroAt, 'the abandoned terminal deadline never fires').toBeNull();
     expect(m.satisfied, 'the fresh performance is not at terminal zero').toBe(false);
