@@ -9,8 +9,8 @@
   "narrative": "One complete arc recorded at the presentation default speed (3×, deviation 44 — ≈5.4 real minutes for the ≈980-performance-second first arc) with the deviation-45 retuned trajectory, i.e. at the pacing the operator will actually see. The arc completes and walks the whole first-arc movement path. Post refinement (deviation 48), NO §6.4 injection rescue fires: the nucleation field starts below the dead thresholds but is rising, so the trend-aware detector keeps it alive (rescueCount 0). `npm run test:rescue` (RESCUE=1) confirms no spurious rescue while rising and preserves a deliberate dead fixture that still rescues.",
   "arc": {
     "seed": 8100001,
-    "wallClockSeconds": 266.848,
-    "performanceSeconds": 800.5833333331545,
+    "wallClockSeconds": 267.618,
+    "performanceSeconds": 801.7249999998869,
     "arcReached": 1,
     "movementsVisited": [
       "dormancy",
@@ -28,7 +28,7 @@
     "extinctionDecisionCount": 0,
     "genesisCount": 2,
     "captureCount": 8,
-    "descriptorSamples": 611,
+    "descriptorSamples": 602,
     "holdSeconds": 20.008333333315136,
     "darkestHoldMax": 0,
     "pageErrors": []

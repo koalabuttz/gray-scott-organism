@@ -309,13 +309,19 @@ describe('AC.11 worker recovery association (MAJOR 3)', () => {
     expect(client.busy).toBe(true);
 
     // A's late reply is dead letter: the live handler was detached, and the captured handler's
-    // generation guard drops it.
+    // generation guard drops it — counted as `ignored` (deviation 53/MAJOR 3) without touching the
+    // new request's slot ownership.
+    const ignoredBefore = client.stats().ignored;
     workerA.emitCurrent(aReply);
     workerA.emitCaptured(aReply);
     expect(client.busy, 'worker B stays busy').toBe(true);
     expect(client.poll(), 'no old result is publishable').toBeNull();
     expect(client.acquire(), 'the new request still owns its slot').toBeNull();
     expect(client.stats().results).toBe(0);
+    expect(
+      client.stats().ignored,
+      'the stale-generation reply from the terminated worker is counted as exactly one `ignored`',
+    ).toBe(ignoredBefore + 1);
 
     // B's own reply (after its epoch reset) alone recycles the slot.
     const bReply = workerB.replyFor(model, 1)!;

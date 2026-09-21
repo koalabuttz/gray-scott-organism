@@ -473,17 +473,17 @@ test.describe('ARC_TUNED=1 single complete arc at the presentation default (devi
       expect(visited, `arc-tuned: movement '${movement}' was visited`).toContain(movement);
     }
     // Post-refinement (deviation 48): a rising nucleation field below the dead thresholds is no longer
-    // rescued, so the retuned arc should be rescue-free. The assertion below keeps the plan-permitted
-    // §6.4 bound (at most one injection rescue per arc) as an upper bound; `npm run test:rescue`
+    // rescued, so the retuned trajectory is **rescue-free**. Deviation 48/53 and the checked-in
+    // `arcs/arc-tuned/summary.json` (`rescueCount: 0`) all state zero rescues, so the tuned arc is held
+    // to that strict standard rather than the looser plan-permitted bound: a one-rescue run must fail
+    // *here*, before the narrative below is written, instead of passing and recording evidence that
+    // contradicts its own rescueCount (the stale-narrative class round A fixed).
+    //
+    // The plan-permitted §6.4 bound — at most one injection rescue per arc — still exists for the
+    // *legacy* 1× arcs and is asserted as an upper bound in `assertArc` above; `npm run test:rescue`
     // (RESCUE=1) is the focused evidence that no spurious rescue fires while the field rises through
-    // nucleation, and that a deliberately dead field still fires its one bounded rescue.
-    expect(
-      rescues.length,
-      'arc-tuned: at most the one plan-permitted injection rescue',
-    ).toBeLessThanOrEqual(1);
-    for (const decision of rescues) {
-      expect(decision.intention, 'arc-tuned: a rescue fires only on an emerging intention').toBe('emerge');
-    }
+    // nucleation and that a deliberately dead field still fires its one bounded rescue.
+    expect(rescues.length, 'arc-tuned: the retuned trajectory is rescue-free (zero rescues)').toBe(0);
 
     writeJson('arcs/arc-tuned/summary.json', {
       generatedBy: 'tests/browser/arcs.spec.ts (ARC_TUNED=1)',

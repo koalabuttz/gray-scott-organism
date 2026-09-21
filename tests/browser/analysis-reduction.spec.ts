@@ -27,6 +27,24 @@ interface AnalyzerDiagnosticsShape {
   packSaturated: boolean;
 }
 
+interface PresentationProbeShape {
+  requested: number;
+  completed: number;
+  eventSerialBefore: number;
+  eventSerialAfter: number;
+  eventKinds: string[];
+  descriptors: {
+    occupiedFraction: number;
+    meanV: number;
+    beta0Approx: number;
+    beta1Approx: number;
+    largestComponentFraction: number;
+    topologyConfidence: number;
+    persistenceSeconds: number;
+  } | null;
+  tier1OccupiedFraction: number;
+}
+
 test.describe('§7.1 reduction contract (AC.10)', () => {
   test('center-only activity is strong in tier 2; hidden-periphery activity is invisible to tier 2', async ({ page }) => {
     test.setTimeout(120_000);
@@ -185,6 +203,36 @@ test.describe('§7.1 reduction contract (AC.10)', () => {
       ).toBe(0);
       expect(sample!.health.occupiedFraction, 'tier 1 still sees the annulus activity').toBeGreaterThan(0);
     }
+
+    // End-to-end: route the *same* annulus field through the REAL worker presentation/event path
+    // (analyzer readback → pooled combined buffer → PresentationWorker → topology/event tier), not just
+    // the direct reduction sampler above (which bypasses the worker, engine, topology and events). Feed
+    // more samples than the topology birth-persistence window (3) so "no retained component / no salient
+    // event" is *asserted* against the live event serial rather than inferred from a zero occupancy.
+    await hook(page, 'reset');
+    await hook(page, 'seed', [{ center: [0.5, 0.5 - 366 / GRID], radiusCells: 12 }]);
+    const workerProbe = await hook<PresentationProbeShape>(page, 'presentationEventProbeForTest', [6, 8000]);
+    console.info(
+      `[reduction-attenuation] annulus-only worker path: completed=${workerProbe.completed}/${workerProbe.requested} ` +
+        `eventSerial=${workerProbe.eventSerialBefore}->${workerProbe.eventSerialAfter} kinds=[${workerProbe.eventKinds.join(',')}] ` +
+        `beta0=${workerProbe.descriptors?.beta0Approx ?? 'n/a'} beta1=${workerProbe.descriptors?.beta1Approx ?? 'n/a'} ` +
+        `largest=${workerProbe.descriptors?.largestComponentFraction ?? 'n/a'} ` +
+        `conf=${workerProbe.descriptors?.topologyConfidence ?? 'n/a'} tier1=${workerProbe.tier1OccupiedFraction.toExponential(2)}`,
+    );
+    expect(workerProbe.completed, 'every annulus sample completed through the real worker path').toBe(workerProbe.requested);
+    expect(workerProbe.descriptors, 'the worker published tier-2 descriptors').not.toBeNull();
+    // No retained presentation component: the reduced-V field has no foreground at all.
+    expect(workerProbe.descriptors!.beta0Approx, 'no retained presentation component (β0 = 0)').toBe(0);
+    expect(workerProbe.descriptors!.largestComponentFraction, 'no component fraction is retained').toBe(0);
+    expect(workerProbe.descriptors!.occupiedFraction, 'the worker tier-2 occupancy stays zero').toBe(0);
+    // More samples than birth persistence were fed, yet no salient event fired and the serial is unchanged.
+    expect(workerProbe.eventKinds, 'no salient event kind was recognized through the worker path').toEqual([]);
+    expect(
+      workerProbe.eventSerialAfter,
+      'no salient event is emitted: the app event serial is unchanged',
+    ).toBe(workerProbe.eventSerialBefore);
+    // Tier 1 (full-domain, unweighted) still sees the annulus activity through the same path.
+    expect(workerProbe.tier1OccupiedFraction, 'tier 1 occupancy is still > 0 through the worker path').toBeGreaterThan(0);
 
     expect(errors, errors.join(' | ')).toEqual([]);
   });

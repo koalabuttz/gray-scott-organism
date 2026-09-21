@@ -318,6 +318,30 @@ export interface ArtworkTestHook {
     health: { occupiedFraction: number; flux: number; change: number };
     presentation: { meanU: number; meanV: number; occupancy: number; activity: number };
   } | null>;
+  /**
+   * §7.1/§7.3 end-to-end fixture hook: feed `samples` real presentation samples through the **full**
+   * worker path (analyzer readback → pooled combined buffer → `PresentationWorker` → topology/event
+   * tier) — the same path `pollAnalysis` drives in the frame loop — and return the app's event serial
+   * and the last published tier-2 topology state, so a browser spec can assert (rather than infer)
+   * that a sub-threshold field never retains a component and never fires a salient event.
+   */
+  presentationEventProbeForTest(samples: number, timeoutMs?: number): Promise<{
+    requested: number;
+    completed: number;
+    eventSerialBefore: number;
+    eventSerialAfter: number;
+    eventKinds: string[];
+    descriptors: {
+      occupiedFraction: number;
+      meanV: number;
+      beta0Approx: number;
+      beta1Approx: number;
+      largestComponentFraction: number;
+      topologyConfidence: number;
+      persistenceSeconds: number;
+    } | null;
+    tier1OccupiedFraction: number;
+  }>;
   /** §7.1/AC.11: run `iterations` request/poll cycles and report the retained-buffer balance. */
   analyzerRingProbe(iterations: number): Promise<{
     iterations: number;
@@ -1944,6 +1968,90 @@ export class App {
           await new Promise((resolve) => setTimeout(resolve, 1));
         }
         return null;
+      },
+      /**
+       * §7.1/§7.3 end-to-end fixture hook: drive `samples` real presentation samples through the full
+       * worker path — acquire a pooled combined buffer, fill it from the analyzer readback, transfer it
+       * to the `PresentationWorker`, and publish the returned descriptors/event exactly as the frame
+       * loop's `pollAnalysis` does — then report the event serial and the last tier-2 topology state.
+       * This is the *real* event path, so a spec can assert (not infer) that no retained component and
+       * no salient event arise from a sub-threshold field however many samples are fed.
+       */
+      presentationEventProbeForTest: async (samples, timeoutMs = 10_000) => {
+        const eventSerialBefore = this.eventSerial;
+        const eventKinds: string[] = [];
+        let completed = 0;
+        let tier1OccupiedFraction = Number.NaN;
+        let last: PresentationDescriptors | null = null;
+        for (let i = 0; i < samples; i += 1) {
+          const buffer = this.presenter.acquire();
+          if (!buffer) break;
+          if (!this.analyzer.request(this.simulation.fieldWithPrevious(), this.buildSampleStamp())) {
+            this.presenter.release(buffer);
+            break;
+          }
+          const readbackDeadline = performance.now() + timeoutMs;
+          let submitted = false;
+          while (performance.now() < readbackDeadline) {
+            const sample = this.analyzer.poll(new Uint8Array(buffer));
+            if (sample) {
+              if (sample.stamp.epoch === this.simulation.epoch) {
+                this.health = sample.health;
+                this.coarse = sample.coarse;
+                this.analysisPackSaturated = sample.packSaturated;
+                tier1OccupiedFraction = sample.health.fullOccupiedFraction;
+                this.presenter.submit(sample.stamp, buffer);
+                submitted = true;
+              } else {
+                this.presenter.release(buffer);
+              }
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1));
+          }
+          if (!submitted) break;
+          const resultDeadline = performance.now() + timeoutMs;
+          let collected = false;
+          while (performance.now() < resultDeadline) {
+            const result = this.presenter.poll();
+            if (result) {
+              collected = true;
+              if (result.status === 'ok' && result.descriptors && result.epoch === this.simulation.epoch) {
+                this.presentation = result.descriptors.presentation;
+                this.presentationEpoch = result.epoch;
+                this.presentationPerformanceSeconds = result.stamp.performanceSeconds;
+                last = result.descriptors.presentation;
+                if (result.event) {
+                  eventKinds.push(result.event.kind);
+                  this.publishEvent(result.event);
+                }
+              }
+              break;
+            }
+            await new Promise((resolve) => setTimeout(resolve, 1));
+          }
+          if (!collected) break;
+          completed += 1;
+        }
+        return {
+          requested: samples,
+          completed,
+          eventSerialBefore,
+          eventSerialAfter: this.eventSerial,
+          eventKinds,
+          descriptors: last
+            ? {
+                occupiedFraction: last.occupiedFraction,
+                meanV: last.meanV,
+                beta0Approx: last.beta0Approx,
+                beta1Approx: last.beta1Approx,
+                largestComponentFraction: last.largestComponentFraction,
+                topologyConfidence: last.topologyConfidence,
+                persistenceSeconds: last.persistenceSeconds,
+              }
+            : null,
+          tier1OccupiedFraction,
+        };
       },
       /**
        * §7.1/AC.11 readback-ring probe: run `iterations` request/poll cycles synchronously and report

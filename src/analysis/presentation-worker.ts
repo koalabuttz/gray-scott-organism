@@ -263,7 +263,13 @@ export class PresentationWorker {
   private wire(): void {
     const generation = this.generation;
     this.worker.onmessage = (event): void => {
-      if (generation !== this.generation) return; // a reply from a superseded worker generation
+      if (generation !== this.generation) {
+        // A reply from a superseded worker generation: quarantine it like any other unsolicited reply,
+        // counted as `ignored` and without touching slot ownership (deviation 53/MAJOR 3 — the stats
+        // comment and the recovery association both say stale-generation replies are counted).
+        this.ignoredCount += 1;
+        return;
+      }
       this.onResult(event.data);
     };
     this.worker.onerror = (): void => {
