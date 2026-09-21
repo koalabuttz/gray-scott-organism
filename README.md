@@ -4,21 +4,27 @@ An autonomous fullscreen Gray–Scott reaction–diffusion artwork. A small
 mathematical organism emerges from darkness, grows, transforms, collapses,
 and begins again. It runs without visible controls.
 
+<p align="center">
+  <img src="artifacts/phase1-gate/02-mature-wet-material.png" width="49%" alt="The mature organism from overhead — a luminous labyrinth in darkness" />
+  <img src="artifacts/phase1-gate/03-grazing-edge-close.png" width="49%" alt="Grazing light revealing the organism's shallow relief up close" />
+</p>
+
 ## Initial Prompts
 
-Here are some of the prompts I used while exploring potential concepts:                               
+Here are some of the prompts I used while exploring potential concepts:
 - can I get a list of mathematics concepts that have cool visualizations?
 - What are some of the most common combinations of these visualizations out there?
 - Now, based on what we've spoken about, what are some of the least common combinations of these visualizations?
 - Please search online for prior art regarding this
-- within these, can you think of any novel or especially interesting combinations or chains of concepts?   
+- within these, can you think of any novel or especially interesting combinations or chains of concepts?
 - which of these do you think would result in interesting emergent art/be the prettiest/spark the most joy?
 - Now, I want you to pitch each of these to me as an experience. within the experience, think black background, no controls visible (possibly hidden behind a key press, but I also like the idea of something being curated), possibly using additional 3d or 2d flare (glow, bloom, sound, reflection, physics, gravity, light, etc.). This will not be a dashboard of options - each one should get the best pitch you can give them to win their singular spot in the experience.
 - Explain how you think we would approach building the Reaction-Diffusion as a standalone experience
 - Turn this into a prompt to send an agent to build
 
-## Reflection 
-                                                                                                                                            Mathematics-based visualizations always fascinate me, so I was happy to have an excuse to work with them. As you can see in my prompting, I wanted to give some love to a lesser-known one, but I chose the Gray-Scott Reaction Diffusion option based on the pitch. Within my prompting I led the agent through a series of questions towards the kind of experience I was looking for. In the end, I chose the one that interested me the most and looked doable in the free time I had. This initial conversation provided me with ideas and a prompt for a builder agent, which went on to be the one I spent the most time with. I had the builder agent spawn subagents with larger models for implementation planning and code reviews. While waiting for these subagents to finish cost some time, it proved to be useful in terms of catching bugs and ensuring correctness. Because of this review loop, I was able to stay hands off on the coding and focus on the experience, tweaking things like the speed or curation of the visuals. While the agent attempted to use Playwright and screenshots to assist with development, it's doesn't have particularly great taste on its own. As of writing this, audio and further visual flavor is still being added and I hope to make it more compelling in time.
+## Reflection
+
+Mathematics-based visualizations always fascinate me, so I was happy to have an excuse to work with them. As you can see in my prompting, I wanted to give some love to a lesser-known one, but I chose the Gray-Scott Reaction Diffusion option based on the pitch. Within my prompting I led the agent through a series of questions towards the kind of experience I was looking for. In the end, I chose the one that interested me the most and looked doable in the free time I had. This initial conversation provided me with ideas and a prompt for a builder agent, which went on to be the one I spent the most time with. I had the builder agent spawn subagents with larger models for implementation planning and code reviews. While waiting for these subagents to finish cost some time, it proved to be useful in terms of catching bugs and ensuring correctness. Because of this review loop, I was able to stay hands off on the coding and focus on the experience, tweaking things like the speed or curation of the visuals. While the agent attempted to use Playwright and screenshots to assist with development, it's doesn't have particularly great taste on its own. As of writing this, audio and further visual flavor is still being added and I hope to make it more compelling in time.
 
 ## Run
 
