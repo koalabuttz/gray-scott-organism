@@ -1,5 +1,6 @@
 /**
- * §12.3 audio mappings (AC.12 half): the six §8.1 controls are bounded and monotone where specified.
+ * §12.3 audio mappings (AC.12 half): the six §8.1 controls are bounded and monotone where specified,
+ * with the §2/§4/§5 Sunlit Porcelain Garden palette (deviation 58).
  *
  * These are pure functions of plain numbers, so they are tested directly (no graph, no DOM, no
  * context) and again through `deriveAudioControls` on injected synthetic presentation samples that
@@ -10,7 +11,7 @@ import { describe, expect, it } from 'vitest';
 import { AUDIO } from '../src/config.ts';
 import type { PresentationAnalysis } from '../src/core/types.ts';
 import {
-  DETUNE_SIGN,
+  DETUNE_MULTIPLIERS,
   VOICE_RATIOS,
   deriveAudioControls,
   mapDetuneCents,
@@ -19,12 +20,15 @@ import {
   mapFundamentalHz,
   mapGrainRate,
   mapIntensity,
+  mapPadLevel,
   mapTextureFilterHz,
   mapTextureLevel,
   mapVoiceCount,
-  mapVoiceLevel,
+  mapVoiceFilterHz,
   mapWetGain,
   neutralAudioControls,
+  thirdColorGain,
+  voiceLevels,
 } from '../src/audio/voices.ts';
 import { neutralAnalysisState } from '../src/core/world.ts';
 
@@ -33,38 +37,55 @@ function presentation(overrides: Partial<PresentationAnalysis>): PresentationAna
   return { ...neutralAnalysisState().presentation, valid: true, ...overrides };
 }
 
-describe('§8.2 voice ratios', () => {
-  it('are the just intervals [1, 3/2, 2, 3]', () => {
-    expect(VOICE_RATIOS).toEqual([1, 1.5, 2, 3]);
+describe('§2 voice ratios and register', () => {
+  it('are the just intervals [1, 2, 3, 5/2] in removal-priority order', () => {
+    expect(VOICE_RATIOS).toEqual([1, 2, 3, 2.5]);
     expect(AUDIO.maxVoices).toBe(4);
-    expect(DETUNE_SIGN).toHaveLength(4);
+    expect(DETUNE_MULTIPLIERS).toEqual([0, 1, -1, 0.5]);
+    expect(DETUNE_MULTIPLIERS[0], 'the root never detunes').toBe(0);
   });
 
-  it('pins the 50 ms scheduler tick and 150 ms lookahead (the tick stays inside the lookahead)', () => {
+  it('carries the §2 harmonic tables (a warm body, restrained even harmonics)', () => {
+    expect(AUDIO.voice0Harmonics).toEqual([1, 0.28, 0.1]);
+    expect(AUDIO.voiceHarmonics).toEqual([1, 0.1]);
+  });
+
+  it('pins the 110–165 Hz register and the ≤ 3-cent detune ceiling', () => {
+    expect(AUDIO.fundamentalMinHz).toBe(110);
+    expect(AUDIO.fundamentalMaxHz).toBe(165);
+    // Highest carrier is 3 × fundamentalMax = 495 Hz.
+    expect(AUDIO.fundamentalMaxHz * 3).toBe(495);
+    expect(AUDIO.maxDetuneCents).toBe(3);
+  });
+
+  it('pins the §4 texture recipe and the §8.2 scheduler tick', () => {
     expect(AUDIO.tickMs).toBe(50);
     expect(AUDIO.lookaheadMs).toBe(150);
     expect(AUDIO.tickMs).toBeLessThan(AUDIO.lookaheadMs);
-    // The §8.2 bounds that the granular layer is defined against.
-    expect(AUDIO.maxGrainsPerSecond).toBe(3);
-    expect(AUDIO.maxConcurrentGrains).toBe(12);
-    expect(AUDIO.grainMinSeconds).toBe(0.15);
-    expect(AUDIO.grainMaxSeconds).toBe(0.8);
+    expect(AUDIO.maxGrainsPerSecond).toBeCloseTo(1.4, 6);
+    expect(AUDIO.maxConcurrentGrains).toBe(4);
+    expect(AUDIO.grainMinSeconds).toBeCloseTo(0.65, 6);
+    expect(AUDIO.grainMaxSeconds).toBeCloseTo(1.2, 6);
+    expect(AUDIO.grainPeak).toBeCloseTo(0.85, 6);
     expect(AUDIO.eventRefractorySeconds).toBeGreaterThanOrEqual(15);
-    // Deviation 57 (audibility recalibration): the band moved from §8.2's literal ≈38–82 Hz to
-    // 55–110 Hz after the live path proved a 38–82 Hz drone is below laptop-speaker reproduction.
-    expect(AUDIO.fundamentalMinHz).toBe(55);
-    expect(AUDIO.fundamentalMaxHz).toBe(110);
-    expect(AUDIO.wetMin).toBeGreaterThanOrEqual(0.12);
-    expect(AUDIO.wetMax).toBeLessThanOrEqual(0.2);
+    // §5 wet window and the silence policy are retained.
+    expect(AUDIO.wetMin).toBeCloseTo(0.07, 6);
+    expect(AUDIO.wetMax).toBeCloseTo(0.11, 6);
     expect(AUDIO.fadeSeconds).toBeGreaterThanOrEqual(8);
     expect(AUDIO.fadeSeconds).toBeLessThanOrEqual(15);
     expect(AUDIO.offSeconds).toBe(8);
-    expect(AUDIO.wakeSeconds).toBe(3);
+    // §6 presence thresholds and the unified reveal.
+    expect(AUDIO.supportOnFraction).toBeCloseTo(0.001, 6);
+    expect(AUDIO.supportOffFraction).toBeCloseTo(0.00025, 6);
+    expect(AUDIO.supportConfirmSamples).toBe(2);
+    expect(AUDIO.supportConfirmSeconds).toBeCloseTo(0.5, 6);
+    expect(AUDIO.revealSeconds).toBeCloseTo(1.5, 6);
+    expect(AUDIO.activationFadeSeconds).toBeCloseTo(AUDIO.revealSeconds, 6);
   });
 });
 
 describe('§8.1 (1) scale — fundamental', () => {
-  it('stays inside the 55–110 Hz logarithmic band for any input', () => {
+  it('stays inside the 110–165 Hz logarithmic band for any input', () => {
     const samples = [
       [0, 0],
       [1, 1],
@@ -97,7 +118,7 @@ describe('§8.1 (1) scale — fundamental', () => {
     }
   });
 
-  it('reaches the deep end for a large smooth mass and the bright end for fine texture', () => {
+  it('reaches the low end for a large smooth mass and the high end for fine texture', () => {
     expect(mapFundamentalHz(0.66, 1)).toBeLessThan(mapFundamentalHz(0.02, 0));
     expect(mapFundamentalHz(0.66, 1)).toBeCloseTo(AUDIO.fundamentalMinHz, 3);
     expect(mapFundamentalHz(0.0, 0)).toBeCloseTo(AUDIO.fundamentalMaxHz, 3);
@@ -133,17 +154,59 @@ describe('§8.1 (3) intensity and harmonic density', () => {
     expect(mapVoiceCount(1, 0)).toBe(4);
     expect(mapVoiceCount(0, 0)).toBe(1);
   });
+});
 
-  it('voice level is zero at zero intensity (a hidden field is silent) and bounded', () => {
-    expect(mapVoiceLevel(0)).toBe(0);
-    expect(mapVoiceLevel(1)).toBeCloseTo(AUDIO.voiceLevelMax, 9);
-    expect(mapVoiceLevel(9)).toBeLessThanOrEqual(AUDIO.voiceLevelMax + 1e-12);
+describe('§2 pad level and per-voice levels', () => {
+  it('is the 0.18 + 0.06·√intensity living-field floor for a supported field', () => {
+    expect(mapPadLevel(0, 1)).toBeCloseTo(AUDIO.padLevelFloor, 9);
+    expect(mapPadLevel(1, 1)).toBeCloseTo(AUDIO.padLevelFloor + AUDIO.padLevelIntensityGain, 9);
+    for (const intensity of [0, 0.25, 0.5, 1]) {
+      const level = mapPadLevel(intensity, 1);
+      expect(level).toBeGreaterThanOrEqual(AUDIO.padLevelFloor - 1e-12);
+      expect(level).toBeLessThanOrEqual(AUDIO.padLevelFloor + AUDIO.padLevelIntensityGain + 1e-12);
+    }
+  });
+
+  it('is exactly zero when support is absent (the floor cannot leak into an empty fixture)', () => {
+    expect(mapPadLevel(0, 0)).toBe(0);
+    expect(mapPadLevel(1, 0)).toBe(0);
+    // MAJOR 2: the floor is *not* re-gated on the raw on-threshold — presence is the stateful latch, so
+    // any support at all keeps the floor computable (it is held through the hysteresis band).
+    expect(mapPadLevel(1, AUDIO.supportOffFraction)).toBeGreaterThan(0);
+    expect(mapPadLevel(1, AUDIO.supportOnFraction)).toBeGreaterThan(0);
+    expect(mapPadLevel(1, AUDIO.supportOnFraction * 0.5)).toBeGreaterThan(0);
+    // Adversarial inputs stay finite and bounded.
+    expect(mapPadLevel(Number.NaN, 1)).toBeGreaterThanOrEqual(0);
+    expect(mapPadLevel(Number.NaN, 1)).toBeLessThanOrEqual(AUDIO.padLevelFloor + AUDIO.padLevelIntensityGain);
+    expect(mapPadLevel(Number.POSITIVE_INFINITY, 1)).toBeLessThanOrEqual(
+      AUDIO.padLevelFloor + AUDIO.padLevelIntensityGain + 1e-12,
+    );
+    expect(mapPadLevel(Number.NaN, Number.NaN)).toBe(0);
+  });
+
+  it('normalizes the active weights by max(1, sqrt(sum(weight²))) and removes upper voices', () => {
+    const pad = 0.24;
+    const one = voiceLevels(1, pad, 0.5);
+    expect(one[0], 'a lone root is its own weight').toBeCloseTo(pad, 9);
+    expect(one[1]).toBe(0);
+    expect(one[2]).toBe(0);
+    expect(one[3]).toBe(0);
+    const four = voiceLevels(4, pad, 1);
+    const norm = Math.sqrt(AUDIO.voiceWeights.reduce((sum, weight) => sum + weight * weight, 0));
+    expect(four[0]).toBeCloseTo((pad * AUDIO.voiceWeights[0]!) / Math.max(1, norm), 9);
+    // Voice 3 carries the coherence colour: silent at coherence 0, present as it coheres.
+    expect(voiceLevels(4, pad, 0)[3]).toBeCloseTo((pad * AUDIO.voiceWeights[3]! * thirdColorGain(0)) / norm, 9);
+    expect(thirdColorGain(0)).toBe(0);
+    expect(thirdColorGain(1)).toBe(1);
+    expect(thirdColorGain(0.5)).toBeGreaterThan(0);
+    expect(thirdColorGain(0.5)).toBeLessThan(1);
   });
 });
 
 describe('§8.1 (4) coherence', () => {
-  it('detuning falls from the ceiling to zero as coherence rises', () => {
+  it('detuning falls from the 3-cent ceiling to zero as coherence rises', () => {
     expect(mapDetuneCents(0)).toBeCloseTo(AUDIO.maxDetuneCents, 9);
+    expect(AUDIO.maxDetuneCents).toBeLessThanOrEqual(3);
     expect(mapDetuneCents(1)).toBe(0);
     let previous = Number.POSITIVE_INFINITY;
     for (const coherence of [0, 0.25, 0.5, 0.75, 1]) {
@@ -154,7 +217,18 @@ describe('§8.1 (4) coherence', () => {
     }
   });
 
-  it('wet gain stays inside the §8.2 .12–.2 window', () => {
+  it('the third-coherence color is monotone and bounded', () => {
+    let previous = -1;
+    for (const coherence of [0, 0.25, 0.5, 0.75, 1]) {
+      const gain = thirdColorGain(coherence);
+      expect(gain).toBeGreaterThanOrEqual(previous);
+      expect(gain).toBeGreaterThanOrEqual(0);
+      expect(gain).toBeLessThanOrEqual(1);
+      previous = gain;
+    }
+  });
+
+  it('wet gain stays inside the §5 .07–.11 window', () => {
     for (const [coherence, intensity] of [
       [0, 0],
       [1, 1],
@@ -164,19 +238,25 @@ describe('§8.1 (4) coherence', () => {
       expect(wet).toBeGreaterThanOrEqual(AUDIO.wetMin - 1e-12);
       expect(wet).toBeLessThanOrEqual(AUDIO.wetMax + 1e-12);
     }
+    expect(mapWetGain(0, 0)).toBeCloseTo(AUDIO.wetMin, 9);
+    expect(mapWetGain(1, 1)).toBeCloseTo(AUDIO.wetMax, 9);
   });
 });
 
 describe('§8.1 (2) fine detail — granular texture', () => {
-  it('grain rate stays in [0, 3] and rises with fine detail', () => {
+  it('grain rate is 1.4·detail²·(1−fragmentation), in [0, 1.4], rising with detail', () => {
     let previous = -1;
     for (const detail of [0, 0.1, 0.3, 0.6, 1]) {
-      const rate = mapGrainRate(detail);
+      const rate = mapGrainRate(detail, 0);
       expect(rate).toBeGreaterThanOrEqual(0);
-      expect(rate).toBeLessThanOrEqual(AUDIO.maxGrainsPerSecond);
+      expect(rate).toBeLessThanOrEqual(AUDIO.maxGrainsPerSecond + 1e-12);
       expect(rate).toBeGreaterThanOrEqual(previous);
       previous = rate;
     }
+    expect(mapGrainRate(0, 0), 'zero detail → exactly zero').toBe(0);
+    expect(mapGrainRate(1, 1), 'complete fragmentation → exactly zero').toBe(0);
+    expect(mapGrainRate(1, 0)).toBeCloseTo(AUDIO.maxGrainsPerSecond, 9);
+    expect(Number.isFinite(mapGrainRate(Number.NaN, Number.NaN))).toBe(true);
   });
 
   it('fine detail combines high band and edge density, bounded to [0,1]', () => {
@@ -186,10 +266,19 @@ describe('§8.1 (2) fine detail — granular texture', () => {
     expect(mapFineDetail(Number.NaN, Number.NaN)).toBeGreaterThanOrEqual(0);
   });
 
-  it('the granular band-pass centre stays within [400, 3200] Hz and rises with detail', () => {
+  it('the granular band-pass centre stays within [1100, 2400] Hz and rises with detail', () => {
+    expect(AUDIO.grainFilterMinHz).toBe(1100);
+    expect(AUDIO.grainFilterMaxHz).toBe(2400);
     expect(mapTextureFilterHz(0)).toBeCloseTo(AUDIO.grainFilterMinHz, 6);
     expect(mapTextureFilterHz(1)).toBeCloseTo(AUDIO.grainFilterMaxHz, 6);
     expect(mapTextureFilterHz(0.8)).toBeGreaterThan(mapTextureFilterHz(0.2));
+  });
+
+  it('the per-voice low-pass is clamp(carrier·(3 + 2·intensity), 500, 2400)', () => {
+    expect(mapVoiceFilterHz(110, 0, 0)).toBeCloseTo(500, 6); // 110·3 = 330 → clamped up to 500
+    expect(mapVoiceFilterHz(110, 0, 1)).toBeCloseTo(550, 6); // 110·5 = 550
+    expect(mapVoiceFilterHz(165, 2, 1)).toBeCloseTo(2400, 6); // 495·5 → clamped to 2400
+    expect(mapVoiceFilterHz(110, 0, 0.5)).toBeGreaterThanOrEqual(500);
   });
 });
 
@@ -208,9 +297,10 @@ describe('§8.1 (5) fragmentation / collapse', () => {
     expect(Number.isFinite(mapFragmentation(Number.NaN, Number.NaN))).toBe(true);
   });
 
-  it('texture bandwidth is removed by fragmentation and bounded', () => {
+  it('texture bandwidth is removed by fragmentation and bounded to the .07 bus gain', () => {
     expect(mapTextureLevel(1, 1)).toBeCloseTo(0, 12);
     expect(mapTextureLevel(1, 0)).toBeCloseTo(AUDIO.textureLevelMax, 9);
+    expect(AUDIO.textureLevelMax).toBeCloseTo(0.07, 6);
     expect(mapTextureLevel(0, 0)).toBe(0);
   });
 });
@@ -218,10 +308,10 @@ describe('§8.1 (5) fragmentation / collapse', () => {
 describe('deriveAudioControls — the joint bundle', () => {
   it('is bounded across a synthetic arc from dead to saturated to fragmented', () => {
     const arc: Partial<PresentationAnalysis>[] = [
-      { occupiedFraction: 0, reactionActivity: 0, spectralBands: [0, 0, 0, 0], featureScaleUV: 0, coherence: 0 },
-      { occupiedFraction: 0.05, reactionActivity: 0.002, spectralBands: [0.7, 0.2, 0.08, 0.02], featureScaleUV: 0.3, coherence: 0.3, largestComponentFraction: 0.8, beta0Approx: 1 },
-      { occupiedFraction: 0.3, reactionActivity: 0.02, spectralBands: [0.3, 0.3, 0.25, 0.15], featureScaleUV: 0.1, coherence: 0.6, largestComponentFraction: 0.4, beta0Approx: 5, edgeDensity: 0.15 },
-      { occupiedFraction: 0.1, reactionActivity: 0.004, spectralBands: [0.1, 0.2, 0.3, 0.4], featureScaleUV: 0.03, coherence: 0.1, largestComponentFraction: 0.08, beta0Approx: 9, edgeDensity: 0.3 },
+      { occupiedFraction: 0, reactionActivity: 0, spectralBands: [0, 0, 0, 0], featureScaleUV: 0, coherence: 0, supportFraction: 0 },
+      { occupiedFraction: 0.05, reactionActivity: 0.002, spectralBands: [0.7, 0.2, 0.08, 0.02], featureScaleUV: 0.3, coherence: 0.3, largestComponentFraction: 0.8, beta0Approx: 1, supportFraction: 0.2 },
+      { occupiedFraction: 0.3, reactionActivity: 0.02, spectralBands: [0.3, 0.3, 0.25, 0.15], featureScaleUV: 0.1, coherence: 0.6, largestComponentFraction: 0.4, beta0Approx: 5, edgeDensity: 0.15, supportFraction: 0.6 },
+      { occupiedFraction: 0.1, reactionActivity: 0.004, spectralBands: [0.1, 0.2, 0.3, 0.4], featureScaleUV: 0.03, coherence: 0.1, largestComponentFraction: 0.08, beta0Approx: 9, edgeDensity: 0.3, supportFraction: 0.4 },
     ];
     for (const sample of arc) {
       const controls = deriveAudioControls(presentation(sample));
@@ -258,12 +348,33 @@ describe('deriveAudioControls — the joint bundle', () => {
     expect(invalid.grainRate).toBe(0);
   });
 
-  it('a dead-but-valid field maps to silence, not to a floor', () => {
+  it('a valid field with absent support maps to silence, not to the floor', () => {
     const controls = deriveAudioControls(
-      presentation({ occupiedFraction: 0, reactionActivity: 0, spectralBands: [0, 0, 0, 0], featureScaleUV: 0 }),
+      presentation({
+        occupiedFraction: 0,
+        reactionActivity: 0,
+        spectralBands: [0, 0, 0, 0],
+        featureScaleUV: 0,
+        supportFraction: 0,
+      }),
     );
     expect(controls.voiceLevel).toBe(0);
     expect(controls.grainRate).toBe(0);
     expect(controls.textureLevel).toBe(0);
+    expect(controls.voiceLevels.every((level) => level === 0)).toBe(true);
+  });
+
+  it('a valid, zero-intensity but supported field maps to the warm floor, not to zero', () => {
+    const controls = deriveAudioControls(
+      presentation({
+        occupiedFraction: 0,
+        reactionActivity: 0,
+        spectralBands: [0, 0, 0, 0],
+        featureScaleUV: 0.5,
+        supportFraction: 0.5,
+      }),
+    );
+    expect(controls.voiceLevel).toBeCloseTo(AUDIO.padLevelFloor, 9);
+    expect(controls.voiceLevels[0]).toBeGreaterThan(0);
   });
 });

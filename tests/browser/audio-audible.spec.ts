@@ -18,16 +18,15 @@
  * other live-context audio specs; the offline suite remains the device-independent half.
  */
 import { expect, test } from '@playwright/test';
-import { AUDIO } from '../../src/config.ts';
 import { hook, openArtwork } from '../support/browser.ts';
-import type { AudioOutputShape, AudioStatusShape } from '../support/types.ts';
+import type { AudioOutputShape, AudioStatsShape, AudioStatusShape } from '../support/types.ts';
 
 /** An audible linear peak floor (≈ −26 dBFS): far above a silent, stale or DC-only buffer. */
 const AUDIBLE_PEAK = 0.05;
 /** An audible RMS floor: a lone DC offset or a denormal tail never reaches this. */
 const AUDIBLE_RMS = 0.01;
-/** The drone's sounding band: the fundamental (55–110 Hz) through its third partial (≤ 330 Hz). */
-const DRONE_BAND_HZ = { min: 40, max: 400 } as const;
+/** The drone's sounding band: the §2 fundamental (110–165 Hz) through its third partial (≤ 495 Hz). */
+const DRONE_BAND_HZ = { min: 40, max: 800 } as const;
 /** The magnitude floor (dBFS) a real sounding bin must clear. */
 const SPECTRUM_FLOOR_DB = -70;
 
@@ -71,20 +70,31 @@ test.describe('§8 live-path audibility', () => {
     // field is reached in test time rather than after a wall-clock minute.
     await hook(page, 'dispatch', [{ type: 'speed', value: 6 }]);
 
-    // Wait for the field to be genuinely grown — the same occupancy the §8.3 gate wakes above.
+    // Wait for the field to be genuinely grown and **supported** — the §6 presence signal the audio
+    // engine keys on (occupancy and support are different units; the renderer's local V concentration
+    // is what an empty field lacks).
     await expect
       .poll(
         async () => {
-          const presentation = await hook<{ valid: boolean; occupiedFraction: number }>(page, 'presentationAnalysis');
-          return presentation.valid && presentation.occupiedFraction >= AUDIO.wakeOccupancy;
+          const presentation = await hook<{ valid: boolean; supportFraction: number }>(page, 'presentationAnalysis');
+          return presentation.valid && presentation.supportFraction >= 0.02;
         },
-        { timeout: 150_000, intervals: [1000], message: 'the field grew above the §8.3 wake occupancy' },
+        { timeout: 150_000, intervals: [1000], message: 'the field grew a supported body (§6 supportFraction)' },
       )
       .toBe(true);
 
-    // ...then sample the destination tap until the drone has risen. The master wakes over 3 s and the
-    // descriptors glide (levelTau 5 s), so give it a generous window; a genuinely silent path never
-    // satisfies it and the poll times out with the measured values in the failure message.
+    // §6 the engine confirms presence from the support crossing and reveals the pad.
+    await expect
+      .poll(async () => (await hook<AudioStatsShape>(page, 'audioStats'))?.presence ?? false, {
+        timeout: 120_000,
+        intervals: [1000],
+        message: 'the engine confirmed presence (§6)',
+      })
+      .toBe(true);
+
+    // ...then sample the destination tap until the drone has risen. Presence confirms (2 samples +
+    // 0.5 s) and the unified reveal ramps the master over 1.5 s, so give it a generous window; a
+    // genuinely silent path never satisfies it and the poll times out with the measured values.
     let last: AudioOutputShape | null = null;
     let lastPeak = 0;
     await expect
@@ -145,11 +155,20 @@ test.describe('§8 live-path audibility', () => {
     await expect
       .poll(
         async () => {
-          const presentation = await hook<{ valid: boolean; occupiedFraction: number }>(page, 'presentationAnalysis');
-          return presentation.valid && presentation.occupiedFraction >= AUDIO.wakeOccupancy;
+          const presentation = await hook<{ valid: boolean; supportFraction: number }>(page, 'presentationAnalysis');
+          return presentation.valid && presentation.supportFraction >= 0.02;
         },
         { timeout: 150_000, intervals: [1000] },
       )
+      .toBe(true);
+
+    // §6 the engine confirms presence from the support crossing and reveals the pad.
+    await expect
+      .poll(async () => (await hook<AudioStatsShape>(page, 'audioStats'))?.presence ?? false, {
+        timeout: 120_000,
+        intervals: [1000],
+        message: 'the engine confirmed presence (§6)',
+      })
       .toBe(true);
 
     await expect

@@ -240,6 +240,8 @@ export interface PresentationShape {
   orientationRadians: number;
   coherence: number;
   symmetry: number;
+  /** §6 (deviation 58) mean `smoothstep(supportVLow, supportVHigh, reducedV)` — the presence signal. */
+  supportFraction: number;
 }
 
 /** §3.4 a recognized event as it crosses the page boundary. */
@@ -291,6 +293,12 @@ export interface AudioStatsShape {
   masterHeldAtRestart: number | null;
   armed: boolean;
   masterGain: number;
+  /** §6 whether the pad floor is currently eligible (support confirmed, hysteresis held). */
+  presence: boolean;
+  /** §6 distinct qualifying support samples counted toward the current (unconfirmed) crossing. */
+  supportSamples: number;
+  /** §6 the context time the current reveal window ends, or null. */
+  revealUntil: number | null;
 }
 
 /** §8 live-path audibility: a destination-tapped output measurement (`audioOutput()`). */
@@ -327,6 +335,12 @@ export interface OfflineAudioShape {
   sampleRate: number;
   peak: number;
   rms: number;
+  /** §7 band-limited RMS in the 150–2000 Hz band (linear, from rendered samples). */
+  bandRms: number;
+  /** MINOR 5: full-band RMS of each aligned 1-second window. */
+  windowRms: number[];
+  /** MAJOR 1: max |sample| in the scenario's reset silence window (0 when it declares none). */
+  resetSilencePeak: number;
   finite: boolean;
   silentAt: number | null;
   /** §8.3 (MAJOR 1) audio-context time the terminal fade began, or null. */

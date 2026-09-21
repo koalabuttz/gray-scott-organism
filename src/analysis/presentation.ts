@@ -13,7 +13,7 @@
  *
  * All arrays are preallocated per engine; `reset(epoch)` clears the cross-sample history.
  */
-import { PRESENTATION } from '../config.ts';
+import { PRESENTATION, SURFACE } from '../config.ts';
 import type { SampleStamp } from '../core/types.ts';
 import { EventRecognizer } from './events.ts';
 import { decodeHealthRecordAt } from './float-format.ts';
@@ -82,6 +82,7 @@ export class PresentationEngine {
     let minV = 1;
     let maxU = 0;
     let maxV = 0;
+    let supportSum = 0;
     let packSaturated = false;
     for (let i = 0; i < n; i += 1) {
       const r = bytes[i * 4]! / 255;
@@ -93,6 +94,8 @@ export class PresentationEngine {
       sumV += g;
       flux += b;
       weightSum += g;
+      // §6 support: the mean smoothstep of the envelope-weighted reduced V across the support ramp.
+      supportSum += smoothstep(SURFACE.supportVLow, SURFACE.supportVHigh, g);
       const x = i % width;
       const y = (i - x) / width;
       const u = (x + 0.5) / width;
@@ -201,6 +204,7 @@ export class PresentationEngine {
       orientationRadians: orientation,
       coherence,
       symmetry,
+      supportFraction: supportSum / n,
     };
 
     const event =
@@ -257,6 +261,17 @@ export class PresentationEngine {
     const denom = Math.sqrt(normA * normB);
     return denom > 1e-12 ? dot / denom : 0;
   }
+}
+
+/** Hermite smoothstep on `[lo, hi]`; flat at both ends, monotone, bounded to `[0, 1]`. */
+function smoothstep(lo: number, hi: number, value: number): number {
+  const span = hi - lo;
+  if (!(span > 0)) return value >= hi ? 1 : 0;
+  let t = (value - lo) / span;
+  if (!Number.isFinite(t)) return 0;
+  if (t < 0) t = 0;
+  else if (t > 1) t = 1;
+  return t * t * (3 - 2 * t);
 }
 
 /** Decode the 1×1 float health record from the combined buffer at the stamped offset. */

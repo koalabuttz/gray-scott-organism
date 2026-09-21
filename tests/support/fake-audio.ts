@@ -16,10 +16,13 @@
  */
 
 export interface FakeParamEvent {
-  kind: 'set' | 'linear' | 'target';
+  kind: 'set' | 'linear' | 'target' | 'curve';
   value: number;
   time: number;
   tau?: number;
+  /** For `curve` events: the scheduled curve samples and its duration. */
+  curve?: Float32Array;
+  duration?: number;
 }
 
 export class FakeAudioParam {
@@ -45,6 +48,17 @@ export class FakeAudioParam {
 
   setTargetAtTime(value: number, time: number, tau: number): this {
     this.events.push({ kind: 'target', value, time, tau });
+    return this;
+  }
+
+  /**
+   * §4/§3 `setValueCurveAtTime` (grain Hann windows and the bloom's raised-cosine attack). Records the
+   * curve (first value, last value and the samples) so a test can assert the window shape and that the
+   * endpoints are exactly zero. Faithful about not updating the intrinsic `value`.
+   */
+  setValueCurveAtTime(curve: Float32Array, time: number, duration: number): this {
+    const last = curve.length > 0 ? curve[curve.length - 1]! : 0;
+    this.events.push({ kind: 'curve', value: last, time, duration, curve: curve.slice() });
     return this;
   }
 
@@ -88,8 +102,22 @@ class FakeOscillatorNode extends FakeAudioNode {
   type = 'sine';
   readonly frequency = new FakeAudioParam();
   readonly detune = new FakeAudioParam();
+  /** The `PeriodicWave` set by `setPeriodicWave`, if any (a `PeriodicWave`-voiced drone). */
+  wave: FakePeriodicWave | null = null;
+  setPeriodicWave(wave: FakePeriodicWave): void {
+    this.wave = wave;
+  }
   start(): void {}
   stop(): void {}
+}
+
+/** A fake `PeriodicWave` carrying the real/imag coefficient arrays and the normalization flag. */
+export class FakePeriodicWave {
+  constructor(
+    readonly real: Float32Array,
+    readonly imag: Float32Array,
+    readonly disableNormalization: boolean,
+  ) {}
 }
 
 class FakeBiquadFilterNode extends FakeAudioNode {
@@ -152,6 +180,10 @@ export class FakeAudioContext {
   readonly destination = new FakeAudioNode();
   readonly bufferSources: FakeBufferSourceNode[] = [];
   readonly filters: FakeBiquadFilterNode[] = [];
+  /** Every `createOscillator()` result, in creation order (the four §2 pad voices, plus bloom partials). */
+  readonly oscillators: FakeOscillatorNode[] = [];
+  /** Every `createPeriodicWave()` result, in creation order. */
+  readonly periodicWaves: FakePeriodicWave[] = [];
   /** Every `createGain()` result, in creation order (voice gains, buses, …). */
   readonly gains: FakeGainNode[] = [];
 
@@ -166,7 +198,15 @@ export class FakeAudioContext {
   }
 
   createOscillator(): FakeOscillatorNode {
-    return new FakeOscillatorNode();
+    const node = new FakeOscillatorNode();
+    this.oscillators.push(node);
+    return node;
+  }
+
+  createPeriodicWave(real: Float32Array, imag: Float32Array, options?: { disableNormalization?: boolean }): FakePeriodicWave {
+    const wave = new FakePeriodicWave(real, imag, options?.disableNormalization ?? false);
+    this.periodicWaves.push(wave);
+    return wave;
   }
 
   createBiquadFilter(): FakeBiquadFilterNode {

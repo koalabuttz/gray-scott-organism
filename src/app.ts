@@ -64,7 +64,7 @@ import type { ClippingReport } from './simulation/simulation.ts';
 import { pickRecordingMimeType, blobToBase64, startCanvasRecording } from './visual/capture.ts';
 import type { CanvasRecording } from './visual/capture.ts';
 import { Renderer } from './visual/renderer.ts';
-import { AudioSystem } from './audio/audio.ts';
+import { AudioSystem, type BusName } from './audio/audio.ts';
 import { renderOfflineScenario, type OfflineMeasurements, type OfflineScenarioName } from './audio/offline.ts';
 
 export interface AppOptions {
@@ -296,9 +296,16 @@ export interface ArtworkTestHook {
     scenario: OfflineScenarioName;
     seconds?: number;
     tickHz?: number;
+    sampleRate?: number;
     render?: boolean;
     /** §4.4 recorded root seed whose `sound` substream to render (MAJOR 3 determinism). */
     rootSeed?: number;
+    /** §8.2 render-matrix bus isolation (pad-only / texture-only / event-only). */
+    muteBuses?: readonly BusName[];
+    /** §5 verification-only: render only the reverb send (wet-vs-dry guard). */
+    wetOnly?: boolean;
+    /** MINOR 5 verification-only: multiply the bloom peak (over-loud fixture). */
+    eventBoost?: number;
   }): Promise<OfflineMeasurements>;
   /** §9.2 the director's horizon state machine (state / usedThisArc / moments). */
   horizonState(): { state: 'idle' | 'engaged' | 'returned'; usedThisArc: boolean; moments: number };
@@ -1909,8 +1916,12 @@ export class App {
           scenario: options.scenario,
           seconds: options.seconds,
           tickHz: options.tickHz,
+          sampleRate: options.sampleRate,
           render: options.render,
           rootSeed: options.rootSeed,
+          muteBuses: options.muteBuses,
+          wetOnly: options.wetOnly,
+          eventBoost: options.eventBoost,
         }),
       horizonState: () => this.director.horizon,
       presenterStats: () => this.presenter.stats(),

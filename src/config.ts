@@ -308,80 +308,126 @@ export const EVENTS = {
  * loudness effect (§8.2), and the offline render asserts peaks ≤ −6 dBFS.
  */
 export const AUDIO = {
-  /** §8.2 drone voice ratios (just intervals): unison, perfect fifth, octave, twelfth. */
-  voiceRatios: [1, 1.5, 2, 3] as const,
   /**
-   * §8.2 event excitation resonances: exactly three band-passes derived from the current fundamental
-   * (f, 2f, 3f), distinct from the four drone ratios. MINOR 5: `spawnEvent` previously looped all four
-   * `voiceRatios` (f/1.5f/2f/3f), which §8.2 does not specify.
+   * §2 voice ratios (just intervals), in removal-priority order: root, octave, fifth above the octave,
+   * then the major third above the octave. The audible stack is 1 · f, 2 · f, 3 · f, 5/2 · f; the
+   * highest carrier is 3 · 165 = 495 Hz. The ratios are fixed and just — nothing morphs through
+   * dissonant intermediate chord ratios.
    */
-  eventRatios: [1, 2, 3] as const,
-  /** Per-voice relative weight so the upper partials never dominate the fundamental. */
-  voiceWeights: [1, 0.72, 0.6, 0.45] as const,
+  voiceRatios: [1, 2, 3, 2.5] as const,
+  /** §2 base relative weights, before normalisation and the coherence colour on voice 3. */
+  voiceWeights: [1, 0.48, 0.26, 0.22] as const,
   /**
-   * §8.2 fundamental maps logarithmically into this range (deep resonant tones).
-   *
-   * Deviation 57 (audibility recalibration): the band was raised from the literal §8.2 "≈38–82 Hz"
-   * to 55–110 Hz after instrumenting the live path (`browser/audio-audible.spec.ts`). At 38–82 Hz the
-   * mature organism's fundamental sat at 41–53 Hz with all composite energy below ~150 Hz — below the
-   * reproduction floor of ordinary laptop speakers — so the piece measured as real signal at the
-   * destination yet was effectively inaudible. 55 Hz is still a deep sub-bass fundamental; the upper
-   * partials (2f, 3f ⇒ 110–330 Hz) now land in a band real speakers reproduce.
+   * §2 voice-0 waveform: harmonic amplitude table at harmonics 1/2/3, all sine phase. Divided by the
+   * absolute sum (1.38) so the defined waveform bound is ≤ 1 under `disableNormalization:true`.
    */
-  fundamentalMinHz: 55,
-  fundamentalMaxHz: 110,
+  voice0Harmonics: [1, 0.28, 0.1] as const,
+  /** §2 upper-voice waveform: harmonics 1/2, divided by 1.10 under `disableNormalization:true`. */
+  voiceHarmonics: [1, 0.1] as const,
+  /** §2 detune multipliers per voice: root never detunes; direction alternates to avoid whole-stack shift. */
+  detuneMultipliers: [0, 1, -1, 0.5] as const,
+  /** §2 the just major third (voice 3) becomes audible only as coherence rises (smoothstep window). */
+  thirdCoherenceLow: 0.25,
+  thirdCoherenceHigh: 0.75,
+  /**
+   * §2 register: a reproducible low-mid band (110–165 Hz; highest carrier 495 Hz) that real speakers,
+   * not only headphones, reproduce. The logarithmic decreasing mapping is unchanged — large structures
+   * still sound lower — but the whole stack now sits where a laptop speaker has output. (Deviation 58
+   * supersedes the 55–110 Hz band of deviation 57.)
+   */
+  fundamentalMinHz: 110,
+  fundamentalMaxHz: 165,
   maxVoices: 4,
-  /** §8.2 granular layer bounds: 0–3 grains/s, ≤ 12 concurrent, 0.15–0.8 s windows. */
-  maxGrainsPerSecond: 3,
-  maxConcurrentGrains: 12,
-  grainMinSeconds: 0.15,
-  grainMaxSeconds: 0.8,
-  /** §8.2 shared send: the wet (convolver) path sits at ≈ .12–.2 of the bus. */
-  wetMin: 0.12,
-  wetMax: 0.2,
-  /** §8.3 smoothing time constants (seconds): descriptors 3–8, frequency glides 8–20, harmonics 10–30. */
-  levelTau: 5,
-  frequencyTau: 12,
-  harmonicTau: 16,
-  detuneTau: 6,
-  textureTau: 5,
-  wetTau: 10,
-  /** §8.2/§8.3 silence gate: below the off thresholds for 8 s → terminally bounded fade to 0. */
+  /** §2 pad level floor and intensity term: `0.18 + 0.06·√intensity` for a supported field; zero if absent. */
+  padLevelFloor: 0.18,
+  padLevelIntensityGain: 0.06,
+  /** §2 per-voice low-pass: `clamp(carrierHz · (3 + 2·intensity), 500, 2400)`, Q = 0.5. */
+  voiceFilterBase: 3,
+  voiceFilterIntensityGain: 2,
+  voiceFilterMinHz: 500,
+  voiceFilterMaxHz: 2400,
+  voiceFilterQ: 0.5,
+  /** §4 granular texture: a softly-shimmering full-Hann grain rather than a scuttling transient. */
+  grainMinSeconds: 0.65,
+  grainMaxSeconds: 1.2,
+  grainPeak: 0.85,
+  /** §4 rate: `1.4 · fineDetail² · (1−fragmentation)` grains/s; peak value 1.4. */
+  maxGrainsPerSecond: 1.4,
+  /** §4 at most 4 concurrent grains (below the approved 12); never fill a missed interval with a burst. */
+  maxConcurrentGrains: 4,
+  /** §4 next-grain spacing `(0.75 + 0.5·rng.next())/rate`. */
+  grainSpacingLow: 0.75,
+  grainSpacingRange: 0.5,
+  /** §4 shared filter chain: high-pass 700 Hz Q=0.5; band-pass Q=0.65 centre 1100→2400 Hz; low-pass 4200 Q=0.5. */
+  textureHighpassHz: 700,
+  textureHighpassQ: 0.5,
+  textureBandpassQ: 0.65,
+  textureLowpassHz: 4200,
+  textureLowpassQ: 0.5,
+  /** §4 band-pass centre maps logarithmically 1100→2400 Hz by fine detail. */
+  grainFilterMinHz: 1100,
+  grainFilterMaxHz: 2400,
+  /** §4 texture bus gain `0.07 · fineDetail · (1−fragmentation)`; no early texture floor. */
+  textureLevelMax: 0.07,
+  /** §5 reverb wet gain `0.07 + 0.04·clamp01(0.5·coherence + 0.5·intensity)` → 0.07–0.11. */
+  wetMin: 0.07,
+  wetMax: 0.11,
+  /** §3 porcelain bloom: three temporary sine partials at 1/2/3 × bellBaseHz, normalised amplitudes. */
+  bloomPartialRatios: [1, 2, 3] as const,
+  bloomPartialAmplitudes: [0.72, 0.21, 0.07] as const,
+  /** §3 bellBaseHz = rootHz · (featureScaleNorm ≥ 0.5 ? 2 : 3); range 220–495 Hz. */
+  bloomRegisterLarge: 2,
+  bloomRegisterSmall: 3,
+  bloomFeaturePivot: 0.5,
+  /** §3 raised-cosine 120 ms attack, then exponential decay τ 0.85 / 0.55 / 0.35 s. */
+  bloomAttackSeconds: 0.12,
+  bloomDecayTaus: [0.85, 0.55, 0.35] as const,
+  /** §3 from 3.3 s a 100 ms bounded terminal fade; stop/disconnect all bloom nodes by 3.42 s. */
+  bloomTerminalFadeStart: 3.3,
+  bloomTerminalFadeSeconds: 0.1,
+  bloomLifetimeSeconds: 3.42,
+  /** §3 peak event gain `0.065 · clamp(0.4 + eventStrength, 0.4, 1)`. */
+  eventLevelMax: 0.065,
+  /** §8.3 smoothing time constants (seconds): pad level 3, newly admitted/removed upper voices 10. */
+  levelTau: 3,
+  upperVoiceTau: 10,
+  frequencyTau: 10,
+  filterTau: 6,
+  detuneTau: 8,
+  textureTau: 4,
+  wetTau: 8,
+  /** §6 presence: support-on 0.001, support-off 0.00025, two samples and 0.5 s to confirm. */
+  supportOnFraction: 0.001,
+  supportOffFraction: 0.00025,
+  supportConfirmSamples: 2,
+  supportConfirmSeconds: 0.5,
+  /** §6 the unified reveal/activation: a 1.5 s linear master ramp; the root floor regains in 0.75 s. */
+  revealSeconds: 1.5,
+  rootRevealSeconds: 0.75,
+  /**
+   * §8.3 general silence gate: a field with occupancy/activity below the off thresholds **and** support
+   * below support-off for 8 s → terminally bounded fade over 8 s. A visually supported low-activity
+   * body is not empty dormancy, so the support condition is required.
+   */
   offOccupancy: 0.01,
   offActivity: 0.001,
   offSeconds: 8,
-  /** Ramp length (8–15 s) and the higher thresholds that wake it back after 3 s. */
   fadeSeconds: 8,
-  wakeOccupancy: 0.03,
-  wakeActivity: 0.004,
-  wakeSeconds: 3,
-  /** §8.2 at least 15 s between resonant events. */
+  /** §8.2 at least 15 s between porcelain blooms. */
   eventRefractorySeconds: 15,
-  /** Non-just detuning ceiling (cents) at zero coherence; coherence tightens it toward the ratios. */
-  maxDetuneCents: 18,
+  /** §2 non-just detuning ceiling (cents) at zero coherence; coherence tightens it toward the ratios. */
+  maxDetuneCents: 3,
   /**
-   * Conservative levels (linear, pre-compressor). Recalibrated for audibility in deviation 57: the
-   * per-voice ceiling rose 0.085 → 0.2, texture 0.06 → 0.15 and events 0.12 → 0.28 (the same ≈ 2.35×
-   * lift), because at 0.085 a sounding voice was ≈ −21 dBFS on its own and the whole drone measured
-   * −17 dBFS RMS — present at the destination but inaudible on real speakers once the fundamental was
-   * also below their band. `masterLevel` stays the single overall-output trim (post-compressor) and is
-   * the headroom knob if the offline peak approaches −6 dBFS. Deviation 57 trimmed it 0.9 → 0.75: the
-   * louder drone plus Chromium's non-bit-identical compressor/convolver DSP made a 0.9 (or even 0.82)
-   * trim sit within run-to-run variation of the −6 dBFS ceiling, so the post-compressor trim was
-   * lowered to leave ~10% headroom (offline `active` peak 0.5046 → ≈ 0.41); events were set to 0.24
-   * rather than a strict 2.35× lift because the three Q = 8 resonances spike on a rare excitation.
+   * Conservative levels (linear, pre-compressor). §2's active pad level is `0.18 + 0.06·√intensity`
+   * (a living-field floor, exactly zero when support is absent), the bloom peak is `0.065·clamp(…)` and
+   * the texture bus is `0.07·fineDetail·(1−fragmentation)`. `masterLevel` remains the single
+   * overall-output trim (post-compressor) and the headroom knob if the offline peak approaches −6 dBFS.
    */
   masterLevel: 0.75,
-  voiceLevelMax: 0.2,
-  textureLevelMax: 0.15,
-  eventLevelMax: 0.24,
   /** Descriptor reference scales for the six normalized mappings (calibration defaults). */
   intensityOccupancyRef: 0.3,
   intensityActivityRef: 0.02,
   edgeDensityRef: 0.15,
-  /** Granular band-pass centre maps from 400 Hz (coarse) to 3200 Hz (fine detail). */
-  grainFilterMinHz: 400,
-  grainFilterMaxHz: 3200,
   /**
    * §8.2 scheduler: a 50 ms tick with a 150 ms lookahead. Each tick schedules every *due* grain with a
    * start time spread across `[now, now + lookaheadMs]` (MAJOR 4) rather than batching them all at
@@ -393,11 +439,11 @@ export const AUDIO = {
   /** Gap between ticks beyond which the granular cursor drops its overdue debt instead of replaying it. */
   stallSeconds: 1,
   /**
-   * §8.3/§2.3 activation fade: the master is anchored at exactly 0 while locked and ramps up over this
-   * bounded window on the locked→running edge (only when the current state permits sound), so
-   * activation fades from zero and never plays a catch-up burst.
+   * §6/§2.3 unified reveal/activation window: the master is anchored at exactly 0 while locked and
+   * ramps up over this bounded window on the locked→running edge or the confirmed-support reveal (only
+   * when presence is eligible), so activation fades from zero and never plays a catch-up burst.
    */
-  activationFadeSeconds: 4,
+  activationFadeSeconds: 1.5,
   /**
    * §8.3 fresh-performance de-click: a restart/reseed **holds the computed live master level** at the
    * abort instant, ramps linearly to zero over this bounded window (80–150 ms), performs the buffer/IR
@@ -406,12 +452,20 @@ export const AUDIO = {
    */
   declickSeconds: 0.1,
   /**
-   * Generated buffers (§8.2): a deterministic 2 s noise buffer and a 5 s dark stereo IR. The seeds are
-   * **fallbacks only** — the live system and the offline driver derive the §4.4 `sound` substream from
-   * the recorded root seed (MAJOR 3); these constants are used when no root seed is supplied.
+   * Generated buffers (§8.2/§5): a deterministic 2 s noise buffer and a 2.4 s luminous stereo IR. The
+   * seeds are **fallbacks only** — the live system and the offline driver derive the §4.4 `sound`
+   * substream from the recorded root seed (MAJOR 3); these constants are used when no root seed is
+   * supplied.
    */
   noiseSeconds: 2,
-  irSeconds: 5,
+  irSeconds: 2.4,
+  /** §5 IR recipe: exp(−t/0.32) envelope, 10 ms smoothed onset, final 100 ms faded to exact zero. */
+  irEnvelopeTau: 0.32,
+  irOnsetSeconds: 0.01,
+  irTailSeconds: 0.1,
+  /** §5 one-pole low-pass cutoff declining exponentially 5500 → 2200 Hz over the IR duration. */
+  irCutoffStartHz: 5500,
+  irCutoffEndHz: 2200,
   noiseSeed: 0x51ce5eed,
   irSeed: 0x1a2b3c4d,
   /** §8.2 safety compressor (a limiter is not assumed; peaks are verified, not trusted). */

@@ -53,6 +53,7 @@ function neutralPresentation(valid = false): PresentationAnalysis {
     orientationRadians: 0,
     coherence: 0,
     symmetry: 0,
+    supportFraction: 0,
   };
 }
 

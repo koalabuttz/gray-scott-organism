@@ -107,6 +107,17 @@ test.describe('§2.3/§8.3 audio activation and lifecycle', () => {
 
     expect(await hook<number>(page, 'audioRecordingTrackCount'), 'the MediaStream destination has a track').toBe(1);
 
+    // §6 grow the field so the pad is present and the master is live (a dormant field is exactly silent
+    // under the new presence gate, so the boundedness check needs a sounding graph).
+    await hook(page, 'dispatch', [{ type: 'speed', value: 6 }]);
+    await expect
+      .poll(async () => (await hook<AudioStatsShape>(page, 'audioStats'))?.masterGain ?? 0, {
+        timeout: 150_000,
+        intervals: [1000],
+        message: 'the pad revealed a live master after the field grew',
+      })
+      .toBeGreaterThan(0);
+
     // The live graph over a few seconds: one-shot nodes are reaped, nothing accumulates.
     await page.waitForTimeout(4000);
     const stats = await hook<AudioStatsShape>(page, 'audioStats');
@@ -125,6 +136,17 @@ test.describe('§2.3/§8.3 audio activation and lifecycle', () => {
     if (!probe.ok) return;
     const unlocked = await unlockAudio(page);
     test.skip(unlocked.status !== 'running', `no audio device (status=${unlocked.status})`);
+
+    // §6 grow the field so the master is live before opening a kill-wait fade (a dormant field is
+    // exactly silent under the presence gate, so `prepareSilence` would otherwise be a no-op fade).
+    await hook(page, 'dispatch', [{ type: 'speed', value: 6 }]);
+    await expect
+      .poll(async () => (await hook<AudioStatsShape>(page, 'audioStats'))?.masterGain ?? 0, {
+        timeout: 150_000,
+        intervals: [1000],
+        message: 'the pad revealed a live master after the field grew',
+      })
+      .toBeGreaterThan(0.1);
 
     // Start the §8.3 override fade directly (verification-only hook), then restart mid-fade. Without the
     // fresh-performance abort the abandoned episode's 8 s ramp to zero would still be scheduled and the
@@ -169,14 +191,18 @@ test.describe('§2.3/§8.3 audio activation and lifecycle', () => {
 
     const stats = await hook<AudioStatsShape>(page, 'audioStats');
     const silence = await hook<SilenceStatusShape>(page, 'silenceStatus');
-    console.info(`[audio-lifecycle] after restart: master=${stats?.masterGain} armed=${stats?.armed} ${JSON.stringify(silence)}`);
+    console.info(
+      `[audio-lifecycle] after restart: master=${stats?.masterGain} presence=${stats?.presence} ` +
+        `armed=${stats?.armed} ${JSON.stringify(silence)}`,
+    );
     expect(stats, 'graph instrumentation is available').not.toBeNull();
     expect(stats!.armed, 'the abandoned episode acknowledgement is cleared').toBe(false);
-    expect(silence.satisfied, 'the fresh performance is not at terminal zero').toBe(false);
-    // The master is rising back to the live level rather than continuing the stale fade to zero.
-    await page.waitForTimeout(2600);
-    const settled = await hook<AudioStatsShape>(page, 'audioStats');
-    expect(settled!.masterGain, 'the living new field is non-silent').toBeGreaterThan(0.5);
+    expect(silence.satisfied, 'the abandoned fade is not acknowledged as satisfied').toBe(false);
+    // §6 (MAJOR 1): the field-replacing reset leaves the master at **zero** and clears presence. The old
+    // organism's tone is not re-exposed in the freshly seeded, empty field — the master rises again only
+    // through the unified §6 reveal once the NEW field confirms support (`browser/audio-reveal.spec.ts`).
+    expect(stats!.masterGain, 'the reset master stays at zero (no re-exposed old tone)').toBeLessThan(0.01);
+    expect(stats!.presence, 'presence is cleared until the new field confirms').toBe(false);
   });
 
   test('a restart reseeds the §4.4 sound substream deterministically (MAJOR 3)', async ({ page }) => {

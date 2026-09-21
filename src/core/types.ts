@@ -138,6 +138,8 @@ export interface PresentationAnalysis {
   orientationRadians: number;
   coherence: number;
   symmetry: number;
+  /** §6 (deviation 58) mean `smoothstep(supportVLow, supportVHigh, reducedV)` — the presence signal. */
+  supportFraction: number;
 }
 
 export interface AnalysisState {

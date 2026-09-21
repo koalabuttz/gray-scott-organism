@@ -33,6 +33,14 @@ export interface PresentationDescriptors {
   orientationRadians: number;
   coherence: number;
   symmetry: number;
+  /**
+   * §6 (deviation 58) bounded presentation-tier support descriptor: the mean over the envelope-weighted
+   * reduced-V field of `smoothstep(SURFACE.supportVLow, SURFACE.supportVHigh, reducedV)`. Raw (no
+   * multi-second smoothing); exactly 0 for an empty field. It is the presence/wake signal the audio
+   * engine keys on, because the renderer's local V concentration and the audio occupancy threshold are
+   * not the same unit.
+   */
+  supportFraction: number;
 }
 
 /** The numeric payload carried by an `ok` result (both tiers). */

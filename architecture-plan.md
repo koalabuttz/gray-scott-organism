@@ -2112,3 +2112,164 @@ deviations must be recorded here. Each entry states what differs, why, and what 
     **61 passed / 11 gated skips** (`audioZeroAt` ≈ 17.8 performance-s, 20.01 s black-hold, re-arm
     `satisfied` false).
 
+58. **Round-B (Phase 3B) audio character rework — "Sunlit Porcelain Garden".** Operator listening
+    feedback on the deviation-57 system: *"feels kinda creepy — want it more relaxing or interesting;
+    stays too quiet too long after the organism is first seen"*. The design of record is
+    **`sound-design-spec.md`** (repo root, retained for the reviewer; on acceptance its decisions fold
+    into this plan and the file may be removed). This entry **supersedes the §8.2 event subgraph and the
+    timbral constants** of §8.2 and of deviation 57 — the *causal architecture*, the six mappings, the
+    silence discipline (exact zero, terminal assignment, the stillness/kill-wait handshake), the
+    ≤ 4-orchestra / one-noise / one-IR budget, the 50 ms tick / 150 ms lookahead, the recording
+    destination, the mute path and the terminal-master position (deviation 54) are all **unchanged**.
+    The historical evidence above stays as the record of what the previous palette did and why.
+    **Sound changes.** Pad register raised **55–110 Hz → 110–165 Hz** (highest carrier 3·165 = 495 Hz);
+    voice ratios **[1, 3/2, 2, 3] → [1, 2, 3, 5/2]** (root, octave, fifth above the octave, just major
+    third above the octave); the three sine/triangle oscillators are replaced by four built-in
+    `OscillatorNode`s driven by **`PeriodicWave`s** (voice 0 harmonics `[1, 0.28, 0.10]`, upper voices
+    `[1, 0.10]`, all sine phase, `disableNormalization:true`, divided by the absolute harmonic sum);
+    detune ceiling **18 → 3 cents** with fixed multipliers `[0, +1, −1, +0.5]` (root never detunes);
+    base weights `[1, 0.48, 0.26, 0.22]` normalised by `max(1, √Σw²)`, with the just major third
+    (voice 3) coloured by `smoothstep(0.25, 0.75, coherence)`; the pad level is a **living-field floor**
+    `0.18 + 0.06·√intensity`, **exactly zero when support is absent**; per-voice low-pass
+    `clamp(carrier·(3 + 2·intensity), 500, 2400)`, Q = 0.5. The **§8.2 event subgraph is replaced**: the
+    three Q = 8 noise-burst band-passes become a **three-partial additive porcelain bloom** (temporary
+    sine partials at `[1,2,3]×bellBaseHz`, `bellBaseHz = rootHz·(featureScaleNorm ≥ 0.5 ? 2 : 3)`,
+    amplitudes `[0.72, 0.21, 0.07]`, 120 ms raised-cosine attack then exponential decay τ 0.85/0.55/0.35 s,
+    100 ms bounded terminal fade from 3.3 s, stopped by 3.42 s, peak `0.065·clamp(0.4+strength, 0.4, 1)`,
+    pitch sampled once from the **smoothed audible root**); serial skipping, the ≥ 15 s refractory and
+    "at most one live event group, dropped not queued" are preserved. The **granular layer** becomes a
+    soft shimmer: grains 0.65–1.2 s, full-**Hann** window (`setValueCurveAtTime`, peak 0.85, exact-zero
+    endpoints), rate `1.4·fineDetail²·(1−fragmentation)`, spacing `(0.75 + 0.5·rng)/rate`, **≤ 4
+    concurrent**, shared high-pass 700 / band-pass Q 0.65 centre 1100→2400 / low-pass 4200. The **IR**
+    is a **2.4 s luminous** stereo response (`exp(−t/0.32)`, 10 ms onset, one-pole cutoff 5500→2200 Hz,
+    final 100 ms to exact zero) replacing the 5 s dark tail, and wet gain is **0.07–0.11**.
+    **New presence/reveal (§6).** A new bounded presentation descriptor **`supportFraction`** =
+    `mean(smoothstep(SURFACE.supportVLow, SURFACE.supportVHigh, reducedV))` is computed in
+    `presentation.ts` (raw, zero for an empty field) and propagated through the protocol/types/WorldState.
+    The activity-only wake path and the `wakeOccupancy`/`wakeActivity`/`wakeSeconds` thresholds are
+    **removed**: presence eligibility is false at startup/reset, true on a **confirmed** support crossing
+    (two distinct fresh valid samples at/above **0.001** *and* ≥ 0.5 real seconds — repeated ticks on one
+    snapshot do not count), held by hysteresis above **0.00025**, cleared immediately below it. Quiet
+    dormancy now also requires support below support-off. On a confirmed crossing the engine cancels a
+    **general** absence fade only (never a stillness/kill-wait fade, which stays protected) and performs
+    one **unified 1.5 s linear reveal/activation** re-anchored from the mirrored master gain; from exact
+    silence the root's pitch/filter/gain are prepared behind the zero master first (no second root
+    envelope), while a live master raises the root to its floor through a dedicated 0.75 s envelope.
+    Grains and blooms are suppressed during the reveal and whenever support is ineligible; the envelope
+    mirror is used for **every** new master transition (never a scheduled `AudioParam.value`); the
+    de-clicked restart/reseed is preserved.
+    **Verification.** `npx tsc --noEmit` clean; `npm test` **320/320** (new
+    `tests/presentation-support.test.ts` 5 cases; rewritten `tests/mapping.test.ts` and
+    `tests/audio.test.ts`). The browser offline suite
+    gains the §6 wake→reveal **output guard** (150–2000 Hz band RMS **−18.3 dBFS** ≥ −34, full-band RMS
+    **−16.3 dBFS** ≥ −27, rendered samples), a **render matrix** (pad/texture/event-only via
+    verification-only `muteBuses`, combined at 44.1/48 kHz seeds 11/22, single-voice, coherence sweep,
+    sustained, collapse — all peaks **≤ 0.367** (−8.7 dBFS), well under the −6 dBFS ceiling and the
+    −8 dBFS aim), a **wet-vs-dry** guard (wet **−39.9 dBFS** vs dry **−15.8 dBFS**, 24 dB below), a
+    **paired-event** guard comparing **aligned 1-second windows** (max lift **0.00 dB** ≤ +3, plus a
+    deliberately over-loud `eventBoost: 500` fixture lifting a window **11.15 dB** to prove the guard is
+    not vacuous), and a **texture-vs-pad** guard (**−39.2 dBFS** vs **−15.7 dBFS** = 23.5 dB under,
+    ≥ 12 dB, and inside the spec's ≈ −42…−32 dBFS listening guide). Measured matrix: `active` peak 0.3581 / rms −15.8 dBFS;
+    `wake-reveal` peak 0.3549; `single-voice` peak 0.2828; `stillness` and the post-deadline samples
+    stay exactly zero. A new live `browser/audio-reveal.spec.ts` drives the locked→wake→reveal path from
+    a **not-pre-live** frozen load, logs support/audibility/master/phase against real timestamps and
+    asserts the destination is audible within a few real seconds of the wake. The `browser/audio-audible`
+    fixture now keys on `supportFraction` (occupancy and support are different units). The default
+    browser suite runs **66 passed / 12 gated skips** (was 60/12: +5 offline cases and the reveal
+    fixture); `STILLNESS=1` passes (`audioZeroAt` **2.01** performance-s, 20.01 s black-hold, re-arm
+    `satisfied` false). Live capture on the real output device: settlement peak **0.294** / RMS 0.175,
+    dominant **128.9 Hz** (inside the 110–165 register); the locked→wake→reveal path is audible
+    **≈ 1.0 s** after the wake (master 0.27 at +1.2 s, 0.75 by +2.5 s) and the live timeline logs
+    support / root / 150–2000 Hz band / master / silence phase against real timestamps.
+    **Round-C review fixes (same character rework).** (MAJOR 1) A field-replacing reset
+    (`restart`/`applyResolution`/a replaced `load-trajectory`) now **de-clicks to zero and stays there**:
+    `declickMaster`'s ramp back up is gone, `declickToZero` holds the master at exactly zero and every
+    persistent source (the four pad voices and the texture bus) is forced to exactly zero at that zero
+    instant, so the pre-reset tone can no longer sound into the freshly seeded empty field; the master
+    rises only through the ordinary §6 reveal once the NEW field confirms support. A trajectory load that
+    *preserves* the field never calls `resetPerformance`, so it keeps its semantics. Verified by the new
+    offline `reset-silence` fixture (`resetSilencePeak` **exactly 0** from the de-click end until fresh
+    confirmation, then audible), by `resetSilencePeak` **0** in the `restart` fixture, and by the
+    lifecycle restart test, which now asserts presence-gated silence instead of the (previously codified)
+    rise. (MAJOR 2) `mapPadLevel` no longer re-gates the floor on the raw on-threshold every sample: it
+    zeroes only for an **absent** field (`supportFraction > 0`) while the engine's latched
+    `presenceEligible` — not the raw descriptor — is the stateful gate, so the floor is held through the
+    hysteresis band and removed only once below support-off (unit-verified: the pad target is unchanged
+    across six in-band samples and removed exactly once below off). (MAJOR 3) An invalid/stale sample now
+    **breaks an unconfirmed candidate sequence** (counters/timestamp cleared) while already-eligible
+    presence keeps its hold; unit-verified (valid A → invalid > 0.5 s → valid B is sample 1 of a new
+    sequence; valid C + persistence confirms). (MINOR 4) The live-master root raise is now a **bounded
+    linear ramp with an explicit 0.75 s endpoint** (terminal assignment), started from the root's JS
+    mirror — never an asymptotic `setTargetAtTime` and never a read of a scheduled `AudioParam.value`; the
+    ordinary τ smoothing returns after the window (unit-asserted: ramp time = start + 0.75 s, exact
+    endpoint, target equal to the derived per-voice level). (MINOR 5) The paired-event guard compares
+    **aligned 1-second windows** rather than whole 8 s renders, with a deliberately over-loud
+    `eventBoost: 500` fixture that fails the guard (11.15 dB) to prove it is not vacuous. (MINOR 6) This
+    entry records all of the above and fixes the `tests/presentation-support.test.ts` filename. **A real
+    render bug was found while verifying MINOR 5:** `reap()` disconnected one-shot nodes during the
+    offline driver's *pre-render* scheduling (the whole timeline is queued before `startRendering()`), so
+    every finished bloom and most grains were silenced — this is why the isolated texture had measured a
+    spurious ≈ −47 dBFS and the first bloom was inaudible. Disconnection is now deferred to `dispose()`
+    on a non-realtime context while retirement still bounds the live accounting (`long-run`:
+    created = stopped + live). Re-measured: isolated texture **−39.2 dBFS**, event-only **−37.9 dBFS**,
+    `event-refractory` peak 0.3853, all still ≤ the peak ceiling.
+    **Round-D presence/reset fixes (same character rework).** (MAJOR 1) An **inaudible** reset — paused,
+    muted or locked — used to `cancelMasterAutomation()`, which *holds* the mirrored live level (~0.75);
+    a later resume/unmute then saw a nonzero master, took the "master already live" branch and exposed the
+    fresh field through the ~0.15 s mute release instead of the unified 1.5 s reveal. The inaudible branch
+    now calls `anchorMasterAtZero()` (scheduled param **and** JS mirror at exactly zero) and clears the
+    episode state immediately, so the exact-silence branch stays reachable and the resume/unmute runs one
+    1.5 s reveal ending at resume + 1.5 s (unit-verified for paused, muted **and** locked, including that
+    the master is still < 0.2·masterLevel at the 0.15 s mute-release point, so the upper voices cannot
+    become audible through it). (MAJOR 2) `silenceSources()` only zeroed the pad and texture gains, so an
+    in-flight bloom (3.42 s), a grain (≤ 1.2 s) or the convolver's 2.4 s tail could survive into the new
+    field's reveal. It is replaced by **`clearEpisodeState()`**, which at the reset's zero instant retires
+    **every** one-shot (stops and disconnects `pending`, disconnects `retired`, counts them stopped), forces
+    the pad, texture **and event** buses to exactly zero, and flushes the wet path by **reassigning the
+    convolver's impulse response** (a fresh deterministic buffer from the current sound substream) to clear
+    its internal history; a new bloom re-asserts unity on the event bus at its own start time, so the event
+    path keeps working. Verified by new offline fixtures: **`reset-bloom`** (a bloom fired 0.2 s before the
+    reset) and **`reset-grain`** (grains flowing up to the reset) each compared against an exact control
+    (`reset-clean` / `reset-grain-clean`, differing *only* in pre-reset one-shot activity) — the post-reveal
+    windows differ by **0.000 dB** with `resetSilencePeak` **exactly 0**, and the grain comparison is
+    texture-only so the control cannot be trivially silent. (MAJOR 3) `revealVoice` recorded a
+    `rootSegment` constant at its endpoint, so `rootLevelAt` misreported the in-flight level, and
+    `applyControls` kept skipping root control while `rootRevealUntil` was active even after presence had
+    cleared — the scheduled rise continued and a rapid re-confirm started from the false full target. The
+    mirror now records the **true linear segment** (start/end/from/to) and `rootLevelAt` evaluates it, and
+    a new `abandonRootReveal()` cancels the ramp and re-anchors at the mirrored in-flight value whenever
+    presence clears or the reveal becomes prohibited (the ordinary τ then glides the root *down*). Unit
+    test: confirm presence with a live master, drop below support-off halfway through the 0.75 s ramp →
+    the positive endpoint is cancelled, no later gain increase occurs, and a re-cross produces a new ramp
+    that starts exactly at the mirrored in-flight value (no upward step). (MINOR 4) `resetPerformance`
+    unconditionally replaced `pendingReset`, so a **seedless** reset inside the de-click window dropped a
+    pending seeded reseed while `recordedRootSeed` already reported the new seed. It now coalesces: a newer
+    explicit seed supersedes, a seedless reset **preserves the latest pending seeds** and only moves the
+    swap to the newest zero instant, and an inaudible (immediate) reset applies any pending seeds rather
+    than discarding them. Unit-verified: `resetPerformance(t, 77)` then a seedless `resetPerformance(t+0.05)`
+    leaves the material equal to a fresh seed-77 engine; two seeded resets apply the latest; two seedless
+    resets leave the substream unchanged. Counts after Round-D: `npx tsc --noEmit` clean, `npm test`
+    **329/329**, offline browser suite **16/16**.
+    **Round-E root-reveal prohibition fix (same character rework).** (MAJOR) `tick()` abandoned the
+    in-flight root raise on **any** interruption (`!eligible || !revealPermitted()`) and cleared
+    `rootRevealUntil`; `applyControls` then took its ordinary branch and scheduled a **positive** root
+    target, so the root kept rising behind the mute / under the stillness fade — and because presence
+    stayed eligible `presenceRevealed` was never cleared, so `beginReveal` never retried and the root
+    returned *already raised* on resume/unmute. Two distinct cases are now handled: presence **cleared**
+    abandons and glides down as before, while a **prohibited** interval with presence still eligible sets
+    a new `rootRevealPending` marker; for that interval `applyControls` drives the root **down** through
+    the ordinary bounded τ and never schedules a positive target, and when permission returns with
+    presence still eligible the unified reveal restarts **exactly once**. `beginReveal` additionally now
+    gives the root its own bounded 0.75 s ramp — concurrently with, never in series with, the master
+    reveal — when the master is live-ish mid-fade (which also covers the general-fade-reversal case),
+    while from exact silence the root is still *prepared* behind the zero master. Unit-verified for
+    **pause, mute and stillness-armed** (`§6 (MAJOR) a prohibited interval holds the root down and reveals
+    once on release`): after the halfway interruption the root mirror never increases over ≥ 0.6 s and no
+    positive root target or ramp is scheduled; on release exactly one bounded ramp runs to
+    `release + 0.75 s`, starting at the mirrored held/decayed value (no upward step).
+    (MINOR) The three inaudible-reset cases are now parameterized over one table with the **identical**
+    assertion set — immediate/stable exact zero on param and mirror, exactly one linear master ramp to
+    `AUDIO.masterLevel` ending at permission-return + `AUDIO.revealSeconds`, and the master still
+    `< 0.2·masterLevel` at +0.15 s — so paused, muted and locked all pin the early-level bound and the
+    ramp value. Counts after Round-E: `npx tsc --noEmit` clean, `npm test` **332/332**.
+

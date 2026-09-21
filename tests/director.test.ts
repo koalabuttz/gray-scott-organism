@@ -42,6 +42,7 @@ function neutralAnalysis(occupied: number): AnalysisState {
       orientationRadians: 0,
       coherence: 0,
       symmetry: 0,
+      supportFraction: 0,
     },
   };
 }

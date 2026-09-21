@@ -103,6 +103,91 @@
   },
   "suites": [
     {
+      "title": "_probe-timing.spec.ts",
+      "file": "_probe-timing.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "PROBE visible->audible",
+          "file": "_probe-timing.spec.ts",
+          "line": 14,
+          "column": 6,
+          "specs": [
+            {
+              "title": "log timeline",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 240000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 12722,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[probe] t,fieldVis0.025,maxV,presOccupancy,audioPeak\n"
+                        },
+                        {
+                          "text": "[probe] 8.1,0.000e+0,0.000,0.000e+0,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 15.0,0.000e+0,0.000,0.000e+0,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 21.9,0.000e+0,0.000,0.000e+0,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 28.7,0.000e+0,0.000,0.000e+0,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 35.4,0.000e+0,0.000,0.000e+0,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 42.0,9.749e-4,0.322,6.561e-4,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 48.7,1.762e-3,0.361,1.160e-3,0.0000\n"
+                        },
+                        {
+                          "text": "[probe] 55.4,3.866e-3,0.362,2.533e-3,0.2253\n"
+                        },
+                        {
+                          "text": "[probe] 62.1,6.532e-3,0.405,3.769e-3,0.2842\n"
+                        },
+                        {
+                          "text": "[probe] firstVisible=48.69166666666709 firstAudible=55.391666666667184\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:05:00.169Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "12354e79e16f3d6338cf-043f2c342797141b897d",
+              "file": "_probe-timing.spec.ts",
+              "line": 15,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
       "title": "analysis-reduction.spec.ts",
       "file": "analysis-reduction.spec.ts",
       "column": 0,
@@ -131,7 +216,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3788,
+                      "duration": 3180,
                       "errors": [],
                       "stdout": [
                         {
@@ -143,7 +228,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:10.574Z",
+                      "startTime": "2026-09-21T20:05:13.597Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -172,7 +257,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2945,
+                      "duration": 2141,
                       "errors": [],
                       "stdout": [
                         {
@@ -205,7 +290,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:15.049Z",
+                      "startTime": "2026-09-21T20:05:16.815Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -266,7 +351,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:18.057Z",
+                      "startTime": "2026-09-21T20:05:18.988Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -328,7 +413,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:18.060Z",
+                      "startTime": "2026-09-21T20:05:18.990Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -349,6 +434,98 @@
               "id": "3e1e1bf43c291d64511d-938f4463bf2af55a79cd",
               "file": "arcs.spec.ts",
               "line": 445,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "audio-audible.spec.ts",
+      "file": "audio-audible.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "§8 live-path audibility",
+          "file": "audio-audible.spec.ts",
+          "line": 53,
+          "column": 6,
+          "specs": [
+            {
+              "title": "after activation the grown field reaches the destination with an audible drone",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 25841,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-audible] destination (as it rises): peak=0.2916 rms=0.1705 dominant=140.6 Hz (bin 5.86 Hz, strongest bin -26.8 dBFS)\n"
+                        },
+                        {
+                          "text": "[audio-audible] destination (settled): peak=0.2938 rms=0.1759 dominant=134.8 Hz (strongest bin -26.9 dBFS)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:05:19.004Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "848d7de8a4a8aa6b4bb3-5488a374ac63e63b78d1",
+              "file": "audio-audible.spec.ts",
+              "line": 54,
+              "column": 3
+            },
+            {
+              "title": "muting the drone silences the destination tap (the guard measures the real signal)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 17466,
+                      "errors": [],
+                      "stdout": [],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:05:44.892Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "848d7de8a4a8aa6b4bb3-461dcd4ca41c1a7033e5",
+              "file": "audio-audible.spec.ts",
+              "line": 145,
               "column": 3
             }
           ]
@@ -384,7 +561,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1579,
+                      "duration": 1451,
                       "errors": [],
                       "stdout": [
                         {
@@ -396,7 +573,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:18.113Z",
+                      "startTime": "2026-09-21T20:06:02.438Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -425,12 +602,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2076,
+                      "duration": 2024,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:19.729Z",
+                      "startTime": "2026-09-21T20:06:03.929Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -459,12 +636,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1794,
+                      "duration": 1805,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:21.842Z",
+                      "startTime": "2026-09-21T20:06:05.994Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -493,16 +670,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5492,
+                      "duration": 13524,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-lifecycle] live stats: {\"nodes\":{\"nodeCreated\":0,\"nodeStopped\":0,\"liveNodes\":0,\"grainsStarted\":0,\"eventsFired\":0,\"maxLiveNodes\":0},\"phase\":\"live\",\"quietSeconds\":3.8506666666666667,\"eventsSkipped\":0,\"terminalZeroAt\":null,\"fadeStartedAt\":null,\"masterHeldAtRestart\":null,\"armed\":false,\"masterGain\":0.8999999761581421}\n"
+                          "text": "[audio-lifecycle] live stats: {\"nodes\":{\"nodeCreated\":2,\"nodeStopped\":2,\"liveNodes\":0,\"grainsStarted\":1,\"eventsFired\":0,\"maxLiveNodes\":1},\"phase\":\"live\",\"quietSeconds\":0,\"eventsSkipped\":0,\"terminalZeroAt\":null,\"fadeStartedAt\":null,\"masterHeldAtRestart\":null,\"armed\":false,\"masterGain\":0.75,\"presence\":true,\"supportSamples\":3,\"revealUntil\":9.564}\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:23.682Z",
+                      "startTime": "2026-09-21T20:06:07.833Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -531,22 +708,22 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6468,
+                      "duration": 11913,
                       "errors": [],
                       "stdout": [
                         {
                           "text": "[audio-lifecycle] mid-fade before restart: {\"satisfied\":false,\"terminalZeroAt\":null}\n"
                         },
                         {
-                          "text": "[audio-lifecycle] restart transition: heldLevel=0.06370560000000001 samples=[0.057, 0.030, 0.000, 0.028, 0.040, 0.051]\n"
+                          "text": "[audio-lifecycle] restart transition: heldLevel=0.18340888888888893 samples=[0.183, 0.105, 0.007, 0.000, 0.000, 0.000]\n"
                         },
                         {
-                          "text": "[audio-lifecycle] after restart: master=0.42149513959884644 armed=false {\"satisfied\":false,\"terminalZeroAt\":null}\n"
+                          "text": "[audio-lifecycle] after restart: master=0 presence=false armed=false {\"satisfied\":false,\"terminalZeroAt\":null}\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:29.205Z",
+                      "startTime": "2026-09-21T20:06:21.398Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -556,7 +733,7 @@
               ],
               "id": "11330b8e7849cda2647e-5b5eff5c04774e6d7394",
               "file": "audio-lifecycle.spec.ts",
-              "line": 120,
+              "line": 131,
               "column": 3
             },
             {
@@ -575,16 +752,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1881,
+                      "duration": 1522,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-lifecycle] substream: initial=-4.939530335297377 seed12345=-1.4733861482527573 seed999=4.336467733126483\n"
+                          "text": "[audio-lifecycle] substream: initial=5.9401930311829005 seed12345=-0.45464503297466763 seed999=3.9292344072378\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:35.711Z",
+                      "startTime": "2026-09-21T20:06:33.345Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -594,7 +771,7 @@
               ],
               "id": "11330b8e7849cda2647e-fb07af6adda2808452a8",
               "file": "audio-lifecycle.spec.ts",
-              "line": 182,
+              "line": 208,
               "column": 3
             }
           ]
@@ -611,7 +788,7 @@
         {
           "title": "AC.12 offline audio",
           "file": "audio-offline.spec.ts",
-          "line": 22,
+          "line": 53,
           "column": 6,
           "specs": [
             {
@@ -630,16 +807,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4082,
+                      "duration": 2369,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] active: peak=0.3678 rms=0.0978 voices=3 grains=9 events=0 liveNodes=0\n"
+                          "text": "[audio-offline] active: peak=0.3706 rms=0.1625 voices=3 grains=2 events=0 liveNodes=2\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:37.661Z",
+                      "startTime": "2026-09-21T20:06:34.920Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -649,7 +826,7 @@
               ],
               "id": "a4075673bd35189006e7-d726c693f777c9411863",
               "file": "audio-offline.spec.ts",
-              "line": 23,
+              "line": 54,
               "column": 3
             },
             {
@@ -668,16 +845,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 7410,
+                      "duration": 4403,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] quiet-fade: peak=0.2496 fadeStart=12 silentAt=20 terminalZeroAt=20 fadeWindowPeak=0.0980 postPeak=0 postSamples=575998 phase=silent\n"
+                          "text": "[audio-offline] quiet-fade: peak=0.3291 fadeStart=12 silentAt=20 terminalZeroAt=20 fadeWindowPeak=0.0238 postPeak=0 postSamples=575998 phase=silent\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:41.773Z",
+                      "startTime": "2026-09-21T20:06:37.316Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -687,7 +864,7 @@
               ],
               "id": "a4075673bd35189006e7-d25297f9eb130ed01278",
               "file": "audio-offline.spec.ts",
-              "line": 40,
+              "line": 71,
               "column": 3
             },
             {
@@ -706,16 +883,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5431,
+                      "duration": 3583,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] hidden: peak=0 voices=1 vs active peak=0.3678\n"
+                          "text": "[audio-offline] hidden: peak=0 voices=1 vs active peak=0.3706\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:49.216Z",
+                      "startTime": "2026-09-21T20:06:41.761Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -725,7 +902,7 @@
               ],
               "id": "a4075673bd35189006e7-7d076eda1224323e6290",
               "file": "audio-offline.spec.ts",
-              "line": 78,
+              "line": 109,
               "column": 3
             },
             {
@@ -744,16 +921,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 7074,
+                      "duration": 4854,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] events: fired=2 skipped=40 peak=0.3994\n"
+                          "text": "[audio-offline] events: fired=2 skipped=40 peak=0.3853\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:02:54.684Z",
+                      "startTime": "2026-09-21T20:06:45.374Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -763,7 +940,7 @@
               ],
               "id": "a4075673bd35189006e7-a86b3d16c138191a4d7c",
               "file": "audio-offline.spec.ts",
-              "line": 98,
+              "line": 129,
               "column": 3
             },
             {
@@ -782,16 +959,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1301,
+                      "duration": 1581,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] long-run: created=460 stopped=452 live=8 maxLive=3 grains=191 events=13\n"
+                          "text": "[audio-offline] long-run: created=124 stopped=124 live=0 maxLive=2 grains=26 events=12\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:01.788Z",
+                      "startTime": "2026-09-21T20:06:50.257Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -801,7 +978,7 @@
               ],
               "id": "a4075673bd35189006e7-e1d3dd0606ae82070268",
               "file": "audio-offline.spec.ts",
-              "line": 122,
+              "line": 153,
               "column": 3
             },
             {
@@ -820,7 +997,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4972,
+                      "duration": 2978,
                       "errors": [],
                       "stdout": [
                         {
@@ -829,7 +1006,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:03.122Z",
+                      "startTime": "2026-09-21T20:06:51.865Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -839,7 +1016,7 @@
               ],
               "id": "a4075673bd35189006e7-85aa2c4f9b57c98ddb98",
               "file": "audio-offline.spec.ts",
-              "line": 144,
+              "line": 175,
               "column": 3
             },
             {
@@ -858,7 +1035,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 5002,
+                      "duration": 3153,
                       "errors": [],
                       "stdout": [
                         {
@@ -867,7 +1044,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:08.125Z",
+                      "startTime": "2026-09-21T20:06:54.874Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -877,7 +1054,7 @@
               ],
               "id": "a4075673bd35189006e7-d079dce3f78c7bf50a7e",
               "file": "audio-offline.spec.ts",
-              "line": 170,
+              "line": 201,
               "column": 3
             },
             {
@@ -896,16 +1073,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3983,
+                      "duration": 2941,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] restart: peak=0.3021 maxStep=0.00806 phase=live satisfied=false terminalZeroAt=null\n"
+                          "text": "[audio-offline] restart: peak=0.3229 maxStep=0.06652 phase=live satisfied=false terminalZeroAt=null\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:13.164Z",
+                      "startTime": "2026-09-21T20:06:58.059Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -915,7 +1092,7 @@
               ],
               "id": "a4075673bd35189006e7-f8fb292da0476cf810db",
               "file": "audio-offline.spec.ts",
-              "line": 182,
+              "line": 213,
               "column": 3
             },
             {
@@ -934,16 +1111,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 7426,
+                      "duration": 4602,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[audio-offline] substream: root=2024 checksum=2.194145569621469 vs 1.9070995866059093; grains=9/9/9 peak=0.34968045353889465\n"
+                          "text": "[audio-offline] substream: root=2024 checksum=1.9638454737238362 vs 1.480266252030276; grains=1/1/1 peak=0.3579575717449188\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:17.184Z",
+                      "startTime": "2026-09-21T20:07:01.027Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -953,7 +1130,364 @@
               ],
               "id": "a4075673bd35189006e7-f880f073a640b5947835",
               "file": "audio-offline.spec.ts",
-              "line": 209,
+              "line": 247,
+              "column": 3
+            },
+            {
+              "title": "the §6 wake→reveal output guard reaches audibility by the reveal deadline (rendered samples)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2559,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] wake-reveal: bandRms=-18.4 dBFS rms=-16.4 dBFS peak=0.3545 (-9.0 dBFS) phase=live\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:05.650Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-8ba180024caece0b6aa2",
+              "file": "audio-offline.spec.ts",
+              "line": 279,
+              "column": 3
+            },
+            {
+              "title": "the render matrix: bus isolation, 44.1/48 kHz, multiple seeds, conservative peaks",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 16415,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] matrix pad-only: peak=0.3617 rms=-15.7 dBFS voices=4 grains=12 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix texture-only: peak=0.0876 rms=-39.2 dBFS voices=4 grains=12 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix event-only: peak=0.0935 rms=-37.9 dBFS voices=3 grains=4 events=2\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix combined-48k: peak=0.3593 rms=-15.8 dBFS voices=3 grains=1 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix combined-44k: peak=0.3596 rms=-15.7 dBFS voices=3 grains=1 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix combined-seed22: peak=0.3631 rms=-15.8 dBFS voices=3 grains=1 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix single-voice: peak=0.2852 rms=-16.0 dBFS voices=1 grains=1 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix coherence-sweep: peak=0.3689 rms=-15.5 dBFS voices=3 grains=3 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix sustained: peak=0.3593 rms=-15.8 dBFS voices=3 grains=1 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] matrix collapse: peak=0.3303 rms=-15.4 dBFS voices=3 grains=2 events=0\n"
+                        },
+                        {
+                          "text": "[audio-offline] texture -39.2 dBFS vs pad -15.7 dBFS\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:08.233Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-f35f4daa13498fe30e39",
+              "file": "audio-offline.spec.ts",
+              "line": 304,
+              "column": 3
+            },
+            {
+              "title": "the reverb send stays ≥ 15 dB below the dry bus (§5)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 3146,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] wet -39.9 dBFS vs dry -15.8 dBFS\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:24.674Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-6b9c27dfcf53a5c68f70",
+              "file": "audio-offline.spec.ts",
+              "line": 347,
+              "column": 3
+            },
+            {
+              "title": "a porcelain bloom does not lift any aligned 1-second window by more than 3 dB (§3)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4683,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] paired-event max 1 s window lift: 0.00 dB (1 bloom(s); windows 8)\n"
+                        },
+                        {
+                          "text": "[audio-offline] over-loud fixture max 1 s window lift: 11.15 dB (must exceed 3)\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:27.845Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-573c871cbd72375debd2",
+              "file": "audio-offline.spec.ts",
+              "line": 365,
+              "column": 3
+            },
+            {
+              "title": "a field-replacing reset silences the fresh empty field and reveals only on fresh confirmation (§6/MAJOR 1)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 2642,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] reset-silence: resetSilencePeak=0 peak=0.3778 rms=-18.0 dBFS phase=live\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:32.556Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-598955e8c6752ab772bb",
+              "file": "audio-offline.spec.ts",
+              "line": 395,
+              "column": 3
+            },
+            {
+              "title": "a pre-reset bloom and the reverb history it fed do not leak into the new reveal (§6/MAJOR 2)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 4683,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] reset-bloom: resetSilencePeak=0 windows=[0.0530, 0.1684, 0.1749, 0.1792, 0.1612, 0.1683, 0.1787, 0.0416, 0.1195, 0.1697, 0.1676, 0.1678]\n"
+                        },
+                        {
+                          "text": "[audio-offline] reset-bloom post-reveal max window difference: 0.000 dB\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:35.239Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-e72ca8fa9b3a6595ce12",
+              "file": "audio-offline.spec.ts",
+              "line": 419,
+              "column": 3
+            },
+            {
+              "title": "a pre-reset grain does not leak into the new field reveal (§6/MAJOR 2)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 7441,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-offline] reset-grain: resetSilencePeak=0 noiseFloor=0.000 dB leak=0.000 dB windows=[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0064, 0.0096, 0.0118]\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:39.970Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "a4075673bd35189006e7-278cb75e9876e82b8c4b",
+              "file": "audio-offline.spec.ts",
+              "line": 449,
+              "column": 3
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "audio-reveal.spec.ts",
+      "file": "audio-reveal.spec.ts",
+      "column": 0,
+      "line": 0,
+      "specs": [],
+      "suites": [
+        {
+          "title": "§6 live presence and reveal",
+          "file": "audio-reveal.spec.ts",
+          "line": 37,
+          "column": 6,
+          "specs": [
+            {
+              "title": "a visible supported body becomes audible within seconds of the wake (locked→wake→reveal)",
+              "ok": true,
+              "tags": [],
+              "tests": [
+                {
+                  "timeout": 180000,
+                  "annotations": [],
+                  "expectedStatus": "passed",
+                  "projectId": "headless-gpu",
+                  "projectName": "headless-gpu",
+                  "results": [
+                    {
+                      "workerIndex": 0,
+                      "parallelIndex": 0,
+                      "status": "passed",
+                      "duration": 21699,
+                      "errors": [],
+                      "stdout": [
+                        {
+                          "text": "[audio-reveal] visible→support 14234 ms; support→unlock 105 ms; unlock→audible 963 ms\n    +551ms support=0.026 peak=0.0000 root=0Hz band=-240.0dB master=0.00 presence=false live\n    +1165ms support=0.030 peak=0.1029 root=129Hz band=-44.3dB master=0.27 presence=true live\n    +1781ms support=0.037 peak=0.2208 root=129Hz band=-36.8dB master=0.58 presence=true live\n    +2417ms support=0.041 peak=0.2905 root=129Hz band=-33.8dB master=0.75 presence=true live\n    +3065ms support=0.049 peak=0.2892 root=129Hz band=-33.9dB master=0.75 presence=true live\n    +3677ms support=0.055 peak=0.2879 root=129Hz band=-33.9dB master=0.75 presence=true live\n    +4296ms support=0.064 peak=0.2871 root=129Hz band=-33.9dB master=0.75 presence=true live\n    +4902ms support=0.070 peak=0.2881 root=129Hz band=-33.9dB master=0.75 presence=true live\n    +5499ms support=0.077 peak=0.2875 root=129Hz band=-34.0dB master=0.75 presence=true live\n    +6130ms support=0.087 peak=0.2887 root=129Hz band=-34.1dB master=0.75 presence=true live\n"
+                        }
+                      ],
+                      "stderr": [],
+                      "retry": 0,
+                      "startTime": "2026-09-21T20:07:47.462Z",
+                      "annotations": [],
+                      "attachments": []
+                    }
+                  ],
+                  "status": "expected"
+                }
+              ],
+              "id": "dfa7d34f06580c05ea25-58bf91e58e446b562a89",
+              "file": "audio-reveal.spec.ts",
+              "line": 38,
               "column": 3
             }
           ]
@@ -1004,7 +1538,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:24.645Z",
+                      "startTime": "2026-09-21T20:08:09.192Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -1060,7 +1594,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1030,
+                      "duration": 857,
                       "errors": [],
                       "stdout": [
                         {
@@ -1069,7 +1603,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:24.657Z",
+                      "startTime": "2026-09-21T20:08:09.208Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1098,16 +1632,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2555,
+                      "duration": 2005,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[AC.6] seeded composite after 4000 steps (20ms): max=250 mean=1.840 p50=0 p95=1 p99=62 nonBlack=0.0374 bright=0.0212 clipped=0.000001 channelMean=[1.75, 1.79, 1.84] field occupied=0.0572 edgeDensity=0.00622\n"
+                          "text": "[AC.6] seeded composite after 4000 steps (21ms): max=250 mean=1.840 p50=0 p95=1 p99=62 nonBlack=0.0374 bright=0.0212 clipped=0.000001 channelMean=[1.75, 1.79, 1.84] field occupied=0.0572 edgeDensity=0.00622\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:25.724Z",
+                      "startTime": "2026-09-21T20:08:10.088Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1136,7 +1670,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1498,
+                      "duration": 1227,
                       "errors": [],
                       "stdout": [
                         {
@@ -1148,7 +1682,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:28.313Z",
+                      "startTime": "2026-09-21T20:08:12.123Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1194,12 +1728,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4111,
+                      "duration": 3756,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:29.857Z",
+                      "startTime": "2026-09-21T20:08:13.389Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1260,7 +1794,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:34.044Z",
+                      "startTime": "2026-09-21T20:08:17.204Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -1307,7 +1841,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 7258,
+                      "duration": 6375,
                       "errors": [],
                       "stdout": [
                         {
@@ -1325,7 +1859,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:34.045Z",
+                      "startTime": "2026-09-21T20:08:17.205Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1386,7 +1920,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:41.369Z",
+                      "startTime": "2026-09-21T20:08:23.623Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -1447,7 +1981,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 926,
+                      "duration": 783,
                       "errors": [],
                       "stdout": [
                         {
@@ -1465,7 +1999,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:41.386Z",
+                      "startTime": "2026-09-21T20:08:23.639Z",
                       "annotations": [
                         {
                           "type": "renderer",
@@ -1499,7 +2033,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1321,
+                      "duration": 1032,
                       "errors": [],
                       "stdout": [
                         {
@@ -1514,7 +2048,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:42.336Z",
+                      "startTime": "2026-09-21T20:08:24.439Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1543,7 +2077,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1115,
+                      "duration": 884,
                       "errors": [],
                       "stdout": [
                         {
@@ -1552,7 +2086,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:43.699Z",
+                      "startTime": "2026-09-21T20:08:25.501Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1581,11 +2115,11 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 50298,
+                      "duration": 46440,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[AC.5] GPU 10000 steps @ 256x256 in 1.9s (339.6 M cell-updates/s): nonFinite=0 occupied=0.0754 meanV=0.0221 edgeDensity=0.00957 feedbackViolations=0 steps=10000\n"
+                          "text": "[AC.5] GPU 10000 steps @ 256x256 in 1.8s (354.6 M cell-updates/s): nonFinite=0 occupied=0.0754 meanV=0.0221 edgeDensity=0.00957 feedbackViolations=0 steps=10000\n"
                         },
                         {
                           "text": "[AC.5] pre-clamp instrumentation: clippedU=0 clippedV=0 frequency=0.000e+0 (bound 0.001) maxExcursion=0.000e+0 significantCellSteps=0 | CPU reference: clippedU=0 clippedV=0 maxExcursion=0.000e+0 | saturation proxy (includes the untouched U=1 void): 35928 cells\n"
@@ -1593,7 +2127,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:03:44.854Z",
+                      "startTime": "2026-09-21T20:08:26.419Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1622,7 +2156,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1446,
+                      "duration": 1200,
                       "errors": [],
                       "stdout": [
                         {
@@ -1631,7 +2165,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:04:35.198Z",
+                      "startTime": "2026-09-21T20:09:12.889Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1660,7 +2194,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1917,
+                      "duration": 1930,
                       "errors": [],
                       "stdout": [
                         {
@@ -1678,7 +2212,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:04:36.690Z",
+                      "startTime": "2026-09-21T20:09:14.135Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1707,7 +2241,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1191,
+                      "duration": 1151,
                       "errors": [],
                       "stdout": [
                         {
@@ -1722,7 +2256,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:04:38.638Z",
+                      "startTime": "2026-09-21T20:09:16.099Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1751,25 +2285,25 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 28259,
+                      "duration": 27910,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[perf] canvas 1280x720 (scene 1280x720): 60.0 fps, 120.0 sim steps/s (nominal 120), frame p50=16.7ms p95=16.7ms p99=16.8ms submit-only sim=0.12ms render=0.11ms overload=false\n"
+                          "text": "[perf] canvas 1280x720 (scene 1280x720): 60.0 fps, 120.0 sim steps/s (nominal 120), frame p50=16.7ms p95=16.8ms p99=50.0ms submit-only sim=0.11ms render=0.09ms overload=false\n"
                         },
                         {
-                          "text": "[perf] canvas 1920x1080 (scene 1920x1080): 60.0 fps, 120.0 sim steps/s (nominal 120), frame p50=16.7ms p95=16.8ms p99=16.8ms submit-only sim=0.16ms render=0.13ms overload=false\n"
+                          "text": "[perf] canvas 1920x1080 (scene 1920x1080): 60.0 fps, 120.0 sim steps/s (nominal 120), frame p50=16.7ms p95=16.8ms p99=49.9ms submit-only sim=0.12ms render=0.09ms overload=false\n"
                         },
                         {
-                          "text": "[perf] drained frame cost @1080p: 9.06 ms/frame (110.4 fps implied, serialised)\n"
+                          "text": "[perf] drained frame cost @1080p: 7.91 ms/frame (126.4 fps implied, serialised)\n"
                         },
                         {
-                          "text": "[perf] drained frame cost @720p: 7.44 ms/frame (134.5 fps implied, serialised)\n"
+                          "text": "[perf] drained frame cost @720p: 6.59 ms/frame (151.6 fps implied, serialised)\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:04:39.880Z",
+                      "startTime": "2026-09-21T20:09:17.290Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1798,12 +2332,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1041,
+                      "duration": 992,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:08.173Z",
+                      "startTime": "2026-09-21T20:09:45.233Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1864,7 +2398,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:09.320Z",
+                      "startTime": "2026-09-21T20:09:46.262Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -1920,12 +2454,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1652,
+                      "duration": 1324,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:09.343Z",
+                      "startTime": "2026-09-21T20:09:46.289Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1954,7 +2488,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2353,
+                      "duration": 2111,
                       "errors": [],
                       "stdout": [
                         {
@@ -1963,7 +2497,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:11.021Z",
+                      "startTime": "2026-09-21T20:09:47.654Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -1992,12 +2526,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3277,
+                      "duration": 2863,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:13.426Z",
+                      "startTime": "2026-09-21T20:09:49.791Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2026,12 +2560,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2303,
+                      "duration": 1967,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:16.738Z",
+                      "startTime": "2026-09-21T20:09:52.674Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2060,7 +2594,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 3354,
+                      "duration": 2947,
                       "errors": [],
                       "stdout": [
                         {
@@ -2069,7 +2603,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:19.091Z",
+                      "startTime": "2026-09-21T20:09:54.672Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2106,12 +2640,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1518,
+                      "duration": 1315,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:22.484Z",
+                      "startTime": "2026-09-21T20:09:57.646Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2140,12 +2674,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1548,
+                      "duration": 1272,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:24.043Z",
+                      "startTime": "2026-09-21T20:09:59.004Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2182,12 +2716,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1500,
+                      "duration": 1048,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:25.628Z",
+                      "startTime": "2026-09-21T20:10:00.300Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2248,7 +2782,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:27.160Z",
+                      "startTime": "2026-09-21T20:10:01.384Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -2302,7 +2836,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:27.161Z",
+                      "startTime": "2026-09-21T20:10:01.385Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -2373,7 +2907,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:27.161Z",
+                      "startTime": "2026-09-21T20:10:01.385Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -2429,12 +2963,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 9281,
+                      "duration": 8877,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:27.200Z",
+                      "startTime": "2026-09-21T20:10:01.416Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2463,12 +2997,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2029,
+                      "duration": 1897,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:36.520Z",
+                      "startTime": "2026-09-21T20:10:10.328Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2497,19 +3031,19 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 14012,
+                      "duration": 13981,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[cadence] 1x: pub/real=2.00 pub/perf=2.00 req/real=2.00\n"
+                          "text": "[cadence] 1x: pub/real=1.99 pub/perf=1.99 req/real=1.99\n"
                         },
                         {
-                          "text": "[cadence] 6x: pub/real=4.00 pub/perf=0.67 req/real=3.80\n"
+                          "text": "[cadence] 6x: pub/real=3.80 pub/perf=0.66 req/real=3.80\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:38.574Z",
+                      "startTime": "2026-09-21T20:10:12.252Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2538,14 +3072,14 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 73848,
+                      "duration": 67756,
                       "errors": [],
                       "stdout": [
                         {
                           "text": "[MAJOR 5] uniform: cpu occ=0.000000 flux=0.000000 change=0.000000 | gpu occ=0.000000 flux=0.000000 change=0.000000 | dOcc=0.00e+0 dFlux=0.00e+0 dChange=0.00e+0\n"
                         },
                         {
-                          "text": "[MAJOR 5] grown-sparse: cpu occ=0.004191 flux=0.000098 change=0.000003 | gpu occ=0.004191 flux=0.000098 change=0.000003 | dOcc=1.55e-10 dFlux=6.44e-11 dChange=5.22e-13\n"
+                          "text": "[MAJOR 5] grown-sparse: cpu occ=0.003323 flux=0.000080 change=0.000004 | gpu occ=0.003323 flux=0.000080 change=0.000004 | dOcc=1.29e-10 dFlux=7.36e-11 dChange=5.21e-12\n"
                         },
                         {
                           "text": "[MAJOR 5] high-flux: cpu occ=0.919244 flux=0.017728 change=0.000095 | gpu occ=0.919244 flux=0.017727 change=0.000095 | dOcc=1.06e-7 dFlux=2.07e-7 dChange=4.21e-11\n"
@@ -2556,7 +3090,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:05:52.620Z",
+                      "startTime": "2026-09-21T20:10:26.263Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2585,16 +3119,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 14747,
+                      "duration": 14876,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[MAJOR 7] re-enable: distance 4.4564 -> 4.4991, azimuth 2.3562 -> 2.3575\n"
+                          "text": "[MAJOR 7] re-enable: distance 4.4564 -> 4.5030, azimuth 2.3562 -> 2.3576\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:06.501Z",
+                      "startTime": "2026-09-21T20:11:34.052Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2623,12 +3157,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1410,
+                      "duration": 1550,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:21.283Z",
+                      "startTime": "2026-09-21T20:11:48.961Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2657,12 +3191,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2080,
+                      "duration": 2370,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:22.717Z",
+                      "startTime": "2026-09-21T20:11:50.545Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2691,12 +3225,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2234,
+                      "duration": 1980,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:24.856Z",
+                      "startTime": "2026-09-21T20:11:52.949Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2725,12 +3259,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1437,
+                      "duration": 1440,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:27.153Z",
+                      "startTime": "2026-09-21T20:11:54.971Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2776,31 +3310,31 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 19271,
+                      "duration": 18109,
                       "errors": [],
                       "stdout": [
                         {
                           "text": "[phase2] curator left dormancy: movement=nucleation intention=emerge arc=0\n"
                         },
                         {
-                          "text": "[phase2] chemistryHealth: occupied=0.0005 flux=0.000011 change=0.000000 age=1.50s\n"
+                          "text": "[phase2] chemistryHealth: occupied=0.0006 flux=0.000014 change=0.000001 age=1.20s\n"
                         },
                         {
-                          "text": "[phase2] presentation: occ=0.0005 β0=1 β1=1 bands=[0.03, 0.24, 0.52, 0.17] coh=0.100 sym=0.000 conf=1.000 age=1.6s\n"
+                          "text": "[phase2] presentation: occ=0.0007 β0=1 β1=1 bands=[0.04, 0.30, 0.42, 0.22] coh=0.044 sym=0.000 conf=1.000 age=1.3s\n"
                         },
                         {
                           "text": "[phase2] events: serial=0 latest=none; horizon: state=idle moments=0\n"
                         },
                         {
-                          "text": "[phase2] coarseOccupancy: size=16 occupied=0.0006 centroid=[0.501, 0.504]\n"
+                          "text": "[phase2] coarseOccupancy: size=16 occupied=0.0006 centroid=[0.496, 0.494]\n"
                         },
                         {
-                          "text": "[phase2] director targets: azimuth 2.44649 -> 2.49012 (moved=true), distance 5.63708 -> 6.55371 (moved=true)\n"
+                          "text": "[phase2] director targets: azimuth 2.27414 -> 2.23039 (moved=true), distance 5.47587 -> 6.49416 (moved=true)\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:28.642Z",
+                      "startTime": "2026-09-21T20:11:56.462Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2846,7 +3380,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1888,
+                      "duration": 1744,
                       "errors": [],
                       "stdout": [
                         {
@@ -2855,7 +3389,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:47.948Z",
+                      "startTime": "2026-09-21T20:12:14.615Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2884,12 +3418,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4087,
+                      "duration": 4109,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:49.870Z",
+                      "startTime": "2026-09-21T20:12:16.387Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2918,12 +3452,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1168,
+                      "duration": 1262,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:53.987Z",
+                      "startTime": "2026-09-21T20:12:20.525Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -2984,7 +3518,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:55.182Z",
+                      "startTime": "2026-09-21T20:12:21.819Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -3040,7 +3574,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2967,
+                      "duration": 2961,
                       "errors": [],
                       "stdout": [
                         {
@@ -3049,7 +3583,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:55.198Z",
+                      "startTime": "2026-09-21T20:12:21.835Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -3078,12 +3612,12 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4141,
+                      "duration": 3961,
                       "errors": [],
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:07:58.189Z",
+                      "startTime": "2026-09-21T20:12:24.820Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -3112,7 +3646,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 1457,
+                      "duration": 1187,
                       "errors": [],
                       "stdout": [
                         {
@@ -3124,7 +3658,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:08:02.373Z",
+                      "startTime": "2026-09-21T20:12:28.812Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -3153,16 +3687,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 6074,
+                      "duration": 5898,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[smoke] after 5 s: steps=1834 performanceSeconds=15.28 scene=1280x720 renderer=ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)\n"
+                          "text": "[smoke] after 5 s: steps=1822 performanceSeconds=15.18 scene=1280x720 renderer=ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:08:03.864Z",
+                      "startTime": "2026-09-21T20:12:30.040Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -3191,16 +3725,16 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 4981,
+                      "duration": 4875,
                       "errors": [],
                       "stdout": [
                         {
-                          "text": "[smoke] resume after 2 s paused: +179 steps\n"
+                          "text": "[smoke] resume after 2 s paused: +186 steps\n"
                         }
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:08:09.975Z",
+                      "startTime": "2026-09-21T20:12:35.972Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -3229,7 +3763,7 @@
                       "workerIndex": 0,
                       "parallelIndex": 0,
                       "status": "passed",
-                      "duration": 2692,
+                      "duration": 2604,
                       "errors": [],
                       "stdout": [
                         {
@@ -3238,7 +3772,7 @@
                       ],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:08:14.986Z",
+                      "startTime": "2026-09-21T20:12:40.877Z",
                       "annotations": [],
                       "attachments": []
                     }
@@ -3299,7 +3833,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:08:17.714Z",
+                      "startTime": "2026-09-21T20:12:43.510Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -3370,7 +3904,7 @@
                       "stdout": [],
                       "stderr": [],
                       "retry": 0,
-                      "startTime": "2026-09-21T06:08:17.714Z",
+                      "startTime": "2026-09-21T20:12:43.510Z",
                       "annotations": [
                         {
                           "type": "skip",
@@ -3400,9 +3934,9 @@
   ],
   "errors": [],
   "stats": {
-    "startTime": "2026-09-21T06:02:09.640Z",
-    "duration": 368320.189,
-    "expected": 58,
+    "startTime": "2026-09-21T20:04:59.139Z",
+    "duration": 464558.006,
+    "expected": 69,
     "skipped": 12,
     "unexpected": 0,
     "flaky": 0

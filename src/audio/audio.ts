@@ -7,12 +7,12 @@
  * `browser/audio-offline.spec.ts` render deterministic output and measure peaks, terminal zero and
  * voice bounds in-page without an audio device.
  *
- * Graph (§8.2), one instance per context:
+ * Graph (§8.2/§2/§3/§4, palette per the Sunlit Porcelain Garden record):
  *
- *   4 sine/triangle voices → gain → low-pass ─┐
- *   reusable noise grains → high/band-pass → texture gain ├→ dry bus ─┐
- *   rare noise impulse → 3 resonant band-passes → event gain ─────────┘ │
- *                            └→ shared send → convolver → wet gain ────┘
+ *   4 PeriodicWave voices → gain → low-pass ──┐
+ *   reusable noise grains → high/band/low-pass → texture gain ├→ dry bus ─┐
+ *   rare 3-partial porcelain bloom → event gain ──────────────┘          │
+ *                            └→ shared send → convolver → wet gain ─────┘
  *                                                        ↓
  *                       high-pass 25 Hz → compressor → master gain → mute gain
  *                                                        ├→ audio destination
@@ -29,15 +29,16 @@
  */
 import { AUDIO } from '../config.ts';
 import { Rng } from '../core/random.ts';
-import type { WorldState } from '../core/types.ts';
+import type { PresentationAnalysis, WorldState } from '../core/types.ts';
 import { createImpulseResponse, createNoiseBuffer } from './buffers.ts';
 import { deriveSoundSeeds, type SoundSubstreamSeeds } from './substream.ts';
 import {
-  DETUNE_SIGN,
-  EVENT_RATIOS,
+  DETUNE_MULTIPLIERS,
   VOICE_RATIOS,
   clamp,
   deriveAudioControls,
+  featureScaleNorm,
+  neutralAudioControls,
   type AudioControls,
 } from './voices.ts';
 
@@ -69,6 +70,9 @@ export interface GraphStats {
   maxLiveNodes: number;
 }
 
+/** §8.2 verification-only bus isolation (a render matrix measures one source group at a time). */
+export type BusName = 'pad' | 'texture' | 'event';
+
 export interface AudioGraphOptions {
   /** §4.4 recorded root seed; the `sound` substream is derived from it (MAJOR 3). */
   rootSeed?: number;
@@ -78,10 +82,56 @@ export interface AudioGraphOptions {
   irSeconds?: number;
   /** The master gain the silence gate restores to when not silent. */
   masterLevel?: number;
+  /**
+   * Verification-only: bus names to **mute**, so an offline render can measure one source group in
+   * isolation (`pad`/`texture`/`event`). Never set in the live system, where all three sound.
+   */
+  muteBuses?: readonly BusName[];
+  /** Verification-only: omit the dry path so only the reverb send reaches the mix (wet-vs-dry guard). */
+  wetOnly?: boolean;
+  /** Verification-only: multiply the bloom peak (MINOR 5's deliberately over-loud fixture). */
+  eventBoost?: number;
 }
 
 function setTarget(param: AudioParam, value: number, now: number, tau: number): void {
   param.setTargetAtTime(value, now, Math.max(1e-3, tau));
+}
+
+/**
+ * §2 a voice's `PeriodicWave`: voice 0 carries harmonics `[1, 0.28, 0.10]` (a warm, softly resonant
+ * body); voices 1–3 carry `[1, 0.10]`. All sine phase, divided by the absolute harmonic sum, and
+ * `disableNormalization:true` so the defined waveform bound stays ≤ 1.
+ */
+function createVoiceWave(context: BaseAudioContext, index: number): PeriodicWave {
+  const harmonics = index === 0 ? AUDIO.voice0Harmonics : AUDIO.voiceHarmonics;
+  const sum = harmonics.reduce((total, value) => total + Math.abs(value), 0) || 1;
+  const real = new Float32Array(harmonics.length + 1);
+  const imag = new Float32Array(harmonics.length + 1);
+  for (let k = 0; k < harmonics.length; k += 1) imag[k + 1] = harmonics[k]! / sum;
+  return context.createPeriodicWave(real, imag, { disableNormalization: true });
+}
+
+/** §4 a full Hann window `sin²(π·t/duration)` scaled to `peak`; first and last values are exactly 0. */
+function hannWindow(seconds: number, rate: number, peak: number): Float32Array {
+  const length = Math.max(2, Math.round(seconds * rate));
+  const curve = new Float32Array(length);
+  for (let i = 0; i < length; i += 1) {
+    const t = i / (length - 1);
+    const w = Math.sin(Math.PI * t);
+    curve[i] = peak * w * w;
+  }
+  return curve;
+}
+
+/** §3 a raised-cosine attack `peak·(1 − cos(π·t))/2`; first value exactly 0, last exactly `peak`. */
+function raisedCosineAttack(seconds: number, rate: number, peak: number): Float32Array {
+  const length = Math.max(2, Math.round(seconds * rate));
+  const curve = new Float32Array(length);
+  for (let i = 0; i < length; i += 1) {
+    const t = i / (length - 1);
+    curve[i] = peak * 0.5 * (1 - Math.cos(Math.PI * t));
+  }
+  return curve;
 }
 
 /**
@@ -127,6 +177,22 @@ function masterSegmentValue(segment: MasterSegment, t: number): number {
 }
 
 /**
+ * §6 (MINOR 4) one leg of the **root voice's** intended gain, mirrored in plain JS exactly like the
+ * master envelope. It is recorded as a real segment — including an in-flight *linear ramp* with its
+ * true `from`/`to`/`end` — so `rootLevelAt` reports the actual value during a ramp rather than jumping
+ * to the final endpoint, which is what let a mid-ramp presence loss keep rising and let a rapid
+ * re-confirm start from a falsely-reported target.
+ */
+interface RootSegment {
+  readonly start: number;
+  readonly end: number;
+  readonly from: number;
+  readonly to: number;
+  readonly curve: 'linear' | 'target';
+  readonly tau: number;
+}
+
+/**
  * §8 live-path instrumentation: the default FFT size for the destination-tapped analyser. 8192 gives a
  * 5.9 Hz bin at 48 kHz — fine enough to resolve the deep fundamental band (≈55–110 Hz) — over a 170 ms
  * window that is short enough to catch a drone as it rises.
@@ -159,6 +225,7 @@ export class AudioGraph {
   readonly textureBus: GainNode;
   readonly textureHighpass: BiquadFilterNode;
   readonly textureBandpass: BiquadFilterNode;
+  readonly textureLowpass: BiquadFilterNode;
   readonly textureGain: GainNode;
   readonly eventGain: GainNode;
   readonly sendGain: GainNode;
@@ -176,10 +243,32 @@ export class AudioGraph {
   private readonly masterLevel: number;
   private readonly noiseSeconds: number;
   private readonly irSeconds: number;
+  /**
+   * §8.2 verification-only bus isolation: false for a bus named in `muteBuses`. A muted bus is forced
+   * to silence wherever it would otherwise contribute, so an offline render can measure one group.
+   */
+  private readonly busEnabled = { pad: true, texture: true, event: true };
+  /**
+   * §6 (MINOR 4) the root voice's intended gain, mirrored in plain JS like the master envelope, so the
+   * bounded reveal raise can start from the *intended* level rather than a stale `AudioParam.value`.
+   */
+  /**
+   * §6 (MINOR 4) the root voice's intended gain, mirrored in plain JS like the master envelope, so the
+   * bounded reveal raise can start from the *intended* level rather than a stale `AudioParam.value` and
+   * an in-flight ramp is reported truthfully.
+   */
+  private rootSegment: RootSegment | null = null;
+  /** Verification-only event-level multiplier (MINOR 5: an over-loud fixture that must fail the guard). */
+  private readonly eventBoost: number;
   // §4.4 sound substream: the seeds the noise/IR were generated from. Kept so a reseed can rebuild
   // them and the signature can report which substream is live.
   private soundSeeds: SoundSubstreamSeeds;
   private pending: PendingSource[] = [];
+  /**
+   * One-shot nodes already retired from the live accounting whose `disconnect()` is deferred to
+   * `dispose()` because the context has not rendered them yet (see `reap`).
+   */
+  private retired: AudioNode[] = [];
   private nodeCreated = 0;
   private nodeStopped = 0;
   private grainsStarted = 0;
@@ -203,49 +292,60 @@ export class AudioGraph {
     // when one is supplied; the explicit seeds / fixed constants remain as a fallback for callers that
     // have no performance seed (e.g. a one-off graph probe).
     this.soundSeeds = resolveSoundSeeds(options);
+    // §8.2 verification-only bus isolation (offline render matrix); never set in the live system.
+    if (options.muteBuses) {
+      for (const bus of options.muteBuses) this.busEnabled[bus] = false;
+    }
+    this.eventBoost = options.eventBoost ?? 1;
 
     // The dry bus is the single merge point for the three source groups (§8.2).
     this.dryBus = context.createGain();
     this.dryBus.gain.value = 1;
 
-    // --- four drone voices ---------------------------------------------------
+    // --- §2 four logical voices ---------------------------------------------
+    // Removal-priority order [1, 2, 3, 5/2] × fundamental. Each is a `PeriodicWave` on the existing
+    // built-in `OscillatorNode` — a warm body with restrained even harmonics and a just major third,
+    // never a triangle/saw drone. No oscillator phase retrigger on descriptor changes.
     for (let i = 0; i < AUDIO.maxVoices; i += 1) {
       const oscillator = context.createOscillator();
-      // A sine fundamental floor with a slightly brighter triangle on the upper partials: still a
-      // drone, never a "spectrum analyzer".
-      oscillator.type = i === 0 ? 'sine' : 'triangle';
-      oscillator.frequency.value = 55 * (VOICE_RATIOS[i] ?? 1);
+      oscillator.setPeriodicWave(createVoiceWave(context, i));
+      oscillator.frequency.value = AUDIO.fundamentalMaxHz * (VOICE_RATIOS[i] ?? 1);
       oscillator.detune.value = 0;
       const gain = context.createGain();
       gain.gain.value = 0;
       const filter = context.createBiquadFilter();
       filter.type = 'lowpass';
-      filter.frequency.value = 800;
-      filter.Q.value = 0.4;
+      filter.frequency.value = AUDIO.voiceFilterMaxHz;
+      filter.Q.value = AUDIO.voiceFilterQ;
       oscillator.connect(gain).connect(filter).connect(this.dryBus);
       oscillator.start();
       this.voices.push({ oscillator, gain, filter });
     }
 
-    // --- granular texture layer: grains → high/band-pass → texture gain ------
+    // --- §4 soft shimmer: grains → high/band/low-pass → texture gain --------
     this.textureBus = context.createGain();
     this.textureHighpass = context.createBiquadFilter();
     this.textureHighpass.type = 'highpass';
-    this.textureHighpass.frequency.value = AUDIO.grainFilterMinHz;
-    this.textureHighpass.Q.value = 0.5;
+    this.textureHighpass.frequency.value = AUDIO.textureHighpassHz;
+    this.textureHighpass.Q.value = AUDIO.textureHighpassQ;
     this.textureBandpass = context.createBiquadFilter();
     this.textureBandpass.type = 'bandpass';
     this.textureBandpass.frequency.value = AUDIO.grainFilterMinHz;
-    this.textureBandpass.Q.value = 1.2;
+    this.textureBandpass.Q.value = AUDIO.textureBandpassQ;
+    this.textureLowpass = context.createBiquadFilter();
+    this.textureLowpass.type = 'lowpass';
+    this.textureLowpass.frequency.value = AUDIO.textureLowpassHz;
+    this.textureLowpass.Q.value = AUDIO.textureLowpassQ;
     this.textureGain = context.createGain();
     this.textureGain.gain.value = 0;
     this.textureBus
       .connect(this.textureHighpass)
       .connect(this.textureBandpass)
+      .connect(this.textureLowpass)
       .connect(this.textureGain)
       .connect(this.dryBus);
 
-    // --- rare event excitation: impulse → 3 resonant band-passes → event gain
+    // --- rare porcelain bloom: three sine partials → event gain (see `spawnEvent`)
     this.eventGain = context.createGain();
     this.eventGain.gain.value = 1;
     this.eventGain.connect(this.dryBus);
@@ -267,7 +367,8 @@ export class AudioGraph {
     // --- mix bus → high-pass 25 Hz → master → compressor → destinations ------
     this.mixBus = context.createGain();
     this.mixBus.gain.value = 1;
-    this.dryBus.connect(this.mixBus);
+    // §5 wet-vs-dry verification: `wetOnly` omits the dry path so only the reverb send reaches the mix.
+    if (!options.wetOnly) this.dryBus.connect(this.mixBus);
     this.wetGain.connect(this.mixBus);
     this.highpass = context.createBiquadFilter();
     this.highpass.type = 'highpass';
@@ -313,20 +414,96 @@ export class AudioGraph {
     index: number,
     values: { frequencyHz: number; detuneCents: number; level: number; filterHz: number },
     now: number,
-    taus: { frequencyTau: number; detuneTau: number; levelTau: number },
+    taus: { frequencyTau: number; detuneTau: number; levelTau: number; filterTau: number },
+  ): void {
+    const voice = this.voices[index];
+    if (!voice) return;
+    this.applyVoiceTone(index, values, now, taus);
+    const level = this.busEnabled.pad ? values.level : 0;
+    // §6 (MINOR 4) mirror the root's intended gain so a later bounded reveal can start from it.
+    if (index === 0) {
+      this.rootSegment = {
+        start: now,
+        end: Number.POSITIVE_INFINITY,
+        from: this.rootLevelAt(now),
+        to: level,
+        curve: 'target',
+        tau: taus.levelTau,
+      };
+    }
+    setTarget(voice.gain.gain, level, now, taus.levelTau);
+  }
+
+  /**
+   * The root voice's intended gain at `t`, from the JS mirror (never a scheduled `AudioParam.value`).
+   * Reports the true **in-flight** value of a linear ramp, not its endpoint (MINOR 4).
+   */
+  rootLevelAt(t: number): number {
+    const segment = this.rootSegment;
+    if (!segment) return 0;
+    if (t <= segment.start) return segment.from;
+    if (t >= segment.end && segment.curve === 'linear') return segment.to;
+    return masterSegmentValue(segment, t);
+  }
+
+  /**
+   * §6 (MINOR 4) abandon an in-flight root reveal: cancel the scheduled ramp (including its positive
+   * endpoint) and re-anchor the mirror and the param at the **mirrored in-flight level**, so the caller
+   * can then apply a bounded *downward* transition — no continuing upward automation, and no
+   * instantaneous upward set.
+   */
+  abandonRootReveal(now: number): void {
+    const voice = this.voices[0];
+    if (!voice) return;
+    const held = this.rootLevelAt(now);
+    const param = voice.gain.gain;
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(held, now);
+    this.rootSegment = { start: now, end: now, from: held, to: held, curve: 'linear', tau: 1e-3 };
+  }
+
+  /** §2/§6 glide a voice's pitch/filter only (used while a dedicated root envelope drives its gain). */
+  applyVoiceTone(
+    index: number,
+    values: { frequencyHz: number; detuneCents: number; filterHz: number },
+    now: number,
+    taus: { frequencyTau: number; detuneTau: number; filterTau: number },
   ): void {
     const voice = this.voices[index];
     if (!voice) return;
     setTarget(voice.oscillator.frequency, values.frequencyHz, now, taus.frequencyTau);
     setTarget(voice.oscillator.detune, values.detuneCents, now, taus.detuneTau);
-    setTarget(voice.gain.gain, values.level, now, taus.levelTau);
-    setTarget(voice.filter.frequency, values.filterHz, now, taus.frequencyTau);
+    // §2 filter smoothing is its own, faster time constant (6 s) than the 10 s frequency glide.
+    setTarget(voice.filter.frequency, values.filterHz, now, taus.filterTau);
+  }
+
+  /**
+   * §6 from exact silence: prepare the root behind the **zero** master — set pitch/filter/gain to their
+   * latest valid targets **immediately** so the reveal does not audibly glide from a placeholder pitch
+   * and there is no second root envelope in series with the master reveal.
+   */
+  prepareRoot(
+    values: { frequencyHz: number; detuneCents: number; level: number; filterHz: number },
+    now: number,
+  ): void {
+    const voice = this.voices[0];
+    if (!voice) return;
+    const level = this.busEnabled.pad ? values.level : 0;
+    voice.oscillator.frequency.cancelScheduledValues(now);
+    voice.oscillator.frequency.setValueAtTime(values.frequencyHz, now);
+    voice.oscillator.detune.cancelScheduledValues(now);
+    voice.oscillator.detune.setValueAtTime(values.detuneCents, now);
+    voice.filter.frequency.cancelScheduledValues(now);
+    voice.filter.frequency.setValueAtTime(values.filterHz, now);
+    voice.gain.gain.cancelScheduledValues(now);
+    voice.gain.gain.setValueAtTime(level, now);
+    this.rootSegment = { start: now, end: now, from: level, to: level, curve: 'linear', tau: 1e-3 };
   }
 
   applyTexture(values: { level: number; filterHz: number }, now: number, tau: number): void {
-    setTarget(this.textureGain.gain, values.level, now, tau);
-    setTarget(this.textureBandpass.frequency, values.filterHz, now, tau);
-    setTarget(this.textureHighpass.frequency, Math.min(AUDIO.grainFilterMinHz, values.filterHz * 0.5), now, tau);
+    const level = this.busEnabled.texture ? values.level : 0;
+    setTarget(this.textureGain.gain, level, now, tau);
+    setTarget(this.textureBandpass.frequency, values.filterHz, now, AUDIO.filterTau);
   }
 
   applyWet(gain: number, now: number, tau: number): void {
@@ -401,22 +578,23 @@ export class AudioGraph {
     return deadline;
   }
 
-  /** Wake from zero (§8.3): anchor at 0 and glide up; never a catch-up burst. */
-  wakeFromZero(now: number, tau: number): void {
+  /**
+   * §6 unified reveal/activation: cancel a **general absence fade** (never a stillness/kill-wait fade —
+   * the engine refuses to reveal when stillness is armed), re-anchor from the mirrored current gain and
+   * ramp **linearly** to the live master level over `seconds`, ending with an assignment so the level is
+   * exact. Reveal and activation are this one envelope operation, never serial fades.
+   */
+  revealMaster(now: number, seconds: number): number {
     const param = this.master.gain;
-    const targetTau = Math.max(1e-3, tau);
+    const from = this.masterLevelAt(now);
+    const end = now + Math.max(1e-3, seconds);
     param.cancelScheduledValues(now);
-    param.setValueAtTime(0, now);
-    param.setTargetAtTime(this.masterLevel, now, targetTau);
-    this.anchorEnvelope(now, 0);
-    this.masterSegments.push({
-      start: now,
-      end: Number.POSITIVE_INFINITY,
-      from: 0,
-      to: this.masterLevel,
-      curve: 'target',
-      tau: targetTau,
-    });
+    param.setValueAtTime(from, now);
+    param.linearRampToValueAtTime(this.masterLevel, end);
+    param.setValueAtTime(this.masterLevel, end);
+    this.anchorEnvelope(now, from);
+    this.masterSegments.push({ start: now, end, from, to: this.masterLevel, curve: 'linear' });
+    return end;
   }
 
   /** Smooth mute for pause/hidden-tab/context loss; no backlog is ever replayed. */
@@ -429,9 +607,10 @@ export class AudioGraph {
   /**
    * §8.3 fresh-performance anchor: synchronously cancel **all** scheduled master automation (so a stale
    * terminal fade from an abandoned episode can never reach its deadline and silence the new
-   * performance) while **holding the computed live level** (MAJOR 1/2) rather than stepping to zero.
-   * Used by the silent/armed activation paths and the locked fresh-performance abort, which do not ramp;
-   * the audible restart path uses `declickMaster`.
+   * performance) while **holding the computed live level** rather than stepping to zero. Used by the
+   * activation edge's silent branches, which do not ramp. A field-replacing reset does **not** use this:
+   * an audible reset de-clicks to zero (`declickToZero`) and an inaudible one anchors zero
+   * (`anchorMasterAtZero`).
    */
   cancelMasterAutomation(now: number): void {
     const param = this.master.gain;
@@ -442,31 +621,30 @@ export class AudioGraph {
   }
 
   /**
-   * §2.3/§8.3 (MAJOR 2) bounded activation fade: anchor at exactly zero and ramp linearly up to the
-   * live master level over `fadeSeconds`, ending with an assignment so the level is exact. Used on the
-   * locked→running activation edge and, as the second half of `declickMaster`, for a restarted
-   * performance.
+   * §6 (MAJOR 1) anchor the master at **exactly zero** — both the scheduled param and the JS mirror.
+   * This is what an *inaudible* reset (paused, muted or locked) must do instead of merely cancelling:
+   * `cancelMasterAutomation` would **hold** the prior mirrored level (~0.75) in the mirror, so a later
+   * resume/unmute would see a nonzero master and take the "master already live" branch — only the 0.75 s
+   * root raise, with the mute release (~0.15 s) bringing the fresh field back fast and loud instead of
+   * through the unified 1.5 s reveal. Anchoring zero keeps the exact-silence branch (and therefore the
+   * unified reveal) reachable once support re-confirms.
    */
-  fadeMasterIn(now: number, fadeSeconds: number): number {
+  anchorMasterAtZero(now: number): void {
     const param = this.master.gain;
     param.cancelScheduledValues(now);
     param.setValueAtTime(0, now);
-    const end = now + Math.max(1e-3, fadeSeconds);
-    param.linearRampToValueAtTime(this.masterLevel, end);
-    param.setValueAtTime(this.masterLevel, end);
     this.anchorEnvelope(now, 0);
-    this.masterSegments.push({ start: now, end, from: 0, to: this.masterLevel, curve: 'linear' });
-    return end;
   }
 
   /**
-   * §8.3 (MAJOR 2) de-clicked fresh-performance transition: hold the computed live level at `now`, ramp
-   * linearly to exactly zero over `declickSeconds` (80–150 ms), then ramp back up to the live level over
-   * `fadeSeconds`. Returns the **zero instant** — the moment the master reaches zero — so the caller can
-   * defer the buffer/IR swap to it. A restart therefore never steps a live master to zero: the
-   * transition is continuous and the reseed happens while the master is at zero.
+   * §8.3/§6 (MAJOR 1) de-clicked fresh-performance transition: hold the computed live level at `now`,
+   * ramp linearly to exactly zero over `declickSeconds` (80–150 ms) and **stay at zero**. Returns the
+   * zero instant so the caller can defer the buffer/IR swap and the source silencing to it. A restart
+   * therefore never steps a live master to zero (no click) and — crucially — does **not** ramp back up:
+   * a field-replacing reset leaves the master at zero until the *new* field confirms presence, at which
+   * point the unified 1.5 s reveal brings it back (the presence state machine owns that rise).
    */
-  declickMaster(now: number, declickSeconds: number, fadeSeconds: number): number {
+  declickToZero(now: number, declickSeconds: number): number {
     const param = this.master.gain;
     const live = this.masterLevelAt(now);
     param.cancelScheduledValues(now);
@@ -476,11 +654,90 @@ export class AudioGraph {
     param.linearRampToValueAtTime(0, zeroAt);
     param.setValueAtTime(0, zeroAt);
     this.masterSegments.push({ start: now, end: zeroAt, from: live, to: 0, curve: 'linear' });
-    const end = zeroAt + Math.max(1e-3, fadeSeconds);
-    param.linearRampToValueAtTime(this.masterLevel, end);
-    param.setValueAtTime(this.masterLevel, end);
-    this.masterSegments.push({ start: zeroAt, end, from: 0, to: this.masterLevel, curve: 'linear' });
     return zeroAt;
+  }
+
+  /**
+   * §6 (MAJOR 1/2) clear every piece of episode-scoped state at the reset's zero instant (the master is
+   * exactly zero there, so all of this is inaudible):
+   *
+   *  - retire **every** in-flight one-shot: the `pending` sources (porcelain blooms live up to 3.42 s,
+   *    grains up to 1.2 s) are stopped and disconnected, and the already-retired nodes are disconnected;
+   *  - force the four pad voices, the texture bus **and the event bus** to exactly zero, so no stale pad
+   *    target, bloom or grain survives into the freshly seeded field (a new bloom re-asserts unity on the
+   *    event bus at its own start time, so the event path keeps working);
+   *  - flush the wet path by reassigning the convolver's impulse response (a fresh, deterministic buffer
+   *    from the current sound substream), which resets the convolver's **internal history** so its tail
+   *    — up to the full 2.4 s IR — cannot leak into the new field's reveal.
+   *
+   * This is the guaranteed-state-clear for the "no old event/tail leaks into the new reveal" contract
+   * (spec §10.5).
+   */
+  clearEpisodeState(now: number): void {
+    for (const entry of this.pending) {
+      for (const node of entry.nodes) {
+        const source = node as Partial<AudioScheduledSourceNode>;
+        if (typeof source.stop === 'function') {
+          try {
+            source.stop(now);
+          } catch {
+            // Never started, or already stopped: nothing to do.
+          }
+        }
+        try {
+          node.disconnect();
+        } catch {
+          // Already torn down with the context; nothing to do.
+        }
+      }
+      this.nodeStopped += entry.nodes.length;
+    }
+    this.pending = [];
+    for (const node of this.retired) {
+      try {
+        node.disconnect();
+      } catch {
+        // Already torn down with the context; nothing to do.
+      }
+    }
+    this.retired = [];
+    for (const voice of this.voices) {
+      voice.gain.gain.cancelScheduledValues(now);
+      voice.gain.gain.setValueAtTime(0, now);
+    }
+    this.textureGain.gain.cancelScheduledValues(now);
+    this.textureGain.gain.setValueAtTime(0, now);
+    this.eventGain.gain.cancelScheduledValues(now);
+    this.eventGain.gain.setValueAtTime(0, now);
+    this.rootSegment = null;
+    // Flush the convolver's internal history with a fresh, deterministic IR.
+    this.convolver.buffer = createImpulseResponse(this.context, this.irSeconds, this.soundSeeds.ir);
+  }
+
+  /**
+   * §6 (MINOR 4) the dedicated root raise with an explicit endpoint: ramp the root voice linearly from
+   * its **mirrored** current level to `level` over `seconds` and assign the endpoint exactly, returning
+   * the end time. Used when the master is already live and presence turns eligible, so a source gain is
+   * never stepped and the raise is a bounded 0.75 s transition rather than an asymptotic approach. The
+   * caller suppresses the ordinary per-tick root gain target until the returned time.
+   */
+  revealVoice(index: number, level: number, now: number, seconds: number): number {
+    const voice = this.voices[index];
+    if (!voice) return now;
+    const target = this.busEnabled.pad ? level : 0;
+    const from = this.rootLevelAt(now);
+    const param = voice.gain.gain;
+    const end = now + Math.max(1e-3, seconds);
+    param.cancelScheduledValues(now);
+    param.setValueAtTime(from, now);
+    param.linearRampToValueAtTime(target, end);
+    param.setValueAtTime(target, end);
+    // MINOR 4: record the *true* linear segment (start/end/from/to), not a constant at the endpoint, so
+    // `rootLevelAt` reports the real in-flight value during the ramp.
+    if (index === 0) {
+      this.rootSegment = { start: now, end, from, to: target, curve: 'linear', tau: 1e-3 };
+    }
+    return end;
   }
 
   /** Anchor the master at the live level immediately (a fresh, unlocked context with nothing scheduled). */
@@ -624,17 +881,23 @@ export class AudioGraph {
 
   // --- one-shot sources -----------------------------------------------------
 
+  /**
+   * §4 a softly-shimmering grain: a full-Hann-windowed slice of the reusable noise buffer (first and
+   * last values exactly zero, peak `AUDIO.grainPeak`), scheduled with `setValueCurveAtTime`. Grains
+   * route through the shared high/band/low-pass chain.
+   */
   spawnGrain(when: number, spec: { seconds: number; offset: number; level: number }): void {
     const source = this.context.createBufferSource();
     source.buffer = this.noiseBuffer;
     const env = this.context.createGain();
     env.gain.value = 0;
     source.connect(env).connect(this.textureBus);
-
-    const attack = Math.min(0.06, spec.seconds * 0.25);
-    env.gain.setValueAtTime(0, when);
-    env.gain.linearRampToValueAtTime(spec.level, when + attack);
-    env.gain.linearRampToValueAtTime(0, when + spec.seconds);
+    const level = this.busEnabled.texture ? spec.level : 0;
+    env.gain.setValueCurveAtTime(
+      hannWindow(spec.seconds, this.context.sampleRate, level),
+      when,
+      spec.seconds,
+    );
     source.start(when, spec.offset, spec.seconds);
     source.stop(when + spec.seconds + 0.02);
     this.track([source, env], when + spec.seconds + 0.02, 'grain');
@@ -642,35 +905,59 @@ export class AudioGraph {
   }
 
   /**
-   * One subtle resonant excitation from the current fundamental (§8.2): the impulse is fed into the
-   * **three** §8.2 event resonances f/2f/3f (`EVENT_RATIOS`), each a band-pass at Q = 8, summed 1/3 each.
+   * §3 a soft porcelain bloom — a three-partial additive resonant excitation (an intentional palette
+   * amendment to the old §8.2 Q = 8 noise-burst subgraph). Three temporary sine oscillators at
+   * `[1, 2, 3] × bellBaseHz` with normalised amplitudes `[0.72, 0.21, 0.07]` all start together, take a
+   * raised-cosine 120 ms attack and then an exponential decay τ 0.85 / 0.55 / 0.35 s; from 3.3 s a
+   * 100 ms bounded terminal fade brings them to exact zero and every node is stopped by 3.42 s. Peak
+   * gain is `AUDIO.eventLevelMax · clamp(0.4 + strength, 0.4, 1)` — no noise transient, detune, pitch
+   * bend or mallet click. The pitch is sampled **once** and held, so unchanged geometry gives the same
+   * pitch and a different geometry a different one. Three partials count as one event.
    */
-  spawnEvent(when: number, spec: { fundamentalHz: number; level: number; seconds?: number }): void {
-    const seconds = spec.seconds ?? 0.5;
-    const source = this.context.createBufferSource();
-    source.buffer = this.noiseBuffer;
-    const mix = this.context.createGain();
-    mix.gain.value = 1 / EVENT_RATIOS.length;
-    const nodes: AudioNode[] = [source, mix];
-    for (const ratio of EVENT_RATIOS) {
-      const band = this.context.createBiquadFilter();
-      band.type = 'bandpass';
-      band.frequency.value = clamp(spec.fundamentalHz * ratio, 20, 12000);
-      band.Q.value = 8;
-      source.connect(band).connect(mix);
-      nodes.push(band);
+  spawnEvent(when: number, spec: { rootHz: number; featureScaleNorm: number; strength: number }): void {
+    if (!this.busEnabled.event) return;
+    const register =
+      spec.featureScaleNorm >= AUDIO.bloomFeaturePivot ? AUDIO.bloomRegisterLarge : AUDIO.bloomRegisterSmall;
+    const bellBaseHz = clamp(
+      spec.rootHz * register,
+      AUDIO.fundamentalMinHz * AUDIO.bloomRegisterLarge,
+      AUDIO.fundamentalMaxHz * AUDIO.bloomRegisterSmall,
+    );
+    const eventPeak = AUDIO.eventLevelMax * clamp(0.4 + spec.strength, 0.4, 1) * this.eventBoost;
+    // MAJOR 2: `clearEpisodeState` muzzles the event bus at a reset's zero instant; every new bloom
+    // re-asserts unity at its own start time so the event path keeps working after a reset.
+    this.eventGain.gain.setValueAtTime(1, when);
+    const attack = AUDIO.bloomAttackSeconds;
+    const fadeStart = AUDIO.bloomTerminalFadeStart;
+    const fadeEnd = fadeStart + AUDIO.bloomTerminalFadeSeconds;
+    const nodes: AudioNode[] = [];
+    for (let index = 0; index < AUDIO.bloomPartialRatios.length; index += 1) {
+      const amplitude = AUDIO.bloomPartialAmplitudes[index] ?? 0;
+      const tau = AUDIO.bloomDecayTaus[index] ?? 0.5;
+      const oscillator = this.context.createOscillator();
+      oscillator.type = 'sine';
+      oscillator.frequency.value = bellBaseHz * (AUDIO.bloomPartialRatios[index] ?? 1);
+      const env = this.context.createGain();
+      env.gain.value = 0;
+      const peakAmp = eventPeak * amplitude;
+      // Raised-cosine attack: a coarse curve is a faithful raised cosine; its endpoints are exact.
+      env.gain.setValueCurveAtTime(
+        raisedCosineAttack(attack, this.context.sampleRate, peakAmp),
+        when,
+        attack,
+      );
+      env.gain.setTargetAtTime(0, when + attack, tau);
+      // 100 ms bounded terminal fade from the analytic decay value to exactly zero.
+      const atFade = peakAmp * Math.exp(-(fadeStart - attack) / tau);
+      env.gain.setValueAtTime(atFade, when + fadeStart);
+      env.gain.linearRampToValueAtTime(0, when + fadeEnd);
+      env.gain.setValueAtTime(0, when + fadeEnd);
+      oscillator.connect(env).connect(this.eventGain);
+      oscillator.start(when);
+      oscillator.stop(when + AUDIO.bloomLifetimeSeconds);
+      nodes.push(oscillator, env);
     }
-    const env = this.context.createGain();
-    env.gain.value = 0;
-    mix.connect(env).connect(this.eventGain);
-    nodes.push(env);
-
-    env.gain.setValueAtTime(0, when);
-    env.gain.linearRampToValueAtTime(spec.level, when + 0.012);
-    env.gain.linearRampToValueAtTime(0, when + seconds);
-    source.start(when, 0, seconds);
-    source.stop(when + seconds + 0.02);
-    this.track(nodes, when + seconds + 0.02, 'event');
+    this.track(nodes, when + AUDIO.bloomLifetimeSeconds, 'event');
     this.eventsFired += 1;
   }
 
@@ -680,19 +967,33 @@ export class AudioGraph {
     if (this.pending.length > this.maxLiveNodes) this.maxLiveNodes = this.pending.length;
   }
 
-  /** Disconnect every one-shot source whose stop time has passed. Bounds the live node count. */
+  /**
+   * Retire every one-shot source whose scheduled stop time has passed, bounding the live node count.
+   *
+   * On a **realtime** context the nodes are disconnected immediately (the audio has already been
+   * rendered). On an `OfflineAudioContext` the whole timeline is scheduled *before* `startRendering()`,
+   * so a `disconnect()` here would remove a source that has not been rendered yet and silence it — the
+   * disconnection is therefore deferred to `dispose()` while the node is still retired from the live
+   * accounting. (Found via the offline render matrix: it made every finished bloom and most grains
+   * silent, e.g. the isolated texture measured ≈ −47 dBFS instead of ≈ −40.)
+   */
   reap(now: number): void {
     if (this.pending.length === 0) return;
+    const realtime = this.mediaStreamDestination !== null;
     const remaining: PendingSource[] = [];
     for (const entry of this.pending) {
       if (entry.stopAt <= now) {
-        for (const node of entry.nodes) {
-          try {
-            node.disconnect();
-          } catch {
-            // Already torn down with the context; nothing to do.
+        this.nodeStopped += entry.nodes.length;
+        if (realtime) {
+          for (const node of entry.nodes) {
+            try {
+              node.disconnect();
+            } catch {
+              // Already torn down with the context; nothing to do.
+            }
           }
-          this.nodeStopped += 1;
+        } else {
+          for (const node of entry.nodes) this.retired.push(node);
         }
       } else {
         remaining.push(entry);
@@ -739,9 +1040,12 @@ export class AudioGraph {
       this.nodeStopped += entry.nodes.length;
     }
     this.pending = [];
+    for (const node of this.retired) node.disconnect();
+    this.retired = [];
     this.textureBus.disconnect();
     this.textureHighpass.disconnect();
     this.textureBandpass.disconnect();
+    this.textureLowpass.disconnect();
     this.textureGain.disconnect();
     this.eventGain.disconnect();
     this.sendGain.disconnect();
@@ -785,7 +1089,6 @@ export class AudioEngine {
   private latest: WorldState | null = null;
   private lastTickTime: number | null = null;
   private quietSeconds = 0;
-  private wakeSeconds = 0;
   private phase: SilencePhase = 'live';
   private fadeDeadline: number | null = null;
   private terminalZeroAt: number | null = null;
@@ -816,13 +1119,54 @@ export class AudioEngine {
    * it is applied on the first tick at or after `at`. Never set for an inaudible (locked/muted/paused)
    * graph, which swaps immediately.
    */
-  private pendingReseed: { seeds: SoundSubstreamSeeds; at: number } | null = null;
+  private pendingReset: { seeds: SoundSubstreamSeeds | null; at: number; silence: boolean } | null = null;
   /**
    * §8.3 (MAJOR 2) the live master level the most recent `resetPerformance()` held from before its
    * de-click, or null before any restart. Instrumentation: the browser lifecycle fixture asserts a
    * restart held a live level (a de-click) rather than stepping to zero (a cut).
    */
   private masterHeldAtRestart: number | null = null;
+  /**
+   * §6 presence eligibility: false at startup/reset; true after a **confirmed** support crossing (two
+   * fresh valid samples at/above the on-threshold and ≥ 0.5 real seconds); held through hysteresis and
+   * cleared immediately when support falls below support-off. It gates the pad floor, grains and
+   * one-shot events, so a visually empty field is exactly silent.
+   */
+  private presenceEligible = false;
+  /**
+   * §6 whether the pad floor has already been revealed for the current presence episode. The reveal is
+   * retried on every tick until it succeeds (a stillness/black-hold or pause may deny it once), then
+   * latched; it is cleared when presence clears or on a reset, so a later re-crossing reveals again.
+   */
+  private presenceRevealed = false;
+  private supportSamples = 0;
+  private supportStartAt = 0;
+  /** The performance-seconds mark of the last sample counted toward confirmation (dedupes repeats). */
+  private lastSupportMark: number | null = null;
+  /**
+   * §3 the current smoothed **audible** root, mirrored in the engine (never read from a scheduled
+   * `AudioParam.value`), so a bloom samples a pitch that is actually sounding rather than a future
+   * unsmoothed target.
+   */
+  private rootHzSmoothed: number | null = null;
+  /** §6 the context time the current reveal window ends (grains/events are suppressed until then). */
+  private revealUntil: number | null = null;
+  /**
+   * §6 (MINOR 4) the context time the bounded root-raise envelope (live master, presence turning
+   * eligible) ends. While it is active the ordinary per-tick root gain target is suppressed so the
+   * explicit 0.75 s ramp is not fought by τ smoothing.
+   */
+  private rootRevealUntil: number | null = null;
+  /**
+   * §6 (MAJOR) whether the bounded root raise was interrupted by a **prohibited** interval (pause, mute,
+   * stillness, lock) while presence stayed eligible. While set, `applyControls` drives the root **down**
+   * through the ordinary bounded τ and never schedules a positive target, and the unified reveal
+   * restarts exactly once when permission returns. Presence *clearing* does not set it (that path simply
+   * abandons and glides down).
+   */
+  private rootRevealPending = false;
+  /** §2 which voices sounded on the previous tick (to pick the admit/remove smoothing τ = 10 s). */
+  private voiceOn = [false, false, false, false];
 
   constructor(context: BaseAudioContext, options: AudioEngineOptions = {}) {
     this.graph = new AudioGraph(context, options);
@@ -858,13 +1202,16 @@ export class AudioEngine {
     this.grainCursor = null;
     // Only post-activation serials excite: baseline past whatever the app already published.
     if (this.latest) this.lastEventSerial = Math.max(this.lastEventSerial, this.latest.events.serial);
-    // Stay silent if stillness is armed or the gate is already at terminal zero (§8.3: quiet intent may
-    // not create a loud sound from a dead field); otherwise fade up from exact zero.
-    if (this.armed || this.phase === 'silent') {
+    // §6 activation fades up over 1.5 s **only when presence is eligible**; activation in dormancy stays
+    // silent (as does a stillness/black-hold lock). Reveal and activation are one envelope operation.
+    if (!this.presenceEligible || !this.revealPermitted()) {
       this.graph.cancelMasterAutomation(now);
       return;
     }
-    this.graph.fadeMasterIn(now, AUDIO.activationFadeSeconds);
+    const controls = this.latest
+      ? deriveAudioControls(this.latest.analysis.presentation)
+      : neutralAudioControls();
+    this.beginReveal(now, controls);
   }
 
   setMuted(muted: boolean): void {
@@ -920,13 +1267,16 @@ export class AudioEngine {
 
   tick(now: number): void {
     if (this.disposed) return;
-    // §8.3 (MAJOR 2) apply a reseed deferred to the de-click's zero instant, now that the master has
-    // reached zero — the buffer/IR swap is inaudible here. (Independent of the world snapshot.)
-    if (this.pendingReseed && now >= this.pendingReseed.at) {
-      const { seeds } = this.pendingReseed;
-      this.pendingReseed = null;
-      this.graph.reseedSound(seeds);
-      this.rng = new Rng(seeds.grains);
+    // §8.3/§6 (MAJOR 1) apply a reset deferred to the de-click's zero instant, now that the master has
+    // reached zero: the buffer/IR swap and the source silencing are inaudible here.
+    if (this.pendingReset && now >= this.pendingReset.at) {
+      const { seeds, silence } = this.pendingReset;
+      this.pendingReset = null;
+      if (seeds) {
+        this.graph.reseedSound(seeds);
+        this.rng = new Rng(seeds.grains);
+      }
+      if (silence) this.graph.clearEpisodeState(now);
     }
     const world = this.latest;
     if (!world) return;
@@ -946,35 +1296,187 @@ export class AudioEngine {
 
     const presentation = world.analysis.presentation;
     const controls = deriveAudioControls(presentation);
+    this.updateRootPitchMirror(controls, dt);
+
+    // §8.3 quiet requires **support below support-off** as well as low occupancy/activity: a visually
+    // supported low-activity body is not empty dormancy.
     const quiet =
       presentation.valid &&
       presentation.occupiedFraction < AUDIO.offOccupancy &&
-      presentation.reactionActivity < AUDIO.offActivity;
-    const active =
-      presentation.valid &&
-      (presentation.occupiedFraction >= AUDIO.wakeOccupancy ||
-        presentation.reactionActivity >= AUDIO.wakeActivity);
+      presentation.reactionActivity < AUDIO.offActivity &&
+      presentation.supportFraction < AUDIO.supportOffFraction;
 
-    this.updateSilence(now, dt, quiet, active);
-    this.updateEvent(now, world, controls);
+    // §6 presence: advance the confirmation/hysteresis machine, then reveal on a false→true crossing
+    // that the current state permits (never during stillness, pause/mute, or a pre-gesture lock). The
+    // reveal is retried each tick until it succeeds, then latched until presence clears.
+    const eligible = this.advancePresence(now, presentation, world.analysis.samplePerformanceSeconds);
+    if (!eligible) this.presenceRevealed = false;
+    if (eligible && !this.presenceRevealed && this.revealPermitted()) this.beginReveal(now, controls);
+    this.presenceEligible = eligible;
+
+    // §6 (MAJOR) root-reveal interruption. Two distinct cases:
+    //  - presence **cleared** while the bounded root raise is in flight → abandon it and let the ordinary
+    //    τ glide the root down (there is nothing left to reveal);
+    //  - the reveal became **prohibited** while presence is still eligible (pause, mute, stillness, lock) →
+    //    abandon the in-flight ramp and mark the reveal *pending* for the prohibited interval. Previously
+    //    `applyControls` then took its ordinary branch and scheduled a *positive* root target, so the root
+    //    kept rising behind the mute / under the stillness fade and returned already-raised on resume.
+    if (this.rootRevealUntil !== null) {
+      if (!eligible) {
+        this.graph.abandonRootReveal(now);
+        this.rootRevealUntil = null;
+        this.rootRevealPending = false;
+      } else if (!this.revealPermitted()) {
+        this.graph.abandonRootReveal(now);
+        this.rootRevealUntil = null;
+        this.rootRevealPending = true;
+      }
+    }
+    if (this.rootRevealPending) {
+      if (!eligible || !this.presenceRevealed) {
+        this.rootRevealPending = false; // presence cleared (or the reveal was never latched)
+      } else if (this.revealPermitted()) {
+        // Permission returned with presence still eligible: restart the reveal exactly once. The root
+        // returns through the dedicated bounded 0.75 s ramp from its mirrored held/decayed value — no
+        // upward step, and `revealVoice` guarantees the ramp is not fought by the ordinary τ.
+        this.rootRevealPending = false;
+        this.beginReveal(now, controls);
+      }
+    }
+
+    this.updateSilence(now, dt, quiet);
+    this.updateEvent(now, world, presentation, controls);
     if (this.phase !== 'silent') this.applyControls(now, controls);
     this.scheduleGrains(now, rawGap, controls);
     this.graph.reap(now);
   }
 
+  /** §3 mirror of the smoothed audible root, tracking the graph's frequency glide (one-pole, τ=10 s). */
+  private updateRootPitchMirror(controls: AudioControls, dt: number): void {
+    if (!controls.valid) return;
+    if (this.rootHzSmoothed === null || dt <= 0) {
+      this.rootHzSmoothed = controls.fundamentalHz;
+      return;
+    }
+    const alpha = 1 - Math.exp(-dt / AUDIO.frequencyTau);
+    this.rootHzSmoothed += (controls.fundamentalHz - this.rootHzSmoothed) * alpha;
+  }
+
   /**
-   * §8.3 (MAJOR 1/2) fresh-performance / episode abort. Cancels the stale master automation and
-   * deadlines, resets the stillness episode state and every counter, drops the granular scheduling
-   * debt, and establishes a **de-clicked** new master transition: it holds the computed live level,
-   * ramps to zero over `AUDIO.declickSeconds`, swaps the §4.4 sound substream while the master is at
-   * zero, and then fades back up. A restart therefore never steps a live master to zero (MAJOR 2, no
-   * click), and the stale terminal deadline from an abandoned episode can never fire (MAJOR 1). Called
-   * by the app on `restart()` and `applyResolution()` (and on a `load-trajectory` that replaces the
-   * active document).
+   * §6 support confirmation: two consecutive fresh valid samples at/above the on-threshold **and** at
+   * least 0.5 real seconds of persistence to become eligible; hysteresis (support-off) to stay; cleared
+   * immediately below support-off. Repeated ticks on the same snapshot (same `mark`) do not count
+   * again, and invalid/stale presentation can never establish presence.
+   */
+  private advancePresence(now: number, presentation: PresentationAnalysis, mark: number): boolean {
+    if (!presentation.valid) {
+      // MAJOR 3: an invalid/stale sample can never *establish* presence; it also breaks an unconfirmed
+      // candidate sequence (so a stale interval cannot count toward the 0.5 s persistence). Already
+      // eligible presence keeps its hold behaviour.
+      if (this.presenceEligible) return true;
+      this.resetSupportConfirmation();
+      return false;
+    }
+    const support = presentation.supportFraction;
+    if (this.presenceEligible) {
+      if (support < AUDIO.supportOffFraction) {
+        this.resetSupportConfirmation();
+        return false;
+      }
+      return true;
+    }
+    if (support >= AUDIO.supportOnFraction) {
+      if (mark !== this.lastSupportMark) {
+        if (this.supportSamples === 0) this.supportStartAt = now;
+        this.supportSamples += 1;
+        this.lastSupportMark = mark;
+      }
+      return (
+        this.supportSamples >= AUDIO.supportConfirmSamples &&
+        now - this.supportStartAt >= AUDIO.supportConfirmSeconds
+      );
+    }
+    this.resetSupportConfirmation();
+    return false;
+  }
+
+  private resetSupportConfirmation(): void {
+    this.supportSamples = 0;
+    this.lastSupportMark = null;
+  }
+
+  /** §6 whether the current state permits a reveal (stillness, pause/mute and pre-gesture lock forbid). */
+  private revealPermitted(): boolean {
+    if (!this.unlocked || this.muted || this.paused) return false;
+    if (this.armed) return false;
+    return (this.latest?.phase.stillnessState ?? 'none') === 'none';
+  }
+
+  /** §6 whether the initial reveal window is still active (grains/events are suppressed during it). */
+  private revealActive(now: number): boolean {
+    return this.revealUntil !== null && now < this.revealUntil;
+  }
+
+  /**
+   * §6 the unified reveal/activation: cancel a general absence fade (or reveal from exact silence) with
+   * one 1.5 s linear master ramp. From exact silence the root's pitch/filter/gain targets are prepared
+   * **behind the zero master** first (never audibly gliding from a placeholder pitch); with the master
+   * already live the root instead regains its floor through the bounded root envelope (see
+   * `applyControls`), never a second master fade in series.
+   */
+  private beginReveal(now: number, controls: AudioControls): void {
+    const master = this.graph.masterLevelAt(now);
+    const rootValues = {
+      frequencyHz: controls.voiceFrequencies[0] ?? controls.fundamentalHz,
+      detuneCents: controls.detuneCents * (DETUNE_MULTIPLIERS[0] ?? 0),
+      filterHz: controls.voiceFilters[0] ?? AUDIO.voiceFilterMaxHz,
+      level: controls.voiceLevels[0] ?? controls.voiceLevel,
+    };
+    if (this.phase === 'fading' || master <= 1e-4) {
+      if (master <= 1e-4 && controls.valid) {
+        // From exact silence: prepare the root behind the zero master, then one 1.5 s master reveal.
+        this.graph.prepareRoot(rootValues, now);
+        this.rootHzSmoothed = controls.fundamentalHz;
+      } else if (controls.valid && this.rootRevealUntil === null) {
+        // A *live-ish* mid-fade master: the root additionally returns through its own bounded 0.75 s ramp,
+        // concurrently with (never in series with) the master reveal, so it does not reappear at its floor
+        // through the ordinary τ. From exact silence it was already prepared behind the zero master, where a
+        // second root envelope in series would be forbidden.
+        this.rootRevealUntil = this.graph.revealVoice(0, rootValues.level, now, AUDIO.rootRevealSeconds);
+      }
+      this.graph.revealMaster(now, AUDIO.revealSeconds);
+    } else if (controls.valid) {
+      // Master already live: raise the root to its new floor through the dedicated **bounded** envelope
+      // (MINOR 4) — a mirrored linear ramp with an explicit 0.75 s endpoint, never an asymptotic step.
+      this.rootRevealUntil = this.graph.revealVoice(0, rootValues.level, now, AUDIO.rootRevealSeconds);
+    }
+    this.phase = 'live';
+    this.fadeDeadline = null;
+    this.terminalZeroAt = null;
+    this.quietSeconds = 0;
+    this.revealUntil = now + AUDIO.revealSeconds;
+    this.presenceRevealed = true;
+  }
+
+  /**
+   * §8.3/§6 (MAJOR 1/2) fresh-performance / episode abort. Cancels the stale master automation and
+   * deadlines, resets the stillness episode state and every counter, drops the granular scheduling debt,
+   * and establishes a **de-clicked** new master transition: it holds the computed live level and ramps
+   * linearly to zero over `AUDIO.declickSeconds`, then **stays at zero**. While the master is at zero the
+   * §4.4 sound substream is swapped and every persistent source (the four pad voices and the texture
+   * bus) is forced to exactly zero, so no pre-reset pad target can sound into the freshly seeded empty
+   * field; the master rises again only through the ordinary §6 presence reveal once the *new* field
+   * confirms support. A restart therefore never steps a live master to zero (no click), never re-exposes
+   * the old organism's tone, and the abandoned episode's terminal deadline can never fire.
+   *
+   * Called by the app on `restart()`, `applyResolution()` and a `load-trajectory` that replaces the
+   * active document. A trajectory load that *preserves* the current field does not call this at all, so
+   * it keeps its current semantics (a crossfade, no reset).
    *
    * When `reseedTo` is supplied the §4.4 sound substream is rebuilt from that root seed. For an audible
-   * (unlocked, unmuted, unpaused) graph the buffer/IR swap is deferred to the de-click's zero instant
-   * (applied on the next tick) so it is inaudible; an inaudible graph swaps immediately.
+   * (unlocked, unmuted, unpaused) graph the buffer/IR swap and the source silencing are deferred to the
+   * de-click's zero instant (applied on the next tick) so they are inaudible; an inaudible graph applies
+   * them immediately.
    */
   resetPerformance(now?: number, reseedTo?: number): void {
     if (this.disposed) return;
@@ -983,13 +1485,15 @@ export class AudioEngine {
     // The live level this restart holds from (MAJOR 2): the de-click ramps down from exactly here.
     this.masterHeldAtRestart = this.graph.masterLevelAt(at);
     // 1. Establish the new master transition: an audible graph holds the live level and de-clicks to
-    //    zero before fading back up; a locked graph cancels outright and stays at zero for the
-    //    activation edge to fade up.
+    //    zero (and stays there); a locked graph cancels outright and stays at zero.
     let zeroAt = at;
     if (audible) {
-      zeroAt = this.graph.declickMaster(at, AUDIO.declickSeconds, AUDIO.activationFadeSeconds);
+      zeroAt = this.graph.declickToZero(at, AUDIO.declickSeconds);
     } else {
-      this.graph.cancelMasterAutomation(at);
+      // MAJOR 1: an inaudible reset (paused, muted or locked) anchors the master at **exactly zero**
+      // (param + mirror) rather than holding the live level, so a later resume/unmute sees exact silence
+      // and takes the unified 1.5 s reveal — not the fast/loud return through the mute release.
+      this.graph.anchorMasterAtZero(at);
     }
     // 2. Reset the stillness episode state and counters.
     this.phase = 'live';
@@ -998,25 +1502,40 @@ export class AudioEngine {
     this.armed = false;
     this.fadeStartedAt = null;
     this.quietSeconds = 0;
-    this.wakeSeconds = 0;
+    // §6 presence is false at reset — the freshly seeded field must re-earn a confirmed support crossing.
+    this.presenceEligible = false;
+    this.presenceRevealed = false;
+    this.resetSupportConfirmation();
+    this.revealUntil = null;
+    this.rootRevealUntil = null;
+    this.rootRevealPending = false;
+    this.rootHzSmoothed = null;
+    this.voiceOn = [false, false, false, false];
     this.lastStillness = 'none';
     this.obsoleteEventsSkipped = 0;
     this.lastEventAt = Number.NEGATIVE_INFINITY;
     // 3. Drop the scheduling time/debt.
     this.lastTickTime = null;
     this.grainCursor = null;
-    // 4. Reseed the §4.4 sound substream. An audible graph defers the buffer/IR swap to the de-click's
-    //    zero instant; an inaudible graph swaps immediately.
-    if (reseedTo !== undefined) {
-      const seeds = deriveSoundSeeds(reseedTo);
-      this.rootSeed = reseedTo >>> 0;
-      if (audible) {
-        this.pendingReseed = { seeds, at: zeroAt };
-      } else {
-        this.pendingReseed = null;
-        this.graph.reseedSound(seeds);
-        this.rng = new Rng(seeds.grains);
+    // 4. Swap the §4.4 sound substream and clear every episode-scoped source, at the de-click's zero
+    //    instant for an audible graph (inaudible there), immediately otherwise.
+    const seeds = reseedTo !== undefined ? deriveSoundSeeds(reseedTo) : null;
+    if (reseedTo !== undefined) this.rootSeed = reseedTo >>> 0;
+    // MINOR 4: coalesce with a reset still pending inside its de-click window. A newer explicit seed
+    // supersedes, but a *seedless* reset preserves the latest pending seeds and just moves the swap to
+    // the newest zero instant — an unconditional replace would silently drop the pending reseed while
+    // `recordedRootSeed` already reported the new seed.
+    const preservedSeeds = seeds ?? this.pendingReset?.seeds ?? null;
+    const swapAt = Math.max(zeroAt, this.pendingReset?.at ?? zeroAt);
+    if (audible) {
+      this.pendingReset = { seeds: preservedSeeds, at: swapAt, silence: true };
+    } else {
+      this.pendingReset = null;
+      if (preservedSeeds) {
+        this.graph.reseedSound(preservedSeeds);
+        this.rng = new Rng(preservedSeeds.grains);
       }
+      this.graph.clearEpisodeState(at);
     }
   }
 
@@ -1033,22 +1552,18 @@ export class AudioEngine {
   /**
    * §8.3 *natural* episode re-arm: stillness returned to `none` on its own, so the acknowledgement is
    * cleared and a later stillness must re-earn it. This is deliberately **not** an episode abort — the
-   * physical master may still be gliding and the general wake path brings it back — and it is *not*
-   * what a restart uses (MAJOR 1: `restart()`/`applyResolution()` call `resetPerformance()`, which
-   * cancels the stale fade outright).
+   * physical master may still be gliding and the presence reveal brings it back — and it is *not* what a
+   * restart uses (MAJOR 1: `restart()`/`applyResolution()` call `resetPerformance()`).
    */
   private rearm(): void {
     this.armed = false;
     this.terminalZeroAt = null;
   }
 
-  private updateSilence(now: number, dt: number, quiet: boolean, active: boolean): void {
+  private updateSilence(now: number, dt: number, quiet: boolean): void {
     if (this.phase === 'live') {
       this.quietSeconds = quiet ? this.quietSeconds + dt : 0;
       if (this.quietSeconds >= AUDIO.offSeconds) this.beginFade(now);
-    } else if (this.phase === 'silent') {
-      this.wakeSeconds = active ? this.wakeSeconds + dt : 0;
-      if (this.wakeSeconds >= AUDIO.wakeSeconds) this.beginWake(now);
     }
     if (this.fadeDeadline !== null && now >= this.fadeDeadline) {
       this.phase = 'silent';
@@ -1058,7 +1573,6 @@ export class AudioEngine {
       this.terminalZeroAt = this.performanceAt(now);
       this.fadeDeadline = null;
       this.quietSeconds = 0;
-      this.wakeSeconds = 0;
     }
   }
 
@@ -1075,51 +1589,91 @@ export class AudioEngine {
     this.phase = 'fading';
   }
 
-  private beginWake(now: number): void {
-    this.phase = 'live';
-    this.quietSeconds = 0;
-    this.wakeSeconds = 0;
-    // Audio is no longer at digital zero, so a later stillness must re-earn the acknowledgement.
-    this.terminalZeroAt = null;
-    this.graph.wakeFromZero(now, AUDIO.levelTau);
-  }
-
-  private updateEvent(now: number, world: WorldState, controls: AudioControls): void {
+  /**
+   * §3 porcelain blooms: only a newly accepted topology serial may trigger one. Obsolete-serial
+   * skipping, the engine-assigned serial and the ≥ 15 s refractory are preserved. A serial is consumed
+   * even when the bloom is suppressed, and a bloom is **dropped, never queued**, when it arrives during
+   * the reveal, a terminal fade, invalid analysis, pause/mute, stillness, absent support, or while one
+   * event group is already live.
+   */
+  private updateEvent(
+    now: number,
+    world: WorldState,
+    presentation: PresentationAnalysis,
+    controls: AudioControls,
+  ): void {
     const serial = world.events.serial;
     if (serial <= this.lastEventSerial) return;
     // Obsolete serials (a jump after a stall) are skipped, not replayed.
     this.obsoleteEventsSkipped += serial - this.lastEventSerial - 1;
-    this.lastEventSerial = serial;
+    this.lastEventSerial = serial; // consumed even when suppressed
     if (world.events.kind === 'none') return;
-    if (this.phase === 'silent') return;
+    if (!controls.valid || !presentation.valid) return;
+    if (!this.presenceEligible) return;
+    if (this.phase !== 'live' || this.revealActive(now)) return;
+    if (this.paused || this.muted || this.armed) return;
+    if (world.phase.stillnessState !== 'none') return;
     if (now - this.lastEventAt < AUDIO.eventRefractorySeconds) return;
+    if (this.graph.liveNodes('event') > 0) return; // at most one live bloom group
     this.lastEventAt = now;
     this.graph.spawnEvent(now, {
-      fundamentalHz: controls.fundamentalHz,
-      level: AUDIO.eventLevelMax * clamp(0.4 + world.events.strength, 0.4, 1),
+      rootHz: this.rootHzSmoothed ?? controls.fundamentalHz,
+      featureScaleNorm: featureScaleNorm(presentation.featureScaleUV),
+      strength: world.events.strength,
     });
   }
 
   private applyControls(now: number, controls: AudioControls): void {
     if (!controls.valid) return; // §3.4: invalid/stale tier → hold the last smoothed values.
+    if (this.rootRevealUntil !== null && now >= this.rootRevealUntil) this.rootRevealUntil = null;
+    const rootReveal = this.rootRevealUntil !== null;
     for (let i = 0; i < AUDIO.maxVoices; i += 1) {
       const on = i < controls.voiceCount;
-      this.graph.applyVoice(
-        i,
-        {
-          frequencyHz: controls.voiceFrequencies[i] ?? controls.fundamentalHz,
-          detuneCents: controls.detuneCents * (DETUNE_SIGN[i] ?? 1),
-          level: on ? controls.voiceLevel * (AUDIO.voiceWeights[i] ?? 1) : 0,
-          filterHz: controls.voiceFilters[i] ?? 600,
-        },
-        now,
-        {
+      // §6 the pad floor is gated by presence eligibility (the latched §6 state, MAJOR 2): absent
+      // support → exactly zero, and the floor is held through the hysteresis band.
+      const level = this.presenceEligible && on ? (controls.voiceLevels[i] ?? 0) : 0;
+      const values = {
+        frequencyHz: controls.voiceFrequencies[i] ?? controls.fundamentalHz,
+        detuneCents: controls.detuneCents * (DETUNE_MULTIPLIERS[i] ?? 0),
+        level,
+        filterHz: controls.voiceFilters[i] ?? AUDIO.voiceFilterMaxHz,
+      };
+      if (i === 0 && rootReveal) {
+        // §6 (MINOR 4) the dedicated bounded root raise owns the root gain for its 0.75 s; glide pitch
+        // and filter only, so the explicit ramp is never fought by the ordinary τ smoothing.
+        this.graph.applyVoiceTone(0, values, now, {
           frequencyTau: AUDIO.frequencyTau,
           detuneTau: AUDIO.detuneTau,
-          // Removing a voice is a harmonic change (10–30 s); an audible voice follows descriptor τ.
-          levelTau: on ? AUDIO.levelTau : AUDIO.harmonicTau,
-        },
-      );
+          filterTau: AUDIO.filterTau,
+        });
+      } else if (i === 0 && this.rootRevealPending) {
+        // §6 (MAJOR) the reveal is pending through a prohibited interval: hold the root **down** with the
+        // ordinary bounded τ and never schedule a positive target, so it cannot rise behind the mute or
+        // under the stillness fade. `applyVoice` keeps the gain mirror in sync for the restart's
+        // `from = rootLevelAt(now)`.
+        this.graph.applyVoice(
+          0,
+          { ...values, level: 0 },
+          now,
+          {
+            frequencyTau: AUDIO.frequencyTau,
+            detuneTau: AUDIO.detuneTau,
+            levelTau: AUDIO.levelTau,
+            filterTau: AUDIO.filterTau,
+          },
+        );
+      } else {
+        // §2 the root follows the ordinary pad τ; an upper voice newly admitted/removed uses τ = 10 s.
+        const transitioning = on !== this.voiceOn[i];
+        const levelTau = i === 0 ? AUDIO.levelTau : transitioning ? AUDIO.upperVoiceTau : AUDIO.levelTau;
+        this.graph.applyVoice(i, values, now, {
+          frequencyTau: AUDIO.frequencyTau,
+          detuneTau: AUDIO.detuneTau,
+          levelTau,
+          filterTau: AUDIO.filterTau,
+        });
+      }
+      this.voiceOn[i] = on;
     }
     this.graph.applyTexture(
       { level: controls.textureLevel, filterHz: controls.textureFilterHz },
@@ -1130,20 +1684,24 @@ export class AudioEngine {
   }
 
   /**
-   * §8.2 (MAJOR 4) granular scheduling with a short-horizon cursor.
+   * §4 (MAJOR 4) granular scheduling with a short-horizon cursor.
    *
    * Rather than spawning every due grain at the tick's `now` — which batches a stalled tick's grains at
    * one instant — the engine keeps `grainCursor`, the context time of the next due grain, and each tick
    * emits grains only while the cursor is inside the §8.2 lookahead window `[now, now + lookaheadMs]`.
    * A material stall, an activation, or a transport resume resyncs the cursor to `now`, dropping overdue
-   * debt instead of replaying it, so no burst is released at a resume timestamp. The ≤ 12 concurrent
-   * grain bound (§8.2) is enforced on every spawn.
+   * debt instead of replaying it, so no burst is released at a resume timestamp. Grains are disabled
+   * during the reveal and whenever support is ineligible; after the reveal the schedule begins from the
+   * current time, never from accumulated debt. The ≤ 4 concurrent-grain bound (§4) is enforced.
    */
   private scheduleGrains(now: number, rawGap: number, controls: AudioControls): void {
-    // Not scheduling: silent, paused/muted transport, or an invalid/zero-rate tier. Pin the cursor to
-    // `now` so no debt accumulates while nothing is emitted.
+    // Not scheduling: not present, during the reveal, paused/muted transport, or an invalid/zero-rate
+    // tier. Pin the cursor to `now` so no debt accumulates while nothing is emitted.
     if (
-      this.phase === 'silent' ||
+      this.phase !== 'live' ||
+      !this.unlocked ||
+      !this.presenceEligible ||
+      this.revealActive(now) ||
       this.paused ||
       this.muted ||
       !controls.valid ||
@@ -1156,14 +1714,15 @@ export class AudioEngine {
     if (this.grainCursor === null || rawGap > AUDIO.stallSeconds) this.grainCursor = now;
 
     const horizon = now + AUDIO.lookaheadMs / 1000;
-    const spacing = 1 / controls.grainRate;
     while (this.graph.liveNodes('grain') < AUDIO.maxConcurrentGrains && this.grainCursor <= horizon) {
       // Never schedule in the past: an overdue cursor is resynced to `now` — one grain, never a batch.
       const when = Math.max(this.grainCursor, now);
       const seconds =
         AUDIO.grainMinSeconds + this.rng.next() * (AUDIO.grainMaxSeconds - AUDIO.grainMinSeconds);
       const offset = this.rng.next() * Math.max(0, AUDIO.noiseSeconds - seconds);
-      this.graph.spawnGrain(when, { seconds, offset, level: 0.9 + this.rng.next() * 0.1 });
+      this.graph.spawnGrain(when, { seconds, offset, level: AUDIO.grainPeak });
+      // §4 next-grain spacing `(0.75 + 0.5·rng.next())/rate`.
+      const spacing = (AUDIO.grainSpacingLow + AUDIO.grainSpacingRange * this.rng.next()) / controls.grainRate;
       this.grainCursor = when + spacing;
     }
   }
@@ -1193,6 +1752,12 @@ export class AudioEngine {
     armed: boolean;
     /** The live master-gain value (0 exactly once the silence gate has reached terminal zero). */
     masterGain: number;
+    /** §6 whether the pad floor is currently eligible (support confirmed, hysteresis held). */
+    presence: boolean;
+    /** §6 distinct qualifying support samples counted toward the current (unconfirmed) crossing. */
+    supportSamples: number;
+    /** §6 the context time the current reveal window ends, or null. */
+    revealUntil: number | null;
   } {
     return {
       nodes: this.graph.stats(),
@@ -1204,6 +1769,9 @@ export class AudioEngine {
       masterHeldAtRestart: this.masterHeldAtRestart,
       armed: this.armed,
       masterGain: this.graph.master.gain.value,
+      presence: this.presenceEligible,
+      supportSamples: this.supportSamples,
+      revealUntil: this.revealUntil,
     };
   }
 
