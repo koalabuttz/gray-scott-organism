@@ -1,0 +1,1221 @@
+{
+  "generatedBy": "tests/browser/soak2h.spec.ts (SOAK2H=1) — AC.14 two-hour real-time presentation soak",
+  "attempt": "control-light",
+  "status": "completed",
+  "abortReason": null,
+  "startedAtIso": "2026-09-22T07:20:00.321Z",
+  "endedAtIso": "2026-09-22T07:26:00.334Z",
+  "requestedDurationSeconds": 360,
+  "measuredWallClockSeconds": 360.013,
+  "configuration": {
+    "seed": 20260921,
+    "grid": "768x768",
+    "speed": 3,
+    "nominalStepsPerSecond": 120,
+    "intendedStepsPerSecond": 360,
+    "viewport": "1920x1080",
+    "canvas": "1920x1080",
+    "scene": "1920x1080",
+    "renderer": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+    "softwareRenderer": false,
+    "userAgent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) HeadlessChrome/153.0.0.0 Safari/537.36",
+    "harnessArgs": "channel=chromium headless --use-angle=vulkan + anti-throttling/autoplay/precise-memory flags",
+    "warmupSeconds": 60
+  },
+  "audio": {
+    "unlockNote": "audioUnlock() -> status=running available=true muted=false",
+    "finalStatus": {
+      "status": "running",
+      "unlocked": true,
+      "muted": false,
+      "mutePreference": false,
+      "available": true
+    },
+    "finalStats": {
+      "nodes": {
+        "nodeCreated": 18,
+        "nodeStopped": 18,
+        "liveNodes": 0,
+        "grainsStarted": 9,
+        "eventsFired": 0,
+        "maxLiveNodes": 1
+      },
+      "phase": "live",
+      "quietSeconds": 0,
+      "eventsSkipped": 0,
+      "terminalZeroAt": null,
+      "fadeStartedAt": 260.608,
+      "masterHeldAtRestart": 0,
+      "armed": false,
+      "masterGain": 0.75,
+      "presence": true,
+      "supportSamples": 3,
+      "revealUntil": 287.388,
+      "pitch": {
+        "activityX": 0.6472180142330825,
+        "observedBand": 3,
+        "padDegree": 3,
+        "coherenceX": 0.03198410983501184,
+        "bloomDegree": 0,
+        "bloomRegister": "coarse",
+        "carriers": [
+          165,
+          330,
+          495,
+          440
+        ],
+        "lastCommitAt": 352.576,
+        "crossings": 7,
+        "eligibleCrossings": 6,
+        "acceptedChanges": 6,
+        "droppedRefractory": 0,
+        "droppedProhibited": 1,
+        "lastBloom": {
+          "at": 351.53066666666666,
+          "baseHz": 220,
+          "degree": 0,
+          "register": "coarse"
+        }
+      }
+    },
+    "stateTimeline": [
+      {
+        "realSeconds": 60.003,
+        "status": "running",
+        "unlocked": true,
+        "muted": false,
+        "available": true,
+        "silenceSatisfied": false,
+        "terminalZeroAt": null,
+        "masterGain": 0.75,
+        "phase": "live"
+      },
+      {
+        "realSeconds": 120.008,
+        "status": "running",
+        "unlocked": true,
+        "muted": false,
+        "available": true,
+        "silenceSatisfied": false,
+        "terminalZeroAt": null,
+        "masterGain": 0.75,
+        "phase": "live"
+      },
+      {
+        "realSeconds": 180.009,
+        "status": "running",
+        "unlocked": true,
+        "muted": false,
+        "available": true,
+        "silenceSatisfied": false,
+        "terminalZeroAt": null,
+        "masterGain": 0.75,
+        "phase": "live"
+      },
+      {
+        "realSeconds": 240.009,
+        "status": "running",
+        "unlocked": true,
+        "muted": false,
+        "available": true,
+        "silenceSatisfied": false,
+        "terminalZeroAt": null,
+        "masterGain": 0.75,
+        "phase": "live"
+      },
+      {
+        "realSeconds": 300.031,
+        "status": "running",
+        "unlocked": true,
+        "muted": false,
+        "available": true,
+        "silenceSatisfied": false,
+        "terminalZeroAt": null,
+        "masterGain": 0.75,
+        "phase": "live"
+      }
+    ],
+    "nodeSamples": [
+      {
+        "realSeconds": 60.003,
+        "liveNodes": 0,
+        "maxLiveNodes": 1,
+        "nodeCreated": 2,
+        "nodeStopped": 2
+      },
+      {
+        "realSeconds": 120.008,
+        "liveNodes": 0,
+        "maxLiveNodes": 1,
+        "nodeCreated": 2,
+        "nodeStopped": 2
+      },
+      {
+        "realSeconds": 180.009,
+        "liveNodes": 0,
+        "maxLiveNodes": 1,
+        "nodeCreated": 8,
+        "nodeStopped": 8
+      },
+      {
+        "realSeconds": 240.009,
+        "liveNodes": 0,
+        "maxLiveNodes": 1,
+        "nodeCreated": 12,
+        "nodeStopped": 12
+      },
+      {
+        "realSeconds": 300.031,
+        "liveNodes": 0,
+        "maxLiveNodes": 1,
+        "nodeCreated": 18,
+        "nodeStopped": 18
+      }
+    ],
+    "nodeSlopesPerMinute": {
+      "liveNodes": 0,
+      "maxLiveNodes": 0
+    }
+  },
+  "frameTiming": {
+    "overall": {
+      "n": 36000,
+      "p50": 16.699999999982538,
+      "p95": 16.80000000000291,
+      "p99": 33.39999999999418,
+      "max": 100,
+      "mean": 17.28214999999949
+    },
+    "warmup": {
+      "n": 6820,
+      "p50": 16.69999999999709,
+      "p95": 16.799999999995634,
+      "p99": 33.29999999999927,
+      "max": 133.39999999999998,
+      "mean": 16.92501466275677
+    },
+    "windows": [
+      {
+        "index": 0,
+        "startRealSeconds": 60,
+        "observedSeconds": 299.9858000000119,
+        "complete": true,
+        "deliveredFps": 57.90940771196273,
+        "frames": {
+          "n": 36000,
+          "p50": 16.699999999982538,
+          "p95": 16.80000000000291,
+          "p99": 33.39999999999418,
+          "max": 100,
+          "mean": 17.28214999999949
+        },
+        "appRingSampleCount": 36000,
+        "injectedMonitorFrames": {
+          "n": 17372,
+          "p50": 16.799999952316284,
+          "p95": 32.19999998807907,
+          "p99": 43.19999998807907,
+          "max": 120.10000002384186,
+          "mean": 17.269399032926547
+        }
+      }
+    ],
+    "appInternalRing": {
+      "n": 36000,
+      "p50": 16.699999999982538,
+      "p95": 16.80000000000291,
+      "p99": 33.39999999999418,
+      "max": 100,
+      "mean": 17.28214999999949,
+      "note": "the app's own 240-frame diagnostics ring, sampled every 1 s and pooled — the authoritative frame-time source (AC.14 §11.1 rAF intervals)"
+    },
+    "injectedMonitorOverall": {
+      "n": 20922,
+      "p50": 16.700000047683716,
+      "p95": 31.599999964237213,
+      "p99": 42.30000001192093,
+      "max": 153.5,
+      "mean": 17.206333046555574,
+      "note": "the injected rAF monitor, used for frame counting / throttling; its percentiles include Playwright polling overhead and are NOT the AC.14 authority"
+    },
+    "judgedWindowCount": 1,
+    "steadyStateWindowCount": 0,
+    "worstWindowByP99": {
+      "index": 0,
+      "startRealSeconds": 60,
+      "observedSeconds": 299.9858000000119,
+      "complete": true,
+      "deliveredFps": 57.90940771196273,
+      "frames": {
+        "n": 36000,
+        "p50": 16.699999999982538,
+        "p95": 16.80000000000291,
+        "p99": 33.39999999999418,
+        "max": 100,
+        "mean": 17.28214999999949
+      },
+      "appRingSampleCount": 36000,
+      "injectedMonitorFrames": {
+        "n": 17372,
+        "p50": 16.799999952316284,
+        "p95": 32.19999998807907,
+        "p99": 43.19999998807907,
+        "max": 120.10000002384186,
+        "mean": 17.269399032926547
+      }
+    },
+    "worstWindowByP50": {
+      "index": 0,
+      "startRealSeconds": 60,
+      "observedSeconds": 299.9858000000119,
+      "complete": true,
+      "deliveredFps": 57.90940771196273,
+      "frames": {
+        "n": 36000,
+        "p50": 16.699999999982538,
+        "p95": 16.80000000000291,
+        "p99": 33.39999999999418,
+        "max": 100,
+        "mean": 17.28214999999949
+      },
+      "appRingSampleCount": 36000,
+      "injectedMonitorFrames": {
+        "n": 17372,
+        "p50": 16.799999952316284,
+        "p95": 32.19999998807907,
+        "p99": 43.19999998807907,
+        "max": 120.10000002384186,
+        "mean": 17.269399032926547
+      }
+    }
+  },
+  "readback": {
+    "probes": [
+      {
+        "realSeconds": 45.009,
+        "ms": 36.299999952316284,
+        "ok": true
+      },
+      {
+        "realSeconds": 90.108,
+        "ms": 12.899999976158142,
+        "ok": true
+      },
+      {
+        "realSeconds": 135.122,
+        "ms": 99.59999996423721,
+        "ok": true
+      },
+      {
+        "realSeconds": 180.185,
+        "ms": 55.5,
+        "ok": true
+      },
+      {
+        "realSeconds": 225.185,
+        "ms": 120.30000001192093,
+        "ok": true
+      },
+      {
+        "realSeconds": 270.213,
+        "ms": 66.30000001192093,
+        "ok": true
+      },
+      {
+        "realSeconds": 315.214,
+        "ms": 962.8999999761581,
+        "ok": true
+      }
+    ],
+    "percentiles": {
+      "n": 7,
+      "p50": 66.30000001192093,
+      "p95": 962.8999999761581,
+      "p99": 962.8999999761581,
+      "max": 962.8999999761581,
+      "mean": 193.3999999846731
+    },
+    "misses": 0,
+    "analysisCadencePerSecond": {
+      "n": 22,
+      "p50": 3.922350751229889,
+      "p95": 3.933071128591426,
+      "p99": 3.933333333333333,
+      "max": 3.933333333333333,
+      "mean": 3.85214407403511
+    },
+    "finalPresenterStats": {
+      "requests": 1387,
+      "results": 1386,
+      "stale": 0,
+      "errors": 0,
+      "skips": 0,
+      "terminations": 0,
+      "ignored": 0,
+      "slots": 3,
+      "free": 2
+    },
+    "finalAnalysisDiagnostics": {
+      "floatFormat": "RGBA32F",
+      "requests": 1395,
+      "samples": 1394,
+      "staleDrops": 0,
+      "nullFenceDrops": 0,
+      "packSaturatedSamples": 0,
+      "packSaturated": false
+    }
+  },
+  "resources": {
+    "start": {
+      "textures": 18,
+      "framebuffers": 18,
+      "renderbuffers": 1,
+      "programs": 14,
+      "shaders": 0,
+      "vertexArrays": 4,
+      "buffers": 5
+    },
+    "end": {
+      "textures": 18,
+      "framebuffers": 18,
+      "renderbuffers": 1,
+      "programs": 14,
+      "shaders": 0,
+      "vertexArrays": 4,
+      "buffers": 5
+    },
+    "deltas": {
+      "textures": 0,
+      "framebuffers": 0,
+      "renderbuffers": 0,
+      "programs": 0,
+      "shaders": 0,
+      "vertexArrays": 0,
+      "buffers": 0
+    },
+    "slopesPerMinute": {
+      "textures": 0,
+      "framebuffers": 0,
+      "renderbuffers": 0,
+      "programs": 0,
+      "shaders": 0,
+      "vertexArrays": 0,
+      "buffers": 0
+    },
+    "samplesEverySeconds": 60,
+    "samples": [
+      {
+        "realSeconds": 60.003,
+        "counts": {
+          "textures": 18,
+          "framebuffers": 18,
+          "renderbuffers": 1,
+          "programs": 14,
+          "shaders": 0,
+          "vertexArrays": 4,
+          "buffers": 5
+        }
+      },
+      {
+        "realSeconds": 120.008,
+        "counts": {
+          "textures": 18,
+          "framebuffers": 18,
+          "renderbuffers": 1,
+          "programs": 14,
+          "shaders": 0,
+          "vertexArrays": 4,
+          "buffers": 5
+        }
+      },
+      {
+        "realSeconds": 180.009,
+        "counts": {
+          "textures": 18,
+          "framebuffers": 18,
+          "renderbuffers": 1,
+          "programs": 14,
+          "shaders": 0,
+          "vertexArrays": 4,
+          "buffers": 5
+        }
+      },
+      {
+        "realSeconds": 240.009,
+        "counts": {
+          "textures": 18,
+          "framebuffers": 18,
+          "renderbuffers": 1,
+          "programs": 14,
+          "shaders": 0,
+          "vertexArrays": 4,
+          "buffers": 5
+        }
+      },
+      {
+        "realSeconds": 300.031,
+        "counts": {
+          "textures": 18,
+          "framebuffers": 18,
+          "renderbuffers": 1,
+          "programs": 14,
+          "shaders": 0,
+          "vertexArrays": 4,
+          "buffers": 5
+        }
+      },
+      {
+        "realSeconds": 360.013,
+        "counts": {
+          "textures": 18,
+          "framebuffers": 18,
+          "renderbuffers": 1,
+          "programs": 14,
+          "shaders": 0,
+          "vertexArrays": 4,
+          "buffers": 5
+        }
+      }
+    ],
+    "eventListeners": {
+      "samples": [
+        {
+          "realSeconds": 0,
+          "counts": {
+            "window": 16,
+            "document": 5,
+            "canvas": 3
+          }
+        },
+        {
+          "realSeconds": 120.008,
+          "counts": {
+            "window": 16,
+            "document": 5,
+            "canvas": 3
+          }
+        },
+        {
+          "realSeconds": 240.009,
+          "counts": {
+            "window": 16,
+            "document": 5,
+            "canvas": 3
+          }
+        }
+      ],
+      "deltas": {
+        "window": 0,
+        "document": 0,
+        "canvas": 0
+      }
+    }
+  },
+  "heap": {
+    "exposed": true,
+    "warmupBaseline": {
+      "usedJSHeapSize": 31014819,
+      "totalJSHeapSize": 47977891,
+      "jsHeapSizeLimit": 4395630592
+    },
+    "final": {
+      "usedJSHeapSize": 23829712,
+      "totalJSHeapSize": 35394304,
+      "jsHeapSizeLimit": 4395630592
+    },
+    "growthFraction": -0.23166690090952974,
+    "samples": [
+      {
+        "realSeconds": 60.003,
+        "usedJSHeapSize": 31009415,
+        "totalJSHeapSize": 47977891
+      },
+      {
+        "realSeconds": 120.008,
+        "usedJSHeapSize": 28824931,
+        "totalJSHeapSize": 45094451
+      },
+      {
+        "realSeconds": 180.009,
+        "usedJSHeapSize": 28598863,
+        "totalJSHeapSize": 47453747
+      },
+      {
+        "realSeconds": 240.009,
+        "usedJSHeapSize": 25850655,
+        "totalJSHeapSize": 39192891
+      },
+      {
+        "realSeconds": 300.031,
+        "usedJSHeapSize": 24422959,
+        "totalJSHeapSize": 39977755
+      },
+      {
+        "realSeconds": 360.013,
+        "usedJSHeapSize": 23829712,
+        "totalJSHeapSize": 35394304
+      }
+    ],
+    "note": "performance.memory with --enable-precise-memory-info; still a coarse process-wide readout."
+  },
+  "arcs": {
+    "count": 1,
+    "boundaries": [
+      {
+        "arc": 0,
+        "performanceSeconds": 3.183333333333331,
+        "realSeconds": 1.001,
+        "genesisCount": 0,
+        "rescueCount": 0,
+        "stillState": "none",
+        "movement": "dormancy"
+      },
+      {
+        "arc": 1,
+        "performanceSeconds": 825.6249999998308,
+        "realSeconds": 275.2,
+        "genesisCount": 2,
+        "rescueCount": 0,
+        "stillState": "none",
+        "movement": "rebirth"
+      }
+    ],
+    "genesisByMode": {
+      "replace": 2,
+      "inject": 1,
+      "total": 3
+    },
+    "extinctionByAction": {
+      "rescue": 1,
+      "recovery": 0,
+      "none": 0,
+      "total": 1
+    }
+  },
+  "resets": {
+    "contextLossCount": 0,
+    "contextLost": false,
+    "genesisTotal": 3,
+    "rescues": 1
+  },
+  "deliveredVsRequested": {
+    "series": [
+      {
+        "realSeconds": 15.008,
+        "requested": 5402.88,
+        "delivered": 5416,
+        "ratio": 1.0024283345178868
+      },
+      {
+        "realSeconds": 30.156,
+        "requested": 10856.16,
+        "delivered": 10852,
+        "ratio": 0.9996168074162504
+      },
+      {
+        "realSeconds": 45.164,
+        "requested": 16259.04,
+        "delivered": 16269,
+        "ratio": 1.0006125822926815
+      },
+      {
+        "realSeconds": 60.173,
+        "requested": 21662.28,
+        "delivered": 21668,
+        "ratio": 1.00026405346067
+      },
+      {
+        "realSeconds": 75.176,
+        "requested": 27063.36,
+        "delivered": 27074,
+        "ratio": 1.0003931514786042
+      },
+      {
+        "realSeconds": 90.185,
+        "requested": 32466.600000000002,
+        "delivered": 32474,
+        "ratio": 1.0002279265460503
+      },
+      {
+        "realSeconds": 105.189,
+        "requested": 37868.04,
+        "delivered": 37879,
+        "ratio": 1.0002894261229258
+      },
+      {
+        "realSeconds": 120.221,
+        "requested": 43279.56,
+        "delivered": 43290,
+        "ratio": 1.0002412224153852
+      },
+      {
+        "realSeconds": 135.239,
+        "requested": 48686.04,
+        "delivered": 48696,
+        "ratio": 1.0002045760961458
+      },
+      {
+        "realSeconds": 150.247,
+        "requested": 54088.920000000006,
+        "delivered": 54096,
+        "ratio": 1.0001308955697394
+      },
+      {
+        "realSeconds": 165.259,
+        "requested": 59493.24,
+        "delivered": 59501,
+        "ratio": 1.0001304349872355
+      },
+      {
+        "realSeconds": 180.273,
+        "requested": 64898.28,
+        "delivered": 64901,
+        "ratio": 1.0000419117424992
+      },
+      {
+        "realSeconds": 195.284,
+        "requested": 70302.23999999999,
+        "delivered": 70300,
+        "ratio": 0.999968137572857
+      },
+      {
+        "realSeconds": 210.284,
+        "requested": 75702.23999999999,
+        "delivered": 75706,
+        "ratio": 1.0000496682793008
+      },
+      {
+        "realSeconds": 225.326,
+        "requested": 81117.36,
+        "delivered": 81112,
+        "ratio": 0.9999339228988715
+      },
+      {
+        "realSeconds": 240.327,
+        "requested": 86517.72,
+        "delivered": 86500,
+        "ratio": 0.9997951864658476
+      },
+      {
+        "realSeconds": 255.343,
+        "requested": 91923.48,
+        "delivered": 91917,
+        "ratio": 0.9999295065852599
+      },
+      {
+        "realSeconds": 270.393,
+        "requested": 97341.48,
+        "delivered": 97341,
+        "ratio": 0.9999950689058765
+      },
+      {
+        "realSeconds": 285.393,
+        "requested": 102741.48,
+        "delivered": 102741,
+        "ratio": 0.9999953280797591
+      },
+      {
+        "realSeconds": 300.405,
+        "requested": 108145.79999999999,
+        "delivered": 108146,
+        "ratio": 1.0000018493552225
+      },
+      {
+        "realSeconds": 316.212,
+        "requested": 113836.31999999999,
+        "delivered": 113840,
+        "ratio": 1.0000323271166882
+      },
+      {
+        "realSeconds": 331.22,
+        "requested": 119239.20000000001,
+        "delivered": 119233,
+        "ratio": 0.9999480036766432
+      },
+      {
+        "realSeconds": 346.234,
+        "requested": 124644.23999999999,
+        "delivered": 124639,
+        "ratio": 0.9999579603517981
+      }
+    ],
+    "ratio": {
+      "n": 23,
+      "p50": 1.0000419117424992,
+      "p95": 1.0006125822926815,
+      "p99": 1.0024283345178868,
+      "max": 1.0024283345178868,
+      "mean": 1.0001820992145303
+    },
+    "simulatedStepsPerSecond": {
+      "n": 23,
+      "p50": 360.0236081054477,
+      "p95": 360.0590260698477,
+      "p99": 360.0590260698478,
+      "max": 360.0590260698478,
+      "mean": 358.72693674204396
+    },
+    "overloadSamples": 2,
+    "overloadAfterWarmup": 1,
+    "overloadSampleTimes": [
+      30.156,
+      240.327
+    ],
+    "finalClock": {
+      "performanceSeconds": 1080.208333332951,
+      "simulationTime": 129625,
+      "steps": 129625,
+      "paused": false,
+      "speed": 3
+    },
+    "finalDiagnostics": {
+      "frameTimesMs": [
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.5,
+        16.79999999998836,
+        16.600000000034925,
+        16.599999999976717,
+        16.79999999998836,
+        16.600000000034925,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.70000000001164,
+        16.600000000034925,
+        16.599999999976717,
+        16.79999999998836,
+        16.600000000034925,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.599999999976717,
+        16.79999999998836,
+        16.600000000034925,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.79999999998836,
+        16.600000000034925,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.79999999998836,
+        16.600000000034925,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.79999999998836,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.600000000034925,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.699999999953434,
+        16.600000000034925,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.800000000046566,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.79999999998836,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.600000000034925,
+        16.79999999998836,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.600000000034925,
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.79999999998836,
+        16.599999999976717,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.600000000034925,
+        16.79999999998836,
+        16.5,
+        16.70000000001164,
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.70000000001164,
+        16.5,
+        16.79999999998836,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.79999999998836,
+        16.599999999976717,
+        16.600000000034925,
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.70000000001164,
+        16.600000000034925,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.70000000001164,
+        33.29999999998836,
+        16.70000000001164,
+        16.600000000034925,
+        16.699999999953434,
+        16.600000000034925,
+        16.79999999998836,
+        16.599999999976717,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.70000000001164,
+        16.70000000001164,
+        16.599999999976717,
+        16.70000000001164,
+        16.600000000034925,
+        16.699999999953434,
+        16.70000000001164,
+        16.600000000034925,
+        16.699999999953434,
+        16.600000000034925,
+        16.70000000001164,
+        16.699999999953434,
+        16.70000000001164,
+        16.600000000034925
+      ],
+      "simulationMsAvg": 0.19832350779140867,
+      "renderMsAvg": 0.1344491417472109,
+      "qualityTier": 0,
+      "overload": false,
+      "rendererInfo": "ANGLE (Intel, Vulkan 1.4.305 (Intel(R) Graphics (RPL-U) (0x0000A7A9)), Intel open-source Mesa driver)",
+      "softwareRenderer": false,
+      "simStepsPerSecond": 360.023608105458,
+      "deliveredFps": 60.00393468424299,
+      "desiredStepsPerSecond": 360,
+      "analysisBacklog": 1
+    }
+  },
+  "nan": {
+    "violations": 0,
+    "samples": [
+      {
+        "realSeconds": 30.002,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 60.003,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 90.006,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 120.008,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 150.009,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 180.009,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 210.021,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 240.194,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 270.213,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 300.217,
+        "nonFinite": 0
+      },
+      {
+        "realSeconds": 330.225,
+        "nonFinite": 0
+      }
+    ]
+  },
+  "errors": {
+    "pageErrors": {
+      "count": 6,
+      "head": [
+        "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 20.55333333333333, 0.85) overlaps setValueCurveAtTime(..., 20.39466666666667, 0.18)",
+        "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 37.15866666666667, 0.85) overlaps setValueCurveAtTime(..., 36.992, 0.18)",
+        "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 68.852, 0.85) overlaps setValueCurveAtTime(..., 68.69333333333333, 0.18)",
+        "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 310.2813333333334, 0.55) overlaps setValueCurveAtTime(..., 310.12, 0.18)",
+        "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 328.4146666666667, 0.85) overlaps setValueCurveAtTime(..., 328.256, 0.18)",
+        "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 351.7106666666667, 0.55) overlaps setValueCurveAtTime(..., 351.552, 0.18)"
+      ],
+      "tail": []
+    },
+    "consoleErrors": {
+      "count": 0,
+      "head": [],
+      "tail": []
+    },
+    "audioSchedulingErrors": 6
+  },
+  "verdict": {
+    "thresholds": {
+      "tier": "none",
+      "checks": {
+        "frameTime-60fps": {
+          "value": {
+            "worstWindow": 0,
+            "p50": 16.699999999982538,
+            "p95": 16.80000000000291,
+            "p99": 33.39999999999418
+          },
+          "threshold": "every 5-min window p50 ≤ 17 / p95 ≤ 22 / p99 ≤ 34 ms",
+          "pass": true
+        },
+        "frameTime-30fps-fallback": {
+          "value": {
+            "worstWindow": 0,
+            "p50": 16.699999999982538,
+            "p95": 16.80000000000291,
+            "p99": 33.39999999999418
+          },
+          "threshold": "every 5-min window p50 ≤ 34 / p95 ≤ 40 / p99 ≤ 67 ms, ≥ 96 delivered steps/s",
+          "pass": true
+        },
+        "readbackLatency": {
+          "value": {
+            "p50": 66.30000001192093,
+            "p95": 962.8999999761581,
+            "p99": 962.8999999761581,
+            "samples": 7,
+            "misses": 0
+          },
+          "threshold": "readback latency p95 ≤ 250 ms, backlog ≤ 1",
+          "pass": false
+        },
+        "resourceSlopes": {
+          "value": {
+            "resourceDeltas": {
+              "textures": 0,
+              "framebuffers": 0,
+              "renderbuffers": 0,
+              "programs": 0,
+              "shaders": 0,
+              "vertexArrays": 0,
+              "buffers": 0
+            },
+            "resourceSlopesPerMinute": {
+              "textures": 0,
+              "framebuffers": 0,
+              "renderbuffers": 0,
+              "programs": 0,
+              "shaders": 0,
+              "vertexArrays": 0,
+              "buffers": 0
+            },
+            "audioNodeDelta": 0,
+            "audioNodeSlopes": {
+              "liveNodes": 0,
+              "maxLiveNodes": 0
+            },
+            "listenerDeltas": {
+              "window": 0,
+              "document": 0,
+              "canvas": 0
+            }
+          },
+          "threshold": "resource slopes ≈ 0 (no growth in GL objects, live audio nodes, event listeners)",
+          "pass": true
+        },
+        "heap": {
+          "value": {
+            "warmupBaselineBytes": 31014819,
+            "finalBytes": 23829712,
+            "growthFraction": -0.23166690090952974
+          },
+          "threshold": "heap growth < 10% after warmup",
+          "pass": true
+        }
+      },
+      "tierEvaluations": {
+        "tier60": {
+          "framePass": true,
+          "stepsPass": true,
+          "readbackPass": false
+        },
+        "tier30": {
+          "framePass": true,
+          "stepsPass": true,
+          "readbackPass": false
+        },
+        "resourceBounded": true,
+        "heapPass": true
+      }
+    },
+    "runIntegrity": {
+      "completed": true,
+      "pageErrors": 6,
+      "pageErrorSamples": {
+        "count": 6,
+        "head": [
+          "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 20.55333333333333, 0.85) overlaps setValueCurveAtTime(..., 20.39466666666667, 0.18)",
+          "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 37.15866666666667, 0.85) overlaps setValueCurveAtTime(..., 36.992, 0.18)",
+          "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 68.852, 0.85) overlaps setValueCurveAtTime(..., 68.69333333333333, 0.18)",
+          "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 310.2813333333334, 0.55) overlaps setValueCurveAtTime(..., 310.12, 0.18)",
+          "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 328.4146666666667, 0.85) overlaps setValueCurveAtTime(..., 328.256, 0.18)",
+          "pageerror: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 351.7106666666667, 0.55) overlaps setValueCurveAtTime(..., 351.552, 0.18)"
+        ],
+        "tail": []
+      },
+      "audioSchedulingErrors": 6,
+      "consoleErrors": 0,
+      "consoleErrorSamples": {
+        "count": 0,
+        "head": [],
+        "tail": []
+      },
+      "nanViolations": 0,
+      "pass": false
+    },
+    "accepted": false
+  },
+  "anomalies": [
+    "the app reported 'overload' in 1 post-warmup cadence sample(s)",
+    "6 uncaught AudioParam scheduling error(s) on the live audio path (setTargetAtTime overlaps setValueCurveAtTime) — see verdict.runIntegrity.pageErrorSamples"
+  ],
+  "artifactsDir": "/home/david/projects/vibe2/artifacts"
+}

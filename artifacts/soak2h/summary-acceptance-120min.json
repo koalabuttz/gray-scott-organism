@@ -1,0 +1,101 @@
+{
+  "attempt": "2",
+  "status": "completed",
+  "achievedTier": "none",
+  "accepted": false,
+  "measuredWallClockSeconds": 7200.029,
+  "arcs": 27,
+  "worstWindow": {
+    "index": 12,
+    "startRealSeconds": 4200,
+    "observedSeconds": 299.9905999999642,
+    "complete": true,
+    "deliveredFps": 55.46507123890544,
+    "frames": {
+      "n": 70080,
+      "p50": 16.700000000186265,
+      "p95": 33.299999999813735,
+      "p99": 33.40000000037253,
+      "max": 99.90000000037253,
+      "mean": 18.062451484018233
+    },
+    "appRingSampleCount": 70080,
+    "injectedMonitorFrames": {
+      "n": 16639,
+      "p50": 17,
+      "p95": 34.60000002384186,
+      "p99": 48,
+      "max": 118.19999998807907,
+      "mean": 18.03039245146872
+    }
+  },
+  "overall": {
+    "n": 1539360,
+    "p50": 16.699999999953434,
+    "p95": 33.299999999813735,
+    "p99": 33.40000000037253,
+    "max": 116.70000000006985,
+    "mean": 18.001400971708513
+  },
+  "warmup": {
+    "n": 141872,
+    "p50": 16.699999999982538,
+    "p95": 16.80000000000291,
+    "p99": 33.39999999999418,
+    "max": 133.29999999999995,
+    "mean": 17.34687676215099
+  },
+  "appInternalRing": {
+    "n": 1539360,
+    "p50": 16.699999999953434,
+    "p95": 33.299999999813735,
+    "p99": 33.40000000037253,
+    "max": 116.70000000006985,
+    "mean": 18.001400971708513
+  },
+  "readback": {
+    "n": 239,
+    "p50": 83.29999995231628,
+    "p95": 303.2999999523163,
+    "p99": 304.10000002384186,
+    "max": 304.5,
+    "mean": 109.65230125513037
+  },
+  "resourceDeltas": {
+    "textures": 0,
+    "framebuffers": 0,
+    "renderbuffers": 0,
+    "programs": 0,
+    "shaders": 0,
+    "vertexArrays": 0,
+    "buffers": 0
+  },
+  "resourceSlopesPerMinute": {
+    "textures": 0,
+    "framebuffers": 0,
+    "renderbuffers": 0,
+    "programs": 0,
+    "shaders": 0,
+    "vertexArrays": 0,
+    "buffers": 0
+  },
+  "audioNodeDelta": 0,
+  "listenerDeltas": {
+    "window": 0,
+    "document": 0,
+    "canvas": 0
+  },
+  "heapGrowthFraction": -0.35655906855247715,
+  "nanViolations": 0,
+  "pageErrors": 43,
+  "audioSchedulingErrors": 43,
+  "consoleErrors": 0,
+  "overloadSamples": 5,
+  "overloadAfterWarmup": 2,
+  "anomalies": [
+    "the trailing frame-time window is partial (shorter than 5 minutes) and was excluded from the verdict",
+    "32 readback probes returned no sample (analyzer busy or timed out)",
+    "the app reported 'overload' in 2 post-warmup cadence sample(s)",
+    "43 uncaught AudioParam scheduling error(s) on the live audio path (setTargetAtTime overlaps setValueCurveAtTime) — see verdict.runIntegrity.pageErrorSamples"
+  ]
+}

@@ -1,0 +1,40 @@
+{
+  "attempt": "2",
+  "generatedBy": "tests/browser/soak2h.spec.ts (SOAK2H=1)",
+  "phase": "soak",
+  "requestedSeconds": 7200,
+  "elapsedSeconds": 7200.029,
+  "updatedAtIso": "2026-09-22T07:11:56.957Z",
+  "framesCollected": 402027,
+  "completedWindows": 21,
+  "frames": {
+    "n": 402027,
+    "p50": 17,
+    "p95": 34.10000002384186,
+    "p99": 47,
+    "max": 157.9000000357628,
+    "mean": 17.90925236364722
+  },
+  "currentArc": 27,
+  "lastResourceCounts": {
+    "textures": 18,
+    "framebuffers": 18,
+    "renderbuffers": 1,
+    "programs": 14,
+    "shaders": 0,
+    "vertexArrays": 4,
+    "buffers": 5
+  },
+  "lastAudioStatus": {
+    "status": "running",
+    "unlocked": true,
+    "muted": false,
+    "mutePreference": false,
+    "available": true
+  },
+  "lastHeapUsed": 16430297,
+  "nanViolations": 0,
+  "pageErrors": 43,
+  "audioSchedulingErrors": 43,
+  "consoleErrors": 0
+}

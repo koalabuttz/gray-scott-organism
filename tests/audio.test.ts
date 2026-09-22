@@ -28,7 +28,7 @@ import {
   voicingCarriers,
 } from '../src/audio/voices.ts';
 import type { EventState, WorldState } from '../src/core/types.ts';
-import { FakeAudioContext, type FakeAudioParam, asBaseAudioContext } from './support/fake-audio.ts';
+import { FakeAudioContext, FakeAudioParam, asBaseAudioContext } from './support/fake-audio.ts';
 
 /** An active-field presentation sample rich enough to drive every control. */
 const ACTIVE_PRESENTATION = {
@@ -167,6 +167,88 @@ describe('§3 porcelain bloom (deviation 58)', () => {
     const fade = env.gain.events.find((event) => event.kind === 'linear')!;
     expect(fade.value).toBe(0);
     expect(fade.time).toBeCloseTo(10 + AUDIO.bloomTerminalFadeStart + AUDIO.bloomTerminalFadeSeconds, 6);
+    engine.dispose();
+  });
+});
+
+describe('§3/§4 (TAKE-5) value curves are scheduled from a clock-anchored time', () => {
+  /**
+   * The exact production repro shape: by the time `spawnEvent` runs, the engine's tick clock is ~13–21 ms
+   * behind the audio clock, so the bloom was scheduled with `when` at/behind the clock. Chromium then
+   * snapped the attack curve's start forward while the decay stayed at `when + attack` — strictly inside
+   * the curve — and threw `NotSupportedError`, aborting that bloom's decay and its bounded terminal fade
+   * (43 uncaught exceptions in a 120-minute soak; the bloom could hang at its attack peak).
+   */
+  it("places the bloom decay at the attack curve's real end when `when` is the clock instant", () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true });
+    context.currentTime = 10; // `when` is exactly the clock: inside the current render quantum
+    const gainsBefore = context.gains.length;
+    expect(() => engine.graph.spawnEvent(10, { baseHz: 220, strength: 1 })).not.toThrow();
+    const env = context.gains.slice(gainsBefore)[0]!;
+    const curve = env.gain.events.find((event) => event.kind === 'curve')!;
+    const decay = env.gain.events.find((event) => event.kind === 'target')!;
+    const curveStart = curve.effectiveStart!;
+    expect(curveStart, 'the guarded start is at or after the requested time').toBeGreaterThanOrEqual(10);
+    expect(decay.time, "the decay starts at or after the curve's never-snapped end").toBeGreaterThanOrEqual(
+      curveStart + curve.duration!,
+    );
+    // The audible shape is preserved: τ is still measured from the end of the 180 ms attack.
+    expect(decay.time - curveStart).toBeCloseTo(AUDIO.bloomAttackSeconds, 6);
+    expect(decay.tau, 'the partial keeps its designed decay τ').toBeCloseTo(AUDIO.bloomDecayTaus[0]!, 6);
+    const ramp = env.gain.events.find((event) => event.kind === 'linear')!;
+    expect(ramp.time, 'the bounded terminal fade is anchored to the same start').toBeCloseTo(
+      curveStart + AUDIO.bloomTerminalFadeStart + AUDIO.bloomTerminalFadeSeconds,
+      6,
+    );
+    // The terminal zero assignment still exists, so the bloom cannot hang at its attack peak.
+    const zeroAt = env.gain.events.filter((event) => event.kind === 'set' && event.value === 0).at(-1)!;
+    expect(zeroAt.time).toBeGreaterThanOrEqual(ramp.time);
+    engine.dispose();
+  });
+
+  it('is overlap-proof for a `when` behind the clock by a full frame, and for grains', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true });
+    context.currentTime = 30;
+    // 21 ms behind the clock — the measured production lag (640–1024 samples at 48 kHz).
+    expect(() => engine.graph.spawnEvent(30 - 0.021, { baseHz: 330, strength: 0.6 })).not.toThrow();
+    expect(() =>
+      engine.graph.spawnGrain(30 - 0.021, { seconds: 0.4, offset: 0.1, level: AUDIO.grainPeak }),
+    ).not.toThrow();
+    engine.dispose();
+  });
+
+  it('models the browser rule itself: an un-guarded decay inside a snapped curve throws', () => {
+    // This is what makes the tests above meaningful: the recording fake now rejects exactly what
+    // Chromium rejects, so this class of regression cannot pass by being unexercised.
+    const snapped = new FakeAudioParam(() => 10);
+    snapped.setValueCurveAtTime(new Float32Array(9), 10, AUDIO.bloomAttackSeconds);
+    expect(() => snapped.setTargetAtTime(0, 10 + AUDIO.bloomAttackSeconds, 0.85)).toThrow(
+      /overlaps setValueCurveAtTime/,
+    );
+    // An event exactly at the curve's end is accepted (the fixed schedule relies on this).
+    const exact = new FakeAudioParam(() => 10);
+    exact.setValueCurveAtTime(new Float32Array(9), 10 + AUDIO.curveLeadMs / 1000, AUDIO.bloomAttackSeconds);
+    expect(() =>
+      exact.setTargetAtTime(0, 10 + AUDIO.curveLeadMs / 1000 + AUDIO.bloomAttackSeconds, 0.85),
+    ).not.toThrow();
+  });
+
+  it('records the glide mirror from the time the glide was actually scheduled at', () => {
+    const context = new FakeAudioContext();
+    const engine = new AudioEngine(asBaseAudioContext(context), { unlocked: true, rootSeed: 5 });
+    context.currentTime = 4;
+    engine.graph.applyPitchGlide([220], [247.5], 4, AUDIO.glideSeconds);
+    const freq = context.oscillators[0]!.frequency;
+    const curve = freq.events.find((event) => event.kind === 'curve')!;
+    expect(curve.effectiveStart, 'the glide curve is scheduled from a guarded start').toBeGreaterThanOrEqual(4);
+    // A later immediate set can never land inside the still-pending glide curve.
+    expect(() =>
+      engine.graph.applyPitchImmediate([261.6], curve.effectiveStart! + 0.5),
+    ).not.toThrow();
+    const set = freq.events.filter((event) => event.kind === 'set').at(-1)!;
+    expect(set.time).toBeGreaterThanOrEqual(curve.effectiveStart! + curve.duration!);
     engine.dispose();
   });
 });
@@ -801,11 +883,15 @@ describe('§6 (MAJOR 2) a reset clears in-flight one-shots and the wet path', ()
     engine.consume(worldFor({}, { event: { serial: 1, kind: 'merge', strength: 0.8 } }));
     engine.tick(bloomAt);
     expect(engine.graph.stats().eventsFired).toBe(1);
+    // §3/§4 (TAKE-5) the re-assertion is scheduled from the guarded start: at or after the requested
+    // instant, and no further ahead than the curve lead (so the envelope can no longer be snapped).
+    const lead = AUDIO.curveLeadMs / 1000;
     expect(
       eventParam(engine).events.some(
-        (event) => event.kind === 'set' && event.value === 1 && event.time === bloomAt,
+        (event) =>
+          event.kind === 'set' && event.value === 1 && event.time >= bloomAt && event.time <= bloomAt + lead,
       ),
-      'the new bloom re-asserts unity on the event bus',
+      'the new bloom re-asserts unity on the event bus at its guarded start',
     ).toBe(true);
     engine.dispose();
   });

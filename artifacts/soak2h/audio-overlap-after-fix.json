@@ -1,0 +1,351 @@
+{
+  "generatedBy": "tests/browser/audio-overlap.spec.ts (OVERLAP=1)",
+  "seed": 7700077,
+  "audioStatus": {
+    "status": "running",
+    "unlocked": true,
+    "muted": false,
+    "mutePreference": false,
+    "available": true
+  },
+  "directProbe": {
+    "ran": true,
+    "reason": "",
+    "throws": 0,
+    "probes": 12,
+    "firstThrow": null,
+    "curveStarts": [
+      0.07133333333333333,
+      0.07133333333333333,
+      0.07133333333333333,
+      0.07133333333333333,
+      0.07133333333333333,
+      0.07133333333333333,
+      0.09266666666666667,
+      0.09266666666666667,
+      0.09266666666666667,
+      0.114,
+      0.114,
+      0.114,
+      0.114,
+      0.114,
+      0.114,
+      0.13533333333333333,
+      0.13533333333333333,
+      0.13533333333333333,
+      0.13533333333333333,
+      0.13533333333333333,
+      0.13533333333333333,
+      0.15666666666666668,
+      0.15666666666666668,
+      0.15666666666666668,
+      0.15666666666666668,
+      0.15666666666666668,
+      0.15666666666666668,
+      0.178,
+      0.178,
+      0.178,
+      0.178,
+      0.178,
+      0.178,
+      0.19933333333333336,
+      0.19933333333333336,
+      0.19933333333333336
+    ],
+    "curveEnds": [
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.27266666666666667,
+      0.27266666666666667,
+      0.27266666666666667,
+      0.294,
+      0.294,
+      0.294,
+      0.294,
+      0.294,
+      0.294,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.358,
+      0.358,
+      0.358,
+      0.358,
+      0.358,
+      0.358,
+      0.37933333333333336,
+      0.37933333333333336,
+      0.37933333333333336
+    ],
+    "decayTimes": [
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.2513333333333333,
+      0.27266666666666667,
+      0.27266666666666667,
+      0.27266666666666667,
+      0.294,
+      0.294,
+      0.294,
+      0.294,
+      0.294,
+      0.294,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.31533333333333335,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.33666666666666667,
+      0.358,
+      0.358,
+      0.358,
+      0.358,
+      0.358,
+      0.358,
+      0.37933333333333336,
+      0.37933333333333336,
+      0.37933333333333336
+    ],
+    "decayTaus": [
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35,
+      0.85,
+      0.55,
+      0.35
+    ],
+    "requestedWhen": [
+      0.021333333333333333,
+      0.0003333333333333313,
+      0.042666666666666665,
+      0.043,
+      0.064,
+      0.06433333333333333,
+      0.08533333333333333,
+      0.08566666666666667,
+      0.10666666666666667,
+      0.107,
+      0.128,
+      0.12833333333333335
+    ],
+    "clock": 0.021333333333333333,
+    "samples": [
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      },
+      {
+        "curveStartDrift": 0,
+        "decayMinusCurveEnd": 0
+      }
+    ]
+  },
+  "liveControl": {
+    "clockAtControl": 0.256,
+    "unguarded": "NotSupportedError: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 0.434, 0.85) overlaps setValueCurveAtTime(..., 0.2773333333333333, 0.18)",
+    "guarded": "no throw"
+  },
+  "liveWindow": {
+    "liveWindowSeconds": 150.718,
+    "blooms": 14,
+    "finalNodes": {
+      "nodeCreated": 88,
+      "nodeStopped": 88,
+      "liveNodes": 0,
+      "grainsStarted": 2,
+      "eventsFired": 14,
+      "maxLiveNodes": 12
+    },
+    "overlapErrors": 0,
+    "pageErrors": [],
+    "polls": 75
+  }
+}

@@ -478,6 +478,21 @@ export const AUDIO = {
   bloomLifetimeSeconds: 3.42,
   /** §3 peak event gain `0.065 · clamp(0.4 + eventStrength, 0.4, 1)`. */
   eventLevelMax: 0.065,
+  /**
+   * §3/§4 (TAKE-5) **value-curve scheduling guard.** Chromium snaps a `setValueCurveAtTime` start
+   * forward to the current render quantum when the requested time is at or behind the audio clock
+   * (measured: a start only 5 ms ahead of the clock is still snapped). Any automation scheduled after
+   * the curve from the *requested* time then lands strictly inside the curve's real interval and the
+   * browser throws `NotSupportedError` — which aborted the porcelain bloom's decay and its bounded
+   * terminal fade 43 times in a 120-minute soak, leaving the bloom able to hang at its attack peak.
+   *
+   * Every value curve is therefore scheduled at least `curveLeadMs` ahead of the clock (≥ one 128-frame
+   * render quantum, 2.67 ms at 48 kHz, plus margin — and no later than the existing 150 ms granular
+   * lookahead), and its real end is mirrored as
+   * `max(start + duration, clock + curveMarginMs + duration)`.
+   */
+  curveLeadMs: 50,
+  curveMarginMs: 20,
   /** §8.3 smoothing time constants (seconds): pad level 3, newly admitted/removed upper voices 10. */
   levelTau: 3,
   upperVoiceTau: 10,

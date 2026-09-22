@@ -1,0 +1,2 @@
+{"kind":"arc-boundary","attempt":"control-paced","arc":0,"performanceSeconds":4.041666666666661,"realSeconds":1.221,"genesisCount":0,"rescueCount":0,"stillState":"none","movement":"dormancy"}
+{"kind":"arc-boundary","attempt":"control-paced","arc":1,"performanceSeconds":826.8166666664699,"realSeconds":275.491,"genesisCount":2,"rescueCount":0,"stillState":"none","movement":"rebirth"}

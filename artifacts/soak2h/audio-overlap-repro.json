@@ -1,0 +1,11 @@
+{
+  "currentTime": 0.2773333333333333,
+  "sampleRate": 48000,
+  "future_50ms": "no throw (when = now +0.05s)",
+  "future_5ms": "no throw (when = now +0.005s)",
+  "past_2ms": "throw: NotSupportedError: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 0.466, 0.85) overlaps setValueCurveAtTime(..., 0.2986666666666667, 0.18)",
+  "past_5ms": "throw: NotSupportedError: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 0.4736666666666667, 0.85) overlaps setValueCurveAtTime(..., 0.3093333333333333, 0.18)",
+  "past_13ms": "throw: NotSupportedError: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 0.4760333333333334, 0.85) overlaps setValueCurveAtTime(..., 0.3093333333333333, 0.18)",
+  "past_21ms": "throw: NotSupportedError: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 0.4787, 0.85) overlaps setValueCurveAtTime(..., 0.32, 0.18)",
+  "past_40ms": "throw: NotSupportedError: Failed to execute 'setTargetAtTime' on 'AudioParam': setTargetAtTime(0, 0.46, 0.85) overlaps setValueCurveAtTime(..., 0.32, 0.18)"
+}

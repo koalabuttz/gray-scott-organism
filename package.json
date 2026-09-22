@@ -21,6 +21,7 @@
     "test:arcs": "ARCS=1 playwright test --project=headless-gpu arcs.spec.ts",
     "test:rescue": "RESCUE=1 playwright test --project=headless-gpu nucleation-rescue.spec.ts",
     "test:soak": "SOAK=1 playwright test --project=headless-gpu soak.spec.ts",
+    "test:soak2h": "SOAK2H=1 playwright test --config playwright.soak2h.config.ts --project=soak2h",
     "tune": "node --experimental-strip-types scripts/tune.ts",
     "explore": "node --experimental-strip-types scripts/explore.ts"
   },

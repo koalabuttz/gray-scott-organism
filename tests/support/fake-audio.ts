@@ -23,12 +23,61 @@ export interface FakeParamEvent {
   /** For `curve` events: the scheduled curve samples and its duration. */
   curve?: Float32Array;
   duration?: number;
+  /**
+   * For `curve` events only: the start Chromium actually renders the curve from. It equals `time`
+   * unless the requested time was at or behind the clock, in which case the browser snaps it forward to
+   * the current render quantum (see `FakeAudioParam`). The overlap rule is checked against this, not
+   * against the requested time — that difference *is* the bloom-envelope defect.
+   */
+  effectiveStart?: number;
 }
+
+/**
+ * One 128-frame render quantum at 48 kHz (2.67 ms) — the granularity Chromium snaps a value curve's
+ * start to. The fake's default sample rate is 48 kHz, so every fake context uses this quantum.
+ */
+const RENDER_QUANTUM_SECONDS = 128 / 48_000;
 
 export class FakeAudioParam {
   value = 0;
   events: FakeParamEvent[] = [];
   cancels: number[] = [];
+
+  /**
+   * @param clock Reads the owning context's `currentTime`; needed only to model the value-curve snap.
+   *   A param built without one behaves as if its clock never advanced.
+   */
+  constructor(private readonly clock: () => number = () => 0) {}
+
+  /**
+   * Chromium snaps a `setValueCurveAtTime` start forward to the current render quantum when the
+   * requested time is at or behind the audio clock (a start a few ms ahead is still snapped). Anything
+   * scheduled from the *requested* time then lands inside the curve's real interval and the browser
+   * throws `NotSupportedError`.
+   */
+  private snapToQuantum(time: number): number {
+    const now = this.clock();
+    return time < now + RENDER_QUANTUM_SECONDS ? now + RENDER_QUANTUM_SECONDS : time;
+  }
+
+  /**
+   * Faithful to Chromium's value-curve rule: no automation event may be scheduled **strictly inside** a
+   * `setValueCurveAtTime` interval — `NotSupportedError` is thrown — while an event exactly at the
+   * curve's end is accepted. Enforcing it here means a regression of the bloom-envelope overlap (or any
+   * future curve/follow-up pair) fails in the unit suite, not only in a live browser.
+   */
+  private guardCurveOverlap(time: number, kind: string): void {
+    for (const event of this.events) {
+      if (event.kind !== 'curve' || event.duration === undefined) continue;
+      const start = event.effectiveStart ?? event.time;
+      if (time > start && time < start + event.duration) {
+        throw new Error(
+          `NotSupportedError: Failed to execute '${kind}' on 'AudioParam': ${kind}(..., ${time}) ` +
+            `overlaps setValueCurveAtTime(..., ${start}, ${event.duration})`,
+        );
+      }
+    }
+  }
 
   /**
    * Schedules a value **without** touching the intrinsic `value` — faithful to the Web Audio spec, where
@@ -37,16 +86,19 @@ export class FakeAudioParam {
    * `param.value`: against a real (and an offline) context it is stale.
    */
   setValueAtTime(value: number, time: number): this {
+    this.guardCurveOverlap(time, 'setValueAtTime');
     this.events.push({ kind: 'set', value, time });
     return this;
   }
 
   linearRampToValueAtTime(value: number, time: number): this {
+    this.guardCurveOverlap(time, 'linearRampToValueAtTime');
     this.events.push({ kind: 'linear', value, time });
     return this;
   }
 
   setTargetAtTime(value: number, time: number, tau: number): this {
+    this.guardCurveOverlap(time, 'setTargetAtTime');
     this.events.push({ kind: 'target', value, time, tau });
     return this;
   }
@@ -54,11 +106,14 @@ export class FakeAudioParam {
   /**
    * §4/§3 `setValueCurveAtTime` (grain Hann windows and the bloom's raised-cosine attack). Records the
    * curve (first value, last value and the samples) so a test can assert the window shape and that the
-   * endpoints are exactly zero. Faithful about not updating the intrinsic `value`.
+   * endpoints are exactly zero. Faithful about not updating the intrinsic `value`, and about the
+   * render-quantum snap.
    */
   setValueCurveAtTime(curve: Float32Array, time: number, duration: number): this {
     const last = curve.length > 0 ? curve[curve.length - 1]! : 0;
-    this.events.push({ kind: 'curve', value: last, time, duration, curve: curve.slice() });
+    const effectiveStart = this.snapToQuantum(time);
+    this.guardCurveOverlap(effectiveStart, 'setValueCurveAtTime');
+    this.events.push({ kind: 'curve', value: last, time, duration, curve: curve.slice(), effectiveStart });
     return this;
   }
 
@@ -95,15 +150,27 @@ class FakeAudioNode {
 }
 
 class FakeGainNode extends FakeAudioNode {
-  readonly gain = new FakeAudioParam();
+  readonly gain: FakeAudioParam;
+
+  constructor(clock: () => number = () => 0) {
+    super();
+    this.gain = new FakeAudioParam(clock);
+  }
 }
 
 class FakeOscillatorNode extends FakeAudioNode {
   type = 'sine';
-  readonly frequency = new FakeAudioParam();
-  readonly detune = new FakeAudioParam();
+  readonly frequency: FakeAudioParam;
+  readonly detune: FakeAudioParam;
   /** The `PeriodicWave` set by `setPeriodicWave`, if any (a `PeriodicWave`-voiced drone). */
   wave: FakePeriodicWave | null = null;
+
+  constructor(clock: () => number = () => 0) {
+    super();
+    this.frequency = new FakeAudioParam(clock);
+    this.detune = new FakeAudioParam(clock);
+  }
+
   setPeriodicWave(wave: FakePeriodicWave): void {
     this.wave = wave;
   }
@@ -122,8 +189,14 @@ export class FakePeriodicWave {
 
 class FakeBiquadFilterNode extends FakeAudioNode {
   type = 'lowpass';
-  readonly frequency = new FakeAudioParam();
-  readonly Q = new FakeAudioParam();
+  readonly frequency: FakeAudioParam;
+  readonly Q: FakeAudioParam;
+
+  constructor(clock: () => number = () => 0) {
+    super();
+    this.frequency = new FakeAudioParam(clock);
+    this.Q = new FakeAudioParam(clock);
+  }
 }
 
 class FakeConvolverNode extends FakeAudioNode {
@@ -132,11 +205,20 @@ class FakeConvolverNode extends FakeAudioNode {
 }
 
 class FakeDynamicsCompressorNode extends FakeAudioNode {
-  readonly threshold = new FakeAudioParam();
-  readonly knee = new FakeAudioParam();
-  readonly ratio = new FakeAudioParam();
-  readonly attack = new FakeAudioParam();
-  readonly release = new FakeAudioParam();
+  readonly threshold: FakeAudioParam;
+  readonly knee: FakeAudioParam;
+  readonly ratio: FakeAudioParam;
+  readonly attack: FakeAudioParam;
+  readonly release: FakeAudioParam;
+
+  constructor(clock: () => number = () => 0) {
+    super();
+    this.threshold = new FakeAudioParam(clock);
+    this.knee = new FakeAudioParam(clock);
+    this.ratio = new FakeAudioParam(clock);
+    this.attack = new FakeAudioParam(clock);
+    this.release = new FakeAudioParam(clock);
+  }
 }
 
 export class FakeAudioBuffer {
@@ -192,13 +274,13 @@ export class FakeAudioContext {
   }
 
   createGain(): FakeGainNode {
-    const node = new FakeGainNode();
+    const node = new FakeGainNode(() => this.currentTime);
     this.gains.push(node);
     return node;
   }
 
   createOscillator(): FakeOscillatorNode {
-    const node = new FakeOscillatorNode();
+    const node = new FakeOscillatorNode(() => this.currentTime);
     this.oscillators.push(node);
     return node;
   }
@@ -210,7 +292,7 @@ export class FakeAudioContext {
   }
 
   createBiquadFilter(): FakeBiquadFilterNode {
-    const node = new FakeBiquadFilterNode();
+    const node = new FakeBiquadFilterNode(() => this.currentTime);
     this.filters.push(node);
     return node;
   }
@@ -220,7 +302,7 @@ export class FakeAudioContext {
   }
 
   createDynamicsCompressor(): FakeDynamicsCompressorNode {
-    return new FakeDynamicsCompressorNode();
+    return new FakeDynamicsCompressorNode(() => this.currentTime);
   }
 
   createBufferSource(): FakeBufferSourceNode {

@@ -425,6 +425,13 @@ export class AudioGraph {
   // the level the envelope starts from; the segments are the scheduled legs after it. Initialised to
   // the graph's zero so `masterLevelAt` is correct before any scheduling.
   private masterAnchor = { time: Number.NEGATIVE_INFINITY, level: 0 };
+  /**
+   * §5 (TAKE-5) per-voice end of the last scheduled pitch-glide **curve**. A value curve whose start
+   * precedes a later `cancelScheduledValues(t)` survives that cancel, so an immediate pitch set placed
+   * inside it would hit the same `NotSupportedError` the bloom did. Tracking the mirrored curve end
+   * lets the immediate set land at or after it instead.
+   */
+  private readonly pitchCurveEnd: number[] = [];
   private masterSegments: MasterSegment[] = [];
   /** §8 live-path instrumentation: lazily-created destination tap (`attachOutputAnalyser`). */
   private analyser: AnalyserNode | null = null;
@@ -632,8 +639,13 @@ export class AudioGraph {
    * idempotent — a per-tick control pass can never fight or restart it. No phase retrigger, no gain
    * boost, no vibrato: the curve is exactly `f0 · (f1/f0)^u`.
    */
-  applyPitchGlide(from: readonly number[], to: readonly number[], now: number, seconds: number): void {
+  applyPitchGlide(from: readonly number[], to: readonly number[], now: number, seconds: number): number {
     const duration = Math.max(1e-3, seconds);
+    // §5 (TAKE-5) guarded start (see `curveWindow`), and never inside an earlier glide's still-pending
+    // curve: the ≥ 12 s degree refractory with a 1.25 s glide already makes an overlap impossible, and
+    // this clamp keeps that true whatever the constants become.
+    const { start } = this.curveWindow(now, duration);
+    const glideStart = Math.max(start, ...this.voices.map((_, index) => this.pitchCurveEnd[index] ?? Number.NEGATIVE_INFINITY));
     for (let i = 0; i < this.voices.length; i += 1) {
       const voice = this.voices[i];
       if (!voice) continue;
@@ -645,9 +657,12 @@ export class AudioGraph {
         curve[point] = f0 * Math.pow(f1 / f0, u);
       }
       const param = voice.oscillator.frequency;
-      param.cancelScheduledValues(now);
-      param.setValueCurveAtTime(curve, now, duration);
+      param.cancelScheduledValues(glideStart);
+      param.setValueCurveAtTime(curve, glideStart, duration);
+      this.pitchCurveEnd[i] = glideStart + duration;
     }
+    // The caller builds its glide mirror from this, so the mirror and the scheduled curve agree.
+    return glideStart;
   }
 
   /**
@@ -655,13 +670,19 @@ export class AudioGraph {
    * post-reset neutral A target. Never a glide: this is the "no change without a crossing" endpoint.
    */
   applyPitchImmediate(carriers: readonly number[], now: number): void {
+    // §5 (TAKE-5) guarded instant: a pending glide curve survives `cancelScheduledValues` when its start
+    // precedes the cancel time, so the immediate set is placed at or after that curve's mirrored end and
+    // can never land strictly inside it (the bloom's overlap class, in the pitch path).
+    const { start } = this.curveWindow(now, 0);
     for (let i = 0; i < this.voices.length; i += 1) {
       const voice = this.voices[i];
       if (!voice) continue;
       const hz = clamp(carriers[i] ?? AUDIO.tonicHz, 1, 20000);
       const param = voice.oscillator.frequency;
-      param.cancelScheduledValues(now);
-      param.setValueAtTime(hz, now);
+      const at = Math.max(start, this.pitchCurveEnd[i] ?? Number.NEGATIVE_INFINITY);
+      param.cancelScheduledValues(at);
+      param.setValueAtTime(hz, at);
+      this.pitchCurveEnd[i] = at;
     }
   }
 
@@ -1066,6 +1087,31 @@ export class AudioGraph {
   // --- one-shot sources -----------------------------------------------------
 
   /**
+   * §3/§4 (TAKE-5) the guarded scheduling window for a value curve of `duration` seconds — the single
+   * place the envelope-mirror guard lives, so every curve in the graph is scheduled consistently.
+   *
+   * Chromium snaps a `setValueCurveAtTime` start forward to the current render quantum when the
+   * requested time is at or behind the audio clock. A later leg of the same envelope anchored to the
+   * *requested* time (the bloom's `setTargetAtTime` decay at `when + 0.18`) then falls strictly inside
+   * the curve's **real** interval, and the browser throws
+   * `NotSupportedError: setTargetAtTime(...) overlaps setValueCurveAtTime(...)`, aborting the rest of
+   * the envelope (43 uncaught exceptions in a 120-minute soak; the decay and the terminal fade to exact
+   * zero were never scheduled).
+   *
+   * `start` is pushed to at least `curveLeadMs` ahead of the clock — never pulled earlier, so a caller's
+   * future time is passed through untouched (the offline driver queues ticks against a context whose
+   * clock does not advance, and must keep its queued times). With `start` comfortably ahead of the clock
+   * no snap can occur, so the curve's analytic end **is** its real end; `end` additionally takes the
+   * clock-anchored bound so the mirror stays truthful even if `curveLeadMs` were ever reduced to zero.
+   */
+  private curveWindow(when: number, duration: number): { start: number; end: number } {
+    const clock = this.context.currentTime;
+    const start = Math.max(when, clock + AUDIO.curveLeadMs / 1000);
+    const end = Math.max(start + duration, clock + AUDIO.curveMarginMs / 1000 + duration);
+    return { start, end };
+  }
+
+  /**
    * §4 a softly-shimmering grain: a full-Hann-windowed slice of the reusable noise buffer (first and
    * last values exactly zero, peak `AUDIO.grainPeak`), scheduled with `setValueCurveAtTime`. Grains
    * route through the shared high/band/low-pass chain.
@@ -1077,14 +1123,18 @@ export class AudioGraph {
     env.gain.value = 0;
     source.connect(env).connect(this.textureBus);
     const level = this.busEnabled.texture ? spec.level : 0;
+    // §3/§4 (TAKE-5) guarded window. A grain's Hann curve is the only automation on this envelope (no
+    // follow-up leg can overlap it), but the curve is still scheduled from a clock-anchored time so the
+    // window is never snapped and `start`/`stop`/reap all name the same instant.
+    const { start, end } = this.curveWindow(when, spec.seconds);
     env.gain.setValueCurveAtTime(
       hannWindow(spec.seconds, this.context.sampleRate, level),
-      when,
+      start,
       spec.seconds,
     );
-    source.start(when, spec.offset, spec.seconds);
-    source.stop(when + spec.seconds + 0.02);
-    this.track([source, env], when + spec.seconds + 0.02, 'grain');
+    source.start(start, spec.offset, spec.seconds);
+    source.stop(end + 0.02);
+    this.track([source, env], end + 0.02, 'grain');
     this.grainsStarted += 1;
   }
 
@@ -1105,12 +1155,16 @@ export class AudioGraph {
     // can never be quantized by a bloom.
     const baseHz = clamp(spec.baseHz, AUDIO.fundamentalMinHz, 20000);
     const eventPeak = AUDIO.eventLevelMax * clamp(0.4 + spec.strength, 0.4, 1) * this.eventBoost;
-    // MAJOR 2: `clearEpisodeState` muzzles the event bus at a reset's zero instant; every new bloom
-    // re-asserts unity at its own start time so the event path keeps working after a reset.
-    this.eventGain.gain.setValueAtTime(1, when);
     const attack = AUDIO.bloomAttackSeconds;
+    // §3/§4 (TAKE-5) guarded window (see `curveWindow`). The decay is referenced to the attack curve's
+    // **mirrored real end**, so its τ is still measured from the true end of the attack — the audible
+    // shape is preserved exactly — while the decay can no longer be scheduled inside the curve.
+    const { start, end: curveEnd } = this.curveWindow(when, attack);
     const fadeStart = AUDIO.bloomTerminalFadeStart;
     const fadeEnd = fadeStart + AUDIO.bloomTerminalFadeSeconds;
+    // MAJOR 2: `clearEpisodeState` muzzles the event bus at a reset's zero instant; every new bloom
+    // re-asserts unity at its own start time so the event path keeps working after a reset.
+    this.eventGain.gain.setValueAtTime(1, start);
     const nodes: AudioNode[] = [];
     for (let index = 0; index < AUDIO.bloomPartialRatios.length; index += 1) {
       const amplitude = AUDIO.bloomPartialAmplitudes[index] ?? 0;
@@ -1124,21 +1178,23 @@ export class AudioGraph {
       // Raised-cosine attack: a coarse curve is a faithful raised cosine; its endpoints are exact.
       env.gain.setValueCurveAtTime(
         raisedCosineAttack(attack, this.context.sampleRate, peakAmp),
-        when,
+        start,
         attack,
       );
-      env.gain.setTargetAtTime(0, when + attack, tau);
+      // The decay starts at the curve's real end — never inside it. With the guarded start this is
+      // exactly `start + attack`, so the exponential τ keeps its designed reference point.
+      env.gain.setTargetAtTime(0, curveEnd, tau);
       // 100 ms bounded terminal fade from the analytic decay value to exactly zero.
       const atFade = peakAmp * Math.exp(-(fadeStart - attack) / tau);
-      env.gain.setValueAtTime(atFade, when + fadeStart);
-      env.gain.linearRampToValueAtTime(0, when + fadeEnd);
-      env.gain.setValueAtTime(0, when + fadeEnd);
+      env.gain.setValueAtTime(atFade, start + fadeStart);
+      env.gain.linearRampToValueAtTime(0, start + fadeEnd);
+      env.gain.setValueAtTime(0, start + fadeEnd);
       oscillator.connect(env).connect(this.eventGain);
-      oscillator.start(when);
-      oscillator.stop(when + AUDIO.bloomLifetimeSeconds);
+      oscillator.start(start);
+      oscillator.stop(start + AUDIO.bloomLifetimeSeconds);
       nodes.push(oscillator, env);
     }
-    this.track(nodes, when + AUDIO.bloomLifetimeSeconds, 'event');
+    this.track(nodes, start + AUDIO.bloomLifetimeSeconds, 'event');
     this.eventsFired += 1;
   }
 
@@ -1736,8 +1792,11 @@ export class AudioEngine {
     const to = voicingCarriers(target);
     this.padDegree = target;
     this.lastCommitAt = now;
-    this.pitch = { from, to, start: now, end: now + AUDIO.glideSeconds };
-    this.graph.applyPitchGlide(from, to, now, AUDIO.glideSeconds);
+    // §5 (TAKE-5) the mirror records the time the glide was **actually** scheduled at (the guard never
+    // pulls a future time earlier, and pushes a time that is behind the clock forward), so the in-flight
+    // carriers read from `pitchCarriersAt` can never disagree with the scheduled frequency curve.
+    const start = this.graph.applyPitchGlide(from, to, now, AUDIO.glideSeconds);
+    this.pitch = { from, to, start, end: start + AUDIO.glideSeconds };
     this.pitchCounters.accepted += 1;
   }
 

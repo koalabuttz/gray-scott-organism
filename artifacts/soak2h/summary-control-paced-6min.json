@@ -1,0 +1,98 @@
+{
+  "attempt": "control-paced",
+  "status": "completed",
+  "achievedTier": "60fps",
+  "accepted": false,
+  "measuredWallClockSeconds": 360.009,
+  "arcs": 1,
+  "worstWindow": {
+    "index": 0,
+    "startRealSeconds": 60,
+    "observedSeconds": 299.48840000003577,
+    "complete": true,
+    "deliveredFps": 59.57826747212202,
+    "frames": {
+      "n": 68640,
+      "p50": 16.699999999982538,
+      "p95": 16.70000000001164,
+      "p99": 16.800000000017462,
+      "max": 83.39999999999418,
+      "mean": 16.783776223771408
+    },
+    "appRingSampleCount": 68640,
+    "injectedMonitorFrames": {
+      "n": 17843,
+      "p50": 16.69999998807907,
+      "p95": 22.30000001192093,
+      "p99": 34.80000001192093,
+      "max": 104.40000003576279,
+      "mean": 16.7855741747464
+    }
+  },
+  "overall": {
+    "n": 68640,
+    "p50": 16.699999999982538,
+    "p95": 16.70000000001164,
+    "p99": 16.800000000017462,
+    "max": 83.39999999999418,
+    "mean": 16.783776223771408
+  },
+  "warmup": {
+    "n": 13343,
+    "p50": 16.69999999999709,
+    "p95": 16.799999999995634,
+    "p99": 16.80000000000291,
+    "max": 116.70000000000005,
+    "mean": 16.889582552650417
+  },
+  "appInternalRing": {
+    "n": 68640,
+    "p50": 16.699999999982538,
+    "p95": 16.70000000001164,
+    "p99": 16.800000000017462,
+    "max": 83.39999999999418,
+    "mean": 16.783776223771408
+  },
+  "readback": {
+    "n": 11,
+    "p50": 60,
+    "p95": 242.39999997615814,
+    "p99": 242.39999997615814,
+    "max": 242.39999997615814,
+    "mean": 92.76363635605031
+  },
+  "resourceDeltas": {
+    "textures": 0,
+    "framebuffers": 0,
+    "renderbuffers": 0,
+    "programs": 0,
+    "shaders": 0,
+    "vertexArrays": 0,
+    "buffers": 0
+  },
+  "resourceSlopesPerMinute": {
+    "textures": 0,
+    "framebuffers": 0,
+    "renderbuffers": 0,
+    "programs": 0,
+    "shaders": 0,
+    "vertexArrays": 0,
+    "buffers": 0
+  },
+  "audioNodeDelta": 0,
+  "listenerDeltas": {
+    "window": null,
+    "document": null,
+    "canvas": null
+  },
+  "heapGrowthFraction": -0.22342874272859858,
+  "nanViolations": 0,
+  "pageErrors": 4,
+  "audioSchedulingErrors": 4,
+  "consoleErrors": 0,
+  "overloadSamples": 0,
+  "overloadAfterWarmup": 0,
+  "anomalies": [
+    "4 uncaught AudioParam scheduling error(s) on the live audio path (setTargetAtTime overlaps setValueCurveAtTime) — see verdict.runIntegrity.pageErrorSamples"
+  ]
+}

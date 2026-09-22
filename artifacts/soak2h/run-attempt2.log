@@ -1,0 +1,33 @@
+
+Running 1 test using 1 worker
+
+[WebServer] Assets in public directory cannot be imported from JavaScript.
+[WebServer] If you intend to import that asset, put the file in the src directory, and use /src/trajectories/default.json instead of /public/trajectories/default.json.
+[WebServer] If you intend to use the URL of that asset, use /trajectories/default.json?url.
+  ✘  1 [soak2h] › tests/browser/soak2h.spec.ts:263:3 › SOAK2H=1 two-hour real-time presentation soak (AC.14) › two-hour unattended run at 768²/3× passing its achieved tier thresholds (2.0h)
+
+
+  1) [soak2h] › tests/browser/soak2h.spec.ts:263:3 › SOAK2H=1 two-hour real-time presentation soak (AC.14) › two-hour unattended run at 768²/3× passing its achieved tier thresholds 
+
+    Error: the soak passes at least one AC.14 threshold tier
+
+    expect(received).not.toBe(expected) // Object.is equality
+
+    Expected: not "none"
+
+      950 |     // leaves the complete evidence on disk.
+      951 |     expect(status, `the soak ran to completion (aborted: ${abortReason})`).toBe('completed');
+    > 952 |     expect(achievedTier, 'the soak passes at least one AC.14 threshold tier').not.toBe('none');
+          |                                                                                   ^
+      953 |     expect(
+      954 |       runIntegrity.pass,
+      955 |       `run integrity (${pageErrors.count} page error(s), ${consoleErrors.count} console error(s), ` +
+        at /home/david/projects/vibe2/tests/browser/soak2h.spec.ts:952:83
+
+    Error Context: test-results/soak2h-SOAK2H-1-two-hour-r-e8c1b-ts-achieved-tier-thresholds-soak2h/error-context.md
+
+  Slow test file: [soak2h] › tests/browser/soak2h.spec.ts (2.0h)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  1 failed
+    [soak2h] › tests/browser/soak2h.spec.ts:263:3 › SOAK2H=1 two-hour real-time presentation soak (AC.14) › two-hour unattended run at 768²/3× passing its achieved tier thresholds 
+PLAYWRIGHT_EXIT=1

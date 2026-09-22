@@ -1,0 +1,99 @@
+{
+  "attempt": "3",
+  "status": "completed",
+  "achievedTier": "none",
+  "accepted": false,
+  "measuredWallClockSeconds": 7200.276,
+  "arcs": 27,
+  "worstWindow": {
+    "index": 12,
+    "startRealSeconds": 4200,
+    "observedSeconds": 299.9807000000477,
+    "complete": true,
+    "deliveredFps": 59.39048745468347,
+    "frames": {
+      "n": 66000,
+      "p50": 16.700000000186265,
+      "p95": 16.799999999813735,
+      "p99": 16.800000000745058,
+      "max": 83.40000000037253,
+      "mean": 16.837463636363616
+    },
+    "appRingSampleCount": 66000,
+    "injectedMonitorFrames": {
+      "n": 17816,
+      "p50": 16.69999998807907,
+      "p95": 24,
+      "p99": 37.19999998807907,
+      "max": 103.69999998807907,
+      "mean": 16.840042658287363
+    }
+  },
+  "overall": {
+    "n": 1461600,
+    "p50": 16.699999999720603,
+    "p95": 16.799999999813735,
+    "p99": 16.800000000279397,
+    "max": 100,
+    "mean": 16.778693007545012
+  },
+  "warmup": {
+    "n": 137137,
+    "p50": 16.699999999982538,
+    "p95": 16.79999999993015,
+    "p99": 16.800000000046566,
+    "max": 133.29999999999995,
+    "mean": 16.770027782432805
+  },
+  "appInternalRing": {
+    "n": 1461600,
+    "p50": 16.699999999720603,
+    "p95": 16.799999999813735,
+    "p99": 16.800000000279397,
+    "max": 100,
+    "mean": 16.778693007545012
+  },
+  "readback": {
+    "n": 237,
+    "p50": 57.40000003576279,
+    "p95": 302,
+    "p99": 303.10000002384186,
+    "max": 304.2000000476837,
+    "mean": 84.34177215013825
+  },
+  "resourceDeltas": {
+    "textures": 0,
+    "framebuffers": 0,
+    "renderbuffers": 0,
+    "programs": 0,
+    "shaders": 0,
+    "vertexArrays": 0,
+    "buffers": 0
+  },
+  "resourceSlopesPerMinute": {
+    "textures": 0,
+    "framebuffers": 0,
+    "renderbuffers": 0,
+    "programs": 0,
+    "shaders": 0,
+    "vertexArrays": 0,
+    "buffers": 0
+  },
+  "audioNodeDelta": 0,
+  "listenerDeltas": {
+    "window": 0,
+    "document": 0,
+    "canvas": 0
+  },
+  "heapGrowthFraction": 0.20251366524519715,
+  "nanViolations": 0,
+  "pageErrors": 0,
+  "audioSchedulingErrors": 0,
+  "consoleErrors": 0,
+  "overloadSamples": 0,
+  "overloadAfterWarmup": 0,
+  "anomalies": [
+    "20 readback probes returned no sample (analyzer busy or timed out)",
+    "the readback latency probe is not adjudicable (20 probe(s) hit its 300 ms timeout, 20 miss(es)) — AC.14's 250 ms readback criterion is NOT demonstrated by this run"
+  ]
+}
