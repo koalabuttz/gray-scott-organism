@@ -9,3 +9,4 @@ playwright-report/
 # Local env / OS noise
 *.local
 .DS_Store
+tmp/
