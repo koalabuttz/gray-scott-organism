@@ -120,6 +120,24 @@ html.cursor-idle #stage {
   color: #b9c6d6;
 }
 
+/* §10 Phase-4 guardrail: a live non-viable-parameter warning, shown while the operator is still
+   choosing rather than after the screen has gone black. */
+.lab-warning {
+  margin: 6px 0;
+  padding: 6px 8px;
+  border: 1px solid #8a5a2b;
+  border-left: 3px solid #d98a3a;
+  border-radius: 3px;
+  background: rgba(120, 70, 20, 0.22);
+  color: #f0c48a;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.lab-warning[hidden] {
+  display: none;
+}
+
 .artwork-error {
   position: fixed;
   inset: 0;

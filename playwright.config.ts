@@ -106,7 +106,14 @@ export default defineConfig({
   webServer: {
     command: 'npm run dev -- --host 127.0.0.1 --port 5199',
     url: 'http://127.0.0.1:5199',
-    reuseExistingServer: true,
+    // `VITE_TEST=1` makes `vite.config.ts` disable HMR, so a source-file write during a run cannot
+    // reload the page mid-test (the shared root cause of the two observed browser flakes: a page
+    // navigation destroying the evaluate context, and live state reverting to startup defaults).
+    env: { VITE_TEST: '1' },
+    // The suite must run against that HMR-suppressed server, so a *pre-existing* dev server (started
+    // by `npm run dev`, HMR on) is not reused: reusing it would restore the reload behaviour. If one
+    // is running on 5199 Playwright reports the port conflict explicitly rather than flaking silently.
+    reuseExistingServer: false,
     timeout: 60_000,
   },
 });

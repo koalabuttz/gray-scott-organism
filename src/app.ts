@@ -137,6 +137,12 @@ export interface ArtworkTestHook {
   labOpen(): boolean;
   toggleLab(): void;
   labSnapshot(): LabSnapshot;
+  /** §11.3 recovery: whether the WebGL context is currently lost (GPU work stopped). */
+  contextLost(): boolean;
+  /** §11.3 recovery: how many context losses have been observed (so a loss is not silently ignored). */
+  contextLossCount(): number;
+  /** §11.3 recovery: the live GL resource counts, so a rebuild can be shown to leak nothing. */
+  resourceCounts(): GLResourceCounts;
   cursorIdle(): boolean;
   updateWorld(deltaSeconds: number): void;
   publishNow(): void;
@@ -227,8 +233,12 @@ export interface ArtworkTestHook {
   events(): EventState;
   /** §3.4 the bounded retained event log. */
   eventLog(): EventState[];
-  /** §8 the truthful audio status (suspended/unlocked/running/unavailable) and mute state. */
-  audioStatus(): { status: string; unlocked: boolean; muted: boolean; available: boolean };
+  /**
+   * §8 the truthful audio status (suspended/unlocked/running/unavailable) and mute state. `muted` is
+   * the **effective** gate (operator preference OR the transient §11.3 context-loss forced mute);
+   * `mutePreference` is the operator's own toggle alone.
+   */
+  audioStatus(): { status: string; unlocked: boolean; muted: boolean; mutePreference: boolean; available: boolean };
   /** §8.3 the live silence acknowledgement the curator reads each tick. */
   silenceStatus(): { satisfied: boolean; terminalZeroAt: number | null };
   /** §8.3 verification-only: issue the stillness silence override directly. */
@@ -585,6 +595,13 @@ export class App {
   private rafHandle = 0;
   private lastTime = 0;
   private userPaused = false;
+  /**
+   * §11.3 recovery: true between a `webglcontextlost` and a successful `webglcontextrestored`. While
+   * it is set the frame loop is stopped, so no GL call is issued against the lost context.
+   */
+  private contextLost = false;
+  /** §11.3 recovery: how many context losses this instance has observed (diagnostic/test accessor). */
+  private contextLossCount = 0;
 
   private cursorTimer = 0;
   private activationStatus = 'not activated (click or press Enter for fullscreen)';
@@ -931,7 +948,9 @@ export class App {
   // ---------------------------------------------------------------- frame
 
   private frame = (now: number): void => {
-    if (this.disposed) return;
+    // §11.3: while the context is lost the loop is stopped, but a queued rAF must not issue GL calls
+    // against a dead context either.
+    if (this.disposed || this.contextLost) return;
     this.rafHandle = requestAnimationFrame(this.frame);
     const realDelta = this.lastTime === 0 ? 0 : Math.max(0, Math.min((now - this.lastTime) / 1000, 0.5));
     this.lastTime = now;
@@ -1300,6 +1319,16 @@ export class App {
   private resetAnalysis(epoch: number): void {
     this.analyzer.reset(epoch);
     this.presenter.reset(epoch);
+    this.clearAnalysisState();
+  }
+
+  /**
+   * The CPU-only half of `resetAnalysis`: drop the app-side health/coarse/presentation state and the
+   * cadence accumulators. Used directly by the §11.3 context-**loss** path, which must issue **no GL
+   * calls** against the lost context — `Analyzer.reset`/`PresentationWorker.reset` are skipped there
+   * (the instances are dropped and rebuilt on restoration anyway).
+   */
+  private clearAnalysisState(): void {
     this.health = null;
     this.coarse = null;
     this.presentation = null;
@@ -1581,6 +1610,9 @@ export class App {
     window.addEventListener('resize', this.onResize);
     window.addEventListener('keydown', this.onKeyDown);
     this.canvas.addEventListener('click', this.onCanvasClick);
+    // §11.3 recovery hooks live on the canvas, which is where the WebGL context fires them.
+    this.canvas.addEventListener('webglcontextlost', this.onContextLost);
+    this.canvas.addEventListener('webglcontextrestored', this.onContextRestored);
     document.addEventListener('mousemove', this.onPointerMove, { passive: true });
     document.addEventListener('visibilitychange', this.onVisibilityChange);
     this.onPointerMove();
@@ -1590,10 +1622,143 @@ export class App {
     window.removeEventListener('resize', this.onResize);
     window.removeEventListener('keydown', this.onKeyDown);
     this.canvas.removeEventListener('click', this.onCanvasClick);
+    this.canvas.removeEventListener('webglcontextlost', this.onContextLost);
+    this.canvas.removeEventListener('webglcontextrestored', this.onContextRestored);
     document.removeEventListener('mousemove', this.onPointerMove);
     document.removeEventListener('visibilitychange', this.onVisibilityChange);
     if (this.cursorTimer !== 0) window.clearTimeout(this.cursorTimer);
     document.documentElement.classList.remove('cursor-idle');
+  }
+
+  // ------------------------------------------------------- §11.3 recovery
+
+  /**
+   * §11.3 recovery on context loss: `preventDefault()` opts into receiving `webglcontextrestored` —
+   * without it the context is gone for good — then stop GPU work (the rAF loop) and issue **no further
+   * GL calls**: muting is on the audio thread, and the pending analysis is discarded through the
+   * CPU-only `clearAnalysisState` (the analyzer/presenter, whose `reset` calls `gl.deleteSync`, are
+   * left untouched and dropped at restoration). Forced silence is a **transient gate** separate from
+   * the operator's mute preference (`setContextMuted`), so an operator toggle during the outage only
+   * moves the preference and cannot defeat the forced silence (review fix MINOR 3).
+   */
+  private onContextLost = (event: Event): void => {
+    event.preventDefault();
+    if (this.disposed || this.contextLost) return;
+    this.contextLost = true;
+    this.contextLossCount += 1;
+    console.warn(
+      '[artwork] WebGL context lost: stopping GPU work, forcing audio silent and discarding pending ' +
+        'analysis (CPU-only; §11.3 recovery)',
+    );
+    this.stop();
+    this.audio.setContextMuted(true);
+    this.clearAnalysisState();
+    this.diagnosticImageCache = null;
+  };
+
+  /**
+   * §11.3 recovery on restoration: recreate every GL resource, then begin a quiet new arc from the
+   * recorded seed. The forced-silence gate is dropped here, so the **operator's** latest mute
+   * preference (which may have changed during the outage) is what applies. If the rebuild itself
+   * throws, the piece stays stopped with an explicit failure rather than presenting a
+   * convincing-looking fake simulation.
+   */
+  private onContextRestored = (): void => {
+    if (this.disposed || !this.contextLost) return;
+    console.info('[artwork] WebGL context restored: rebuilding GPU resources (§11.3 recovery)');
+    try {
+      this.rebuildGlResources();
+    } catch (error) {
+      console.error('[artwork] context restoration failed; the piece remains stopped:', error);
+      return;
+    }
+    this.contextLost = false;
+    this.audio.setContextMuted(false);
+    this.start();
+  };
+
+  /**
+   * §11.3 recovery: recreate **every** GL resource and render state through the same construction
+   * paths the constructor uses, then begin a quiet new arc with the recorded seed.
+   *
+   * The `WebGL2RenderingContext` object survives a loss/restore cycle but none of the textures,
+   * framebuffers, buffers, programs or vertex arrays it owned do. `Simulation` owns the chemistry
+   * ping-pong pair and its programs, `Renderer` owns the derived-field/bloom targets, the material
+   * targets and all render programs, and `Analyzer` owns the reduction targets and the whole
+   * pixel-pack-buffer ring — so the complete set is released and reconstructed here, and no GL
+   * object is reused. The presentation worker is CPU-side but is recreated too, so its pooled slot
+   * ring starts clean. Releasing through `dispose()` keeps the shared resource tracker balanced
+   * (every decrement matches a construction), which the browser evidence asserts.
+   */
+  private rebuildGlResources(): void {
+    const grid = this.simulationResolution;
+    const previousEpoch = this.simulation.epoch;
+
+    // Terminate the (CPU-side) presentation worker; its GL-free pooled slots go with it.
+    this.presenter.dispose();
+    // The dead GL instances are dropped rather than disposed: after a loss the driver has already
+    // freed their objects, and calling `gl.delete*` on the stale handles in the restored context is
+    // an `INVALID_OPERATION` (a console warning). Re-basing the shared tracker to zero gives the
+    // rebuilt set the same baseline the original construction had, so a leak is still visible.
+    this.tracker.reset();
+
+    this.simulation = new Simulation({
+      gl: this.gl,
+      tracker: this.tracker,
+      width: grid,
+      height: grid,
+      dt: TIME.dt,
+    });
+    // Keep the epoch monotonic across the replacement, exactly as the §10 resolution switch does.
+    this.simulation.setEpoch(previousEpoch + 1);
+    this.renderer = new Renderer({
+      gl: this.gl,
+      tracker: this.tracker,
+      canvas: this.canvas,
+      simulationWidth: grid,
+      simulationHeight: grid,
+      width: this.canvas.width,
+      height: this.canvas.height,
+    });
+    this.analyzer = new Analyzer({
+      gl: this.gl,
+      tracker: this.tracker,
+      width: grid,
+      height: grid,
+      epoch: this.simulation.epoch,
+    });
+    this.presenter = new PresentationWorker({
+      createWorker: () =>
+        new Worker(new URL('./analysis/worker.ts', import.meta.url), { type: 'module' }) as unknown as WorkerLike,
+      width: PRESENTATION.width,
+      height: PRESENTATION.height,
+      healthOffset: HEALTH_OFFSET,
+      healthFormat: this.analyzer.floatFormat,
+      slotBytes: this.analyzer.slotBytes,
+      epoch: this.simulation.epoch,
+    });
+
+    // Begin a quiet new arc with the **recorded** seed: the same bookkeeping as `restart()` minus the
+    // randomized seed, so the field is reseeded, the arc/curator flags are fresh, and the director and
+    // audio are re-armed from the retained root seed.
+    this.overrideParams = null;
+    this.blend = null;
+    this.phase = neutralPhaseState();
+    this.events = neutralEventState();
+    this.curator = this.buildCurator();
+    this.curatorParameters = this.curator.parameters;
+    this.genesisLog.length = 0;
+    this.extinctionLog.length = 0;
+    this.director.restartPerformance(this.performanceSeed, this.phase.arc);
+    this.audio.resetPerformance(this.rootSeed);
+    this.lastStillnessState = 'none';
+    this.frameRing = new FrameTimeRing(240);
+    this.clock.reset();
+    this.resetCadence();
+    this.resetAnalysis(this.simulation.epoch);
+    this.publish();
+    // Re-sync canvas and render-target sizes in case the loss coincided with a resize.
+    this.applyCanvasSize();
   }
 
   private onResize = (): void => {
@@ -1897,6 +2062,7 @@ export class App {
         status: this.audio.status(),
         unlocked: this.audio.audioUnlocked(),
         muted: this.audio.isMuted(),
+        mutePreference: this.audio.mutePreference(),
         available: this.audio.available(),
       }),
       silenceStatus: () => this.audio.silenceStatus(),
@@ -2330,6 +2496,9 @@ export class App {
       labOpen: () => this.lab.isOpen,
       toggleLab: () => this.lab.toggle(),
       labSnapshot: () => this.labApi().snapshot(),
+      contextLost: () => this.contextLost,
+      contextLossCount: () => this.contextLossCount,
+      resourceCounts: () => this.tracker.snapshot(),
       cursorIdle: () => document.documentElement.classList.contains('cursor-idle'),
       diagnostics: () => ({ ...this.diagnostics, frameTimesMs: [...this.diagnostics.frameTimesMs] }),
       benchmarkFrames: (count, stepsPerFrame) => this.benchmarkFrames(count, stepsPerFrame),

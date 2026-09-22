@@ -16,6 +16,7 @@
  */
 import { readFileSync } from 'node:fs';
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { CAMERA } from '../../src/config.ts';
 import { hook, openArtwork } from '../support/browser.ts';
 import type {
@@ -27,6 +28,25 @@ import type {
 } from '../support/types.ts';
 
 const MATURE_PARAMETERS = { F: 0.029, k: 0.057, Du: 0.16, Dv: 0.08 };
+
+/**
+ * Wait until the frame loop has delivered at least `seconds` of real clock time.
+ *
+ * `worldState.camera/light/material` is refreshed once per frame, so a fixed (or absent) wait can read
+ * a stale snapshot — which made the Fix B baseline below occasionally capture the pre-reset,
+ * slightly-smoothed camera and then disagree with the freshly-read released camera by ~1e-5 (a rare
+ * full-suite flake). Waiting on loop progress removes the wall-clock assumption. `clock.realSeconds`
+ * advances on every frame even while the transport is paused.
+ */
+async function waitForFrames(page: Page, seconds: number): Promise<void> {
+  const start = (await hook<{ realSeconds: number }>(page, 'cadenceCounters')).realSeconds;
+  await expect
+    .poll(async () => (await hook<{ realSeconds: number }>(page, 'cadenceCounters')).realSeconds, {
+      timeout: 15_000,
+      intervals: [50],
+    })
+    .toBeGreaterThanOrEqual(start + seconds);
+}
 
 test.describe('§10 laboratory composition controls', () => {
   test('the lab shows the running movement and composition readouts after boot', async ({ page }) => {
@@ -236,6 +256,8 @@ test.describe('Fix B: manual-mode camera release restores the calibrated camera'
     // thing that would move the camera is the laboratory override itself.
     await hook(page, 'setAutoSeed', [false]);
     await hook(page, 'setPaused', [true]);
+    // The reset camera must reach the published snapshot before it is used as the baseline.
+    await waitForFrames(page, 0.2);
 
     const calibrated = await hook<PublishedStateShape>(page, 'publishedState');
     expect(calibrated.camera.elevationRadians).toBeCloseTo(CAMERA.elevationRadians, 6);

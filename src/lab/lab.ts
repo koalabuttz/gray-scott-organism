@@ -5,7 +5,7 @@
  * so presentation mode contains zero UI nodes (AC.15). It uses the same command interface as
  * application transport, so nothing here can reach into module internals.
  */
-import { EXPLORATION_GRID, PARAM_ENVELOPE, TIME } from '../config.ts';
+import { DEFAULT_PARAMS, EXPLORATION_GRID, PARAM_ENVELOPE, TIME } from '../config.ts';
 import type { AppCommand } from '../core/commands.ts';
 import { formatSimTempo } from '../core/longform.ts';
 import { describeRegime, formatRegime } from '../core/regime.ts';
@@ -20,6 +20,7 @@ import type {
   WorldState,
 } from '../core/types.ts';
 import { createCaptureControls } from './capture.ts';
+import { VIABLE_ENVELOPE, projectViableParameters } from './viability.ts';
 import type { SliderHandle, TextHandle } from './controls.ts';
 import {
   createButton,
@@ -59,6 +60,40 @@ const PARAM_INFO: Record<keyof Params, { title: string; help: string }> = {
 
 const PANEL_HELP =
   'The organism is chemical V living on fuel U; F feeds it, k kills it, Du/Dv are how far each spreads.';
+
+/**
+ * §10 Phase-4 guardrail (the operator's standing Phase-1 caveat: "quite easy to end up with a blank
+ * screen because of misconfiguring the lab"). The laboratory now warns *while the operator is still
+ * choosing* — from the same `describeRegime` readout the panel already shows plus the live tier-1
+ * occupancy — rather than after the field has already gone black.
+ */
+const VIABLE_PARAMS_WARNING =
+  'parameters look non-viable — the field will die; consider k ≈ .057–.062 at F ≈ .029–.030';
+const COLLAPSED_WARNING =
+  'occupancy has collapsed — the field looks dead; consider k ≈ .057–.062 at F ≈ .029–.030';
+
+/**
+ * Occupancy above which the field is considered to have been alive at least once this session, so a
+ * later fall can count as a collapse. It must sit **below the documented living occupancy of the
+ * sparsest viable regime**: our own worms anchor `(.030, .062)` records occupancy **0.009**
+ * (`artifacts/phase1-gate/captures.json`), so the previous `0.02` could never arm on a legitimate
+ * sparse field and its death went unwarned (review fix MINOR 2). `0.006` is comfortably below that
+ * living value and above the collapse floor `0.002`, and the dormancy/nucleation movement exemption
+ * still prevents fresh-nucleation false positives.
+ */
+const VIABLE_ALIVE_OCCUPANCY = 0.006;
+/** Occupancy at or below which a previously-living field counts as collapsed. */
+const COLLAPSE_OCCUPANCY = 0.002;
+/**
+ * Sustained collapse (performance seconds) before the warning appears. The collapse signal is only
+ * evaluated for **established** movements: `dormancy`/quiet are intentional empty states, and
+ * `nucleation` starts from a freshly reseeded field whose occupancy is legitimately near zero while
+ * the seed grows, so neither may be flagged (measured: occupancy climbs back above the alive
+ * threshold within a few seconds of every nucleation).
+ */
+const COLLAPSE_SECONDS = 6;
+/** Movements whose low occupancy is expected rather than a sign of failure. */
+const COLLAPSE_EXEMPT_MOVEMENTS = new Set(['dormancy', 'nucleation']);
 
 export interface LabSnapshot {
   parameters: Params;
@@ -176,6 +211,14 @@ export class Lab {
   private genesisClick = 0;
   private open = false;
   private genesisRadiusCells = 6;
+  /** §10 guardrail: the live non-viable-parameter warning element (hidden when parameters look viable). */
+  private viabilityText: TextHandle | null = null;
+  /** §10 guardrail: whether the F/k sliders are clamped to `VIABLE_ENVELOPE` (false = wide open). */
+  private allowDangerousValues = false;
+  /** §10 guardrail occupancy-collapse tracking: has the field been alive, and for how long has it been dead. */
+  private seenAlive = false;
+  private deadSeconds = 0;
+  private lastViabilitySeconds: number | null = null;
 
   constructor(private readonly api: LabApi) {}
 
@@ -199,17 +242,27 @@ export class Lab {
     host.appendChild(heading);
     createHelp(host, PANEL_HELP);
 
+    // Danger-off is a safety state: never present or run a non-viable override. Project first, then
+    // read the snapshot the sliders are built from, so the DOM, the native range, the readout and the
+    // internal model all agree with the sanitized pair.
+    this.sanitizeViableOverride();
     const snapshot = this.api.snapshot();
 
     // --- chemistry -------------------------------------------------------
     const chemistry = createSection(host, 'chemistry');
     const parameterKeys: (keyof Params)[] = ['F', 'k', 'Du', 'Dv'];
     for (const key of parameterKeys) {
+      // §10 guardrail (item (c)): F/k sliders are clamped to the viable envelope unless the operator
+      // opts into dangerous values. Du/Dv keep the plan's full envelope as before.
       const bounds =
         key === 'F'
-          ? PARAM_ENVELOPE.F
+          ? this.allowDangerousValues
+            ? PARAM_ENVELOPE.F
+            : VIABLE_ENVELOPE.F
           : key === 'k'
-            ? PARAM_ENVELOPE.k
+            ? this.allowDangerousValues
+              ? PARAM_ENVELOPE.k
+              : VIABLE_ENVELOPE.k
             : key === 'Du'
               ? PARAM_ENVELOPE.Du
               : PARAM_ENVELOPE.Dv;
@@ -220,13 +273,41 @@ export class Lab {
         step: key === 'F' || key === 'k' ? 0.0001 : 0.001,
         value: snapshot.parameters[key],
         format: (value) => value.toFixed(4),
+        testId: `lab-param-${key}`,
         onInput: () => this.emitParameterOverride(),
       });
       this.sliders.set(key, handle);
       createHelp(chemistry, PARAM_INFO[key].help);
     }
+    createToggle(chemistry, 'allow dangerous values', this.allowDangerousValues, (value) => {
+      this.allowDangerousValues = value;
+      // Turning danger off is a safety action: sanitize the live override **now** (dispatch the
+      // projected viable pair immediately) and then rebuild the panel so the sliders adopt the
+      // sanitized values and the narrower ranges. With danger on nothing is projected.
+      if (!value) this.sanitizeViableOverride();
+      this.close();
+      this.openPanel();
+    });
+    createHelp(
+      chemistry,
+      this.allowDangerousValues
+        ? 'dangerous values allowed: the F/k sliders span the full plan envelope and can kill the field'
+        : 'F/k are held inside the viable (F,k) set — a pair that would die is projected to the nearest ' +
+          'viable k (e.g. .014/.045 → .014/.054); toggle to reach the full plan range',
+    );
     this.regime = createText(chemistry, 'lab-regime');
     this.refreshRegime(snapshot.effectiveParameters);
+    // Item (a): the live non-viable warning, and item (b): the one-click restore. Both are updated
+    // while the panel is open (`update`) and immediately when a slider moves (`emitParameterOverride`).
+    this.viabilityText = createText(chemistry, 'lab-warning');
+    this.viabilityText.element.hidden = true;
+    createButton(chemistry, 'restore viable defaults', () => this.restoreViableDefaults());
+    createHelp(
+      chemistry,
+      'restore sets the calibrated viable parameters (F .03, k .062) and reseeds the field, so a ' +
+        'field that has already died can grow back',
+    );
+    this.refreshViability(snapshot);
     createButton(chemistry, 'release parameters', () => {
       this.api.dispatch({ type: 'parameters', value: snapshot.parameters, mode: 'release' });
       const current = this.api.snapshot().parameters;
@@ -442,6 +523,7 @@ export class Lab {
     this.eventsText = null;
     this.audioText = null;
     this.overlayCanvas = null;
+    this.viabilityText = null;
     this.sliders.clear();
     this.open = false;
   }
@@ -449,6 +531,7 @@ export class Lab {
   update(world: WorldState, diagnostics: Diagnostics): void {
     if (!this.open) return;
     this.refreshRegime(world.parameters);
+    this.refreshViability(this.api.snapshot());
     this.refreshTempo(world.clock.speed, diagnostics.simStepsPerSecond);
     this.refreshComposition();
     this.refreshOverlay();
@@ -584,19 +667,108 @@ export class Lab {
 
   private emitParameterOverride(): void {
     const base = this.api.snapshot().parameters;
-    const value: Params = {
+    const proposed: Params = {
       F: this.sliders.get('F')?.value ?? base.F,
       k: this.sliders.get('k')?.value ?? base.k,
       Du: this.sliders.get('Du')?.value ?? base.Du,
       Dv: this.sliders.get('Dv')?.value ?? base.Dv,
     };
+    // Danger-off: project the proposed pair onto the evidence-backed viable set *before* dispatching,
+    // then write the projected values back to the sliders so the model, the readout and the native
+    // range can never disagree (review fix MAJOR). With danger on the proposal is used as-is.
+    const value = this.allowDangerousValues ? proposed : projectViableParameters(proposed);
     this.api.dispatch({ type: 'parameters', value, mode: 'override' });
-    this.refreshRegime(value);
+    if (!this.allowDangerousValues && (value.F !== proposed.F || value.k !== proposed.k)) {
+      this.syncSliderValues(value);
+    }
+    this.refreshRegime(this.api.snapshot().effectiveParameters);
+    this.refreshViability(this.api.snapshot());
+  }
+
+  /** Write a parameter set back to the four sliders (DOM + native range + internal model together). */
+  private syncSliderValues(params: Params): void {
+    for (const key of ['F', 'k', 'Du', 'Dv'] as const) this.sliders.get(key)?.setValue(params[key]);
+  }
+
+  /**
+   * Danger-off sanitize (review fix MAJOR): if the live override pair is not viable, dispatch the
+   * projected viable pair immediately — the "reject/project every proposed pair" rule applied to
+   * whatever is currently in force. Idempotent, and a no-op while dangerous values are allowed.
+   */
+  private sanitizeViableOverride(): void {
+    if (this.allowDangerousValues) return;
+    const current = this.api.snapshot().effectiveParameters;
+    const safe = projectViableParameters(current);
+    if (safe.F !== current.F || safe.k !== current.k || safe.Du !== current.Du || safe.Dv !== current.Dv) {
+      this.api.dispatch({ type: 'parameters', value: safe, mode: 'override' });
+      this.refreshRegime(safe);
+    }
   }
 
   /** The approximate morphology the current (F,k) is expected to produce (§10 regime readout). */
   private refreshRegime(params: Params): void {
     this.regime?.set(`approximate regime: ${formatRegime(describeRegime(params))}`);
+  }
+
+  /**
+   * §10 Phase-4 guardrail: show/hide the live non-viable warning.
+   *
+   * Fires when the *effective* parameters map to `dying`/`nonviable` via `describeRegime` (the
+   * deterministic misconfiguration the operator's caveat is about), or when a field that has been
+   * alive has been measurably collapsed for a sustained interval **outside** a dormancy/quiet
+   * movement (so an intentional rebirth dwell is never flagged). The two conditions share one
+   * actionable suggestion — the calibrated viable band.
+   */
+  private refreshViability(snapshot: LabSnapshot): void {
+    const element = this.viabilityText?.element;
+    const health = snapshot.chemistryHealth;
+    const phase = snapshot.phase;
+
+    // Occupancy-collapse tracking, paced by delivered performance time (bounded so a resumption
+    // cannot accumulate a burst).
+    const previous = this.lastViabilitySeconds;
+    const at = snapshot.performanceSeconds;
+    const dt = previous === null || at < previous ? 0 : at - previous;
+    this.lastViabilitySeconds = at;
+    if (at < (previous ?? 0)) this.deadSeconds = 0;
+    if (health.valid && health.fullOccupiedFraction >= VIABLE_ALIVE_OCCUPANCY) this.seenAlive = true;
+    const living =
+      phase.intention !== 'quiet' &&
+      phase.stillnessState === 'none' &&
+      !COLLAPSE_EXEMPT_MOVEMENTS.has(phase.movement);
+    const collapsedNow =
+      this.seenAlive && health.valid && health.fullOccupiedFraction <= COLLAPSE_OCCUPANCY && living;
+    this.deadSeconds = collapsedNow ? this.deadSeconds + dt : 0;
+
+    const description = describeRegime(snapshot.effectiveParameters);
+    const nonviable = description.nonviable || description.regime === 'dying';
+    const message = nonviable ? VIABLE_PARAMS_WARNING : this.deadSeconds >= COLLAPSE_SECONDS ? COLLAPSED_WARNING : null;
+
+    if (!element) return;
+    if (message === null) {
+      if (!element.hidden) {
+        element.hidden = true;
+        element.textContent = '';
+      }
+    } else {
+      element.hidden = false;
+      if (element.textContent !== message) element.textContent = message;
+    }
+  }
+
+  /**
+   * §10 Phase-4 guardrail (item (b)): one-click recovery. Dispatching the calibrated default
+   * parameters is only half of it — a field that has already died has no V left to grow back from, so
+   * the field is also reseeded at the recorded seed. The sliders are snapped to the restored values
+   * so the panel and the running chemistry agree.
+   */
+  private restoreViableDefaults(): void {
+    const value: Params = { ...DEFAULT_PARAMS };
+    this.api.dispatch({ type: 'parameters', value, mode: 'override' });
+    this.api.reseed(this.genesisRadiusCells);
+    this.syncSliderValues(value);
+    this.refreshRegime(value);
+    this.refreshViability(this.api.snapshot());
   }
 
   /**

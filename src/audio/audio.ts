@@ -2255,7 +2255,13 @@ export class AudioSystem {
   private engine: AudioEngine | null = null;
   private timer: ReturnType<typeof setInterval> | 0 = 0;
   private statusValue: AudioStatus = 'unavailable';
+  /** The operator's own mute preference (the lab `mute` toggle / a mute command). */
   private muted = false;
+  /**
+   * A transient, non-operator mute gate: the §11.3 context-loss forced silence. Kept separate from the
+   * preference so the two never overwrite each other (review fix MINOR 3).
+   */
+  private contextForcedMute = false;
   private disposed = false;
 
   constructor(options: AudioSystemOptions = {}) {
@@ -2326,13 +2332,38 @@ export class AudioSystem {
     this.engine?.setPaused(paused);
   }
 
+  /**
+   * §8.3/§10 the **operator's** mute preference. The effective silence gate is
+   * `preference OR context-forced`, so toggling the preference while the context is lost updates only
+   * the preference (it cannot defeat the forced silence), and dropping the forced gate on restoration
+   * leaves the latest preference in force.
+   */
   setMuted(muted: boolean): void {
     this.muted = muted;
-    this.engine?.setMuted(muted);
+    this.applyMute();
   }
 
+  /**
+   * §11.3 the transient context-loss forced silence: independent of the operator preference and
+   * dropped on restoration. `isMuted()` reports the OR of the two.
+   */
+  setContextMuted(value: boolean): void {
+    this.contextForcedMute = value;
+    this.applyMute();
+  }
+
+  /** The effective mute state (preference OR forced) — what the graph and every readout report. */
   isMuted(): boolean {
+    return this.muted || this.contextForcedMute;
+  }
+
+  /** The operator's own mute preference, ignoring any transient forced gate. */
+  mutePreference(): boolean {
     return this.muted;
+  }
+
+  private applyMute(): void {
+    this.engine?.setMuted(this.isMuted());
   }
 
   prepareSilence(): void {

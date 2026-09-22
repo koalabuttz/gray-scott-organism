@@ -1028,9 +1028,9 @@ Each AC is verified by the named automated test(s) in §Test Strategy, or by the
 
 Manual gates (operator is approver; recorded artifacts required):
 
-- `Phase1MaterialGate` — **APPROVED by the operator, 2026-09-20** ("This is fine for now"). Operator caveat recorded: the lab makes it easy to end up with a blank screen through misconfiguration (e.g., non-viable F/k) — accepted for now; queued as a Phase-4 usability item (lab guardrails/feedback for non-viable parameters). Unblocks Phase-2 integration.
+- `Phase1MaterialGate` — **APPROVED by the operator, 2026-09-20** ("This is fine for now"). Operator caveat recorded: the lab makes it easy to end up with a blank screen through misconfiguration (e.g., non-viable F/k) — accepted for now; queued as a Phase-4 usability item (lab guardrails/feedback for non-viable parameters). Unblocks Phase-2 integration. **Addressed in deviation 59** (Round-A, Phase 4): the laboratory now warns live while the parameters are being chosen and offers one-click recovery plus an opt-in slider clamp.
 - `Phase2ArcReview` — **APPROVED by the operator, 2026-09-20** ("Approve as mentioned"). Operator directive recorded: **the default 1× speed is still too slow for a showcase** — presentation default speed raised (see deviation 44); arc pacing remains adjustable via one config constant. Also approved with the risky-trajectory-endpoint tuning (deviation 45): the shipped trajectory's `cellular-growth`/`replication` endpoint k-values are lowered into the viable band. Unblocks Phase 3.
-- `Phase3CausalityReview` — synchronized capture + diagnostic report of triggering structural events. Operator confirms sound feels caused by the organism; horizon reveals real relief.
+- `Phase3CausalityReview` — **APPROVED to proceed by the operator, 2026-09-21 (take 4)**, after two audio reworks (take 2: "kinda creepy" → take 3: "better but drone-like, marry it to a scale" → take 4: scale-married A-major pentatonic design approved). **Deferred:** the operator has not yet listened (no headphones available); the actual listening verdict folds into `FinalFullArcReview`. Machine evidence: 332→355 unit / 69→75 browser tests through the audio rounds; offline render matrix; exact-zero silence verified.
 - `FinalFullArcReview` — operator approves the opening and one entire arc; no laboratory leakage; documentation complete per the Documentation Strategy.
 
 ## Test Strategy
@@ -2364,4 +2364,171 @@ deviations must be recorded here. Each entry states what differs, why, and what 
     reachability passed. The §9.4 `lively` diagnostics are unchanged (every offline driver tick is fresh,
     so the Round-G freshness rules are a no-op there): still exactly 5 accepted changes with 6 confirmed
     crossings and 1 refractory drop.
+
+59. **Round-A (Phase 4) robustness: the laboratory misconfiguration guardrail, WebGL context-loss
+    recovery, and two browser-flake root causes.**
+
+    **(a) Laboratory misconfiguration guardrail (§10; the operator's standing Phase-1 caveat).** The
+    hidden laboratory now tells the operator that a parameter choice would kill the field **while the
+    sliders are still being moved**, not after the screen has gone black.
+    - A live warning element (`src/lab/lab.ts` `refreshViability`) fires when the *effective* `(F, k)`
+      maps to `dying`/`nonviable` via the existing `describeRegime` (`src/core/regime.ts`) — e.g.
+      `k ≥ DEATH_K (.0635)` or a low-feed `dying` anchor — or when a field that has been measurably
+      alive has collapsed for ≥ 6 performance seconds *outside* an exempt movement. It names the
+      calibrated viable band ("…consider k ≈ .057–.062 at F ≈ .029–.030"). The occupancy-collapse
+      signal is exempt for `dormancy` and `nucleation` (measured: occupancy is legitimately near zero
+      for a few seconds after every nucleation while the seed grows back above the alive threshold),
+      so an intentional rebirth is never flagged.
+    - A **`restore viable defaults`** button dispatches the calibrated parameters (`DEFAULT_PARAMS`,
+      mode `override`) **and reseeds** the recorded seed at the current radius. The reseed is
+      required: a field that has already died has no `V` left and Gray–Scott cannot nucleate from a
+      uniform state, so the dispatch alone would not recover occupancy. The sliders are snapped to the
+      restored values so the panel and the chemistry agree.
+    - An opt-in clamp (scope item (c)) that is **coupled**, not two independent ranges
+      (`src/lab/viability.ts`). Viability is a property of the `(F, k)` pair, so with dangerous values
+      off every proposed pair is **projected** onto an evidence-backed viable set: `F`/`k` are clamped
+      into the danger-off envelope (`F ∈ [.014, .055]`, `k ∈ [.045, .062]` — the `k` ceiling is the
+      highest **measured-alive** anchor `.062`, not the death-boundary midpoint, so a sanitize lands on
+      measured life), then a pair that would classify `dying`/`nonviable`/`unmapped` has `k` moved to
+      the nearest living anchor at that `F` (e.g. the measured-dead corner `.014/.045` → `.014/.054`),
+      falling back to the calibrated defaults only when no anchor `k` is viable at that `F`. The
+      **`allow dangerous values`** toggle widens the sliders to the plan's full `PARAM_ENVELOPE`, and
+      switching it **off sanitizes the live override immediately** (dispatching the projected pair) and
+      re-syncs the slider DOM/native/readout/internal values to it. The toggle rebuilds the panel
+      (bounds of a range input cannot be patched in place) — the same approach the exploration toggle
+      already uses.
+    Presentation mode is untouched (the panel is created only while open and removed on close, AC.15).
+    Browser spec `lab-guardrail.spec.ts` drives the real controls: the calibrated defaults show no
+    warning; all four danger-off envelope corners (including the measured-dead `.014/.045`) land on a
+    viable pair with the slider value, the readout and the effective model all agreeing; with danger on,
+    `k = .075` warns and reads `nonviable`, and switching danger off sanitizes immediately to `k = .062`;
+    re-enabling danger makes `.075` reachable again; clicking restore clears the warning, snaps the
+    sliders to `F .03 / k .062`, and the field's occupancy (read straight from the field via the
+    `fieldStats` hook, not a stale analysis sample) grows out of the collapsed range. A second case
+    proves the collapse warning on a **sparse living field** (see (g)).
+
+    **(b) WebGL context loss and restoration (§11.3; closes the AC.11/AC.13 gap).** `App` now installs
+    `webglcontextlost`/`webglcontextrestored` listeners on the canvas (`src/app.ts`
+    `onContextLost`/`onContextRestored`). On loss it calls `preventDefault()` (opting into
+    restoration), stops the rAF loop and issues **no further GL calls** (the frame callback is guarded
+    too): the forced silence is a **transient gate** (`AudioSystem.setContextMuted`, on the audio
+    thread, separate from the operator's mute preference), and the pending analysis is discarded
+    through the CPU-only `clearAnalysisState` — `Analyzer.reset`/`PresentationWorker.reset` (whose reset
+    calls `gl.deleteSync`) are deliberately **not** invoked on the lost context; those instances are
+    dropped and rebuilt at restoration instead. On restoration it recreates
+    **every** GL resource through the same construction paths the constructor uses — `Simulation`
+    (chemistry ping-pong + programs), `Renderer` (derived-field/bloom/material targets and all render
+    programs) and `Analyzer` (reduction targets + the whole pixel-pack-buffer ring) are reconstructed,
+    and the CPU-side presentation worker is recreated so its pooled slot ring starts clean — then
+    begins a **quiet new arc with the recorded seed** (monotonic epoch, fresh curator, director/audio
+    re-armed) and resumes. The dead GL instances are **dropped rather than disposed**: after a loss the
+    driver has already freed their objects and deleting the stale handles raises `INVALID_OPERATION`
+    console warnings, so `ResourceTracker.reset()` re-bases the shared tracker to zero before the
+    replacements are built (giving the rebuilt set the same baseline the original had, so a leak stays
+    visible). If the rebuild throws, the piece stays stopped rather than presenting a fake simulation.
+    New browser spec `context-loss.spec.ts` forces a real loss through `WEBGL_lose_context` and
+    asserts no page errors, the loss flag/counter, muted audio, a frozen step count and an intact
+    presentation DOM; then `restoreContext()` and asserts the loop resumes, the epoch is monotonic,
+    **the rebuilt resource counts equal the pre-loss counts exactly** (nothing leaked, nothing
+    reused), and the forced gate is dropped so the operator's mute preference applies. A second case
+    (`review fix MINOR 3`) covers initially-muted and initially-unmuted starts: the operator mute
+    toggles **both ways during the outage** update only the preference while the effective gate stays
+    forced-muted, and after restoration the **latest** preference applies.
+
+    **(c) Browser flake A — `smoke.spec.ts` "the loop runs…" read `undefined` / a destroyed execution
+    context.** Root cause: the dev server used by the harness had HMR enabled, and because no module
+    declares an `import.meta.hot.accept`, Vite answers **any** write to a module in the graph with a
+    full page reload sent to every client. During active development — exactly when this suite runs —
+    an editor or another process routinely writes a source file, so a reload could land mid-test,
+    destroying the evaluate context ("Execution context was destroyed") and resetting live state to
+    the startup defaults. Reproduced with a scripted probe: touching `src/config.ts` (mtime only)
+    reloads the page with HMR on and does **not** reload it with `VITE_TEST=1` (frame-navigation count
+    2 → 1). Fixes, all at the harness level: `vite.config.ts` disables HMR when `VITE_TEST=1`;
+    `playwright.config.ts` starts the webServer with that env and no longer reuses a pre-existing
+    server (so the suite always runs against the HMR-suppressed one — a stray `npm run dev` on 5199
+    now fails loudly instead of flaking); the smoke test polls the delivered step count instead of a
+    single fixed-interval read; and the shared `hook()` helper retries across transient execution-
+    context failures, re-waiting for the hook and treating a momentarily-missing `window.__artwork` as
+    transient while still failing fast on a genuinely missing method.
+
+    **(d) Browser flake B — `phase2-integrity.spec.ts` MAJOR 7 director pin ("0.5 vs 1.5").** This was
+    **not** a publish/reset ordering bug in the application. Reproduced in a loop (failed 5/10, then
+    2/20): the pin commands are applied correctly (`cameraPins` reports `true`) but the published
+    camera/light/material read back as the calibrated **defaults**. Instrumentation showed the real
+    clock did not advance at all during the test's fixed 1.5 s wait (`cadenceCounters.realSeconds
+    0.48 → 0.48`, no page errors, no context loss): after the synchronous `advanceComposition(10000)`
+    burst the transport is paused, so the 2 Hz publication never fires and the only writer of the
+    frame-driven `worldState.camera/light/material` is the rAF loop — which can stall briefly while the
+    just-submitted 10 000-step GPU batch drains. A fixed wall-clock wait therefore sometimes elapsed
+    with a stale snapshot. Fix: the test now waits on **frame-loop progress** (`waitForFrames()` polls
+    `clock.realSeconds`, which advances every frame even while paused) instead of a fixed
+    `waitForTimeout`, removing the wall-clock assumption at its source. Verified 20/20 consecutive
+    passes.
+
+    **(e) §9.3 camera light azimuth hold (Phase-2 leftover).** Verified against the plan: `updateLight`
+    travels toward the bounded per-arc target at ≤ 25°/min and snaps/holds once inside
+    `azimuthHoldEpsilonRadians`; the existing tests already covered per-frame rate limiting, the
+    bounded band, and a plateau. Added a unit assertion in `tests/director.test.ts` that encodes §9.3
+    in the plan's own units — no 60 s window exceeds 25°/min of travel — and asserts **zero residual
+    drift** once the azimuth reaches the target exactly. Instrumentation note: the snap-to-target
+    check uses the *pre-move* delta, so the light may land within tolerance a frame before landing
+    exactly on the target — a single bounded step, not drift; the assertion measures from the first
+    frame the azimuth equals the target.
+
+    **(f) Counts after Round-A.** `npx tsc --noEmit` clean; `npm test` **356/356** (one new director
+    case); default `npm run test:browser` **77 passed / 12 gated skips / 0 unexpected / 0 flaky**
+    (JSON report `expected 77, skipped 12, unexpected 0, flaky 0`; the two new specs are
+    `context-loss.spec.ts` and `lab-guardrail.spec.ts`); the two flake specs re-run in a loop —
+    `smoke.spec.ts` "the loop runs…" **10/10** and `phase2-integrity.spec.ts` MAJOR 7 **20/20** — and
+    `STILLNESS=1` stillness reachability passed. Only the run's own regenerated evidence
+    (`artifacts/playwright-report.json`) changed; the checked-in capability/performance artifacts were
+    restored so the round's diff stays limited to the actual work, and `artifacts/phase1-gate/` is
+    untouched.
+
+    **(g) Round-A review fixes (1 MAJOR + 2 MINOR), amended counts.** `npx tsc --noEmit` clean;
+    `npm test` **364/364** (8 new `tests/viability.test.ts` cases); default `npm run test:browser`
+    **79 passed / 12 gated skips / 0 unexpected / 0 flaky** (the two round-A specs gained the cases
+    below). The fixes:
+    - **MAJOR — the danger-off clamp was a rectangle, and danger-off did not sanitize.** The clamp was
+      two independent ranges, so its corner `(.014, .045)` — a project-measured dead anchor — was
+      dialable, and `enable danger → k=.075 → disable danger` merely rebuilt the panel, leaving the
+      live override non-viable and the display disagreeing with the model. Viability is now a
+      **coupled** `(F,k)` predicate with a projection (`src/lab/viability.ts`): with danger off every
+      proposed pair is clamped into the danger-off envelope and, if it would classify
+      `dying`/`nonviable`/`unmapped`, `k` is projected to the nearest **evidence-backed living anchor**
+      at that `F` (or the calibrated defaults when none is viable); the danger-off `k` ceiling is the
+      highest measured-alive anchor `.062` rather than the death-boundary midpoint `.0634`; switching
+      danger off **sanitizes the live override immediately**; and `createSlider` now derives its
+      internal value from the native (clamped) input value, with projected values written back through
+      `setValue`, so the DOM, the native range, the readout and the internal model cannot disagree.
+      `tests/viability.test.ts` pins the invariants — notably that **all four envelope corners** and a
+      dense 10⁻³ sample of the plane project to viable, in-envelope pairs, and that
+      `projectViableParameters` is idempotent on the defaults.
+    - **MINOR 2 — the collapse arming threshold missed sparse living fields.** `seenAlive` armed at full
+      occupancy ≥ 0.02, above our own worms anchor `(.030, .062)` occupancy **0.009**, so a legitimate
+      sparse field could die unwarned. The threshold is now **0.006** (below the documented living
+      value, above the 0.002 collapse floor), keeping the `dormancy`/`nucleation` exemption.
+      `lab-guardrail.spec.ts` grows the sparse worms field (measured occupied ≈ 0.0087), confirms no
+      warning while it lives, then kills the field and asserts the warning appears only after
+      **6 delivered performance seconds** (measured 8.4) and never during `dormancy`/`nucleation`.
+    - **MINOR 3 — the context-loss mute shared one flag with the operator preference.** On loss the app
+      snapshotted `audio.isMuted()` and set the same flag true, so an operator unmute during the outage
+      defeated the forced silence and restoration overwrote a preference change. `AudioSystem` now
+      keeps the operator **preference** and a transient **context-loss gate** separately
+      (`setMuted`/`setContextMuted`), with `isMuted()` = OR of the two and `mutePreference()` the
+      preference alone (exposed on the hook). The loss path sets the gate; restoration drops it. The
+      `context-loss.spec.ts` mute case covers initially-muted and initially-unmuted starts, toggles the
+      operator mute both ways during the outage (effective stays muted throughout), and asserts the
+      latest preference applies after restoration.
+    - **Caveat the reviewer noted — `deleteSync` on a lost context.** The loss path previously called
+      `resetAnalysis`, which reaches `Analyzer.reset` → `gl.deleteSync` on the dead context, so the
+      "no GL calls" wording was wrong. The loss path now uses the CPU-only `clearAnalysisState` and the
+      analyzer/presenter are dropped and rebuilt at restoration, so "no further GL calls" is literally
+      true. Documented in (b).
+    - **Unrelated flake found while verifying (same family as (d)).**
+      `lab-composition.spec.ts` Fix B captured its `calibrated` baseline from the frame-driven
+      published snapshot immediately after a camera reset, so it could read the pre-reset,
+      slightly-smoothed camera and then disagree with the freshly-read released camera by ~1e-5
+      (observed once in the full suite; 20/20 clean in isolation). It now waits for frame-loop progress
+      (`waitForFrames`) before capturing the baseline.
 

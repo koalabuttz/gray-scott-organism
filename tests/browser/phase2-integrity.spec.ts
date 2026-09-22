@@ -18,6 +18,7 @@
  *  - a `null` `fenceSync()` is a dropped request, not a success.
  */
 import { expect, test } from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { resolve } from 'node:path';
 import { hook, openArtwork } from '../support/browser.ts';
 import type {
@@ -111,6 +112,27 @@ function cpuMeans(current: FieldShape, previous: FieldShape): { occ: number; flu
     change += Math.abs(v - previous.v[i]!);
   }
   return { occ: occ / count, flux: flux / count, change: change / count };
+}
+
+/**
+ * Wait until the frame loop has delivered at least `seconds` of real clock time.
+ *
+ * The rAF loop can stall briefly right after a large synchronous `advanceComposition` burst, and the
+ * published snapshot the test reads is frame-driven (the app refreshes `worldState.camera/light/
+ * material` once per frame and the transport is paused, so no 2 Hz publication is happening either).
+ * A fixed wall-clock wait can therefore elapse with a stale snapshot — the observed "director pin did
+ * not survive derive" flake — while the pin itself is correctly set. Waiting on loop progress removes
+ * the wall-clock assumption at its source. `clock.realSeconds` advances on every frame even while the
+ * transport is paused, so it is an exact frame-delivery counter.
+ */
+async function waitForFrames(page: Page, seconds: number): Promise<void> {
+  const start = (await hook<{ realSeconds: number }>(page, 'cadenceCounters')).realSeconds;
+  await expect
+    .poll(async () => (await hook<{ realSeconds: number }>(page, 'cadenceCounters')).realSeconds, {
+      timeout: 30_000,
+      intervals: [100],
+    })
+    .toBeGreaterThanOrEqual(start + seconds);
 }
 
 test.describe('Phase-2 integration integrity', () => {
@@ -374,7 +396,11 @@ test.describe('Phase-2 integration integrity', () => {
     await hook(page, 'dispatch', [{ type: 'camera', value: { distance: 9, focusUV: [0.42, 0.58] } }]);
     await hook(page, 'setLight', [{ intensity: 7 }]);
     await hook(page, 'setMaterial', [{ exposure: 0.5 }]);
-    await page.waitForTimeout(1500);
+    // Wait for the frame loop to have run (not a fixed wall-clock interval): the composition just
+    // advanced 10 000 steps synchronously, the transport is paused, and the snapshot read below is
+    // frame-driven, so a fixed delay could elapse with a stale snapshot (the observed flake). The pin
+    // itself is set immediately by the commands; this wait is what makes the read deterministic.
+    await waitForFrames(page, 1.2);
 
     const pinned = await hook<PublishedStateShape>(page, 'publishedState');
     expect(pinned.camera.distance, 'camera pin survives derive').toBeCloseTo(9, 6);
@@ -382,7 +408,7 @@ test.describe('Phase-2 integration integrity', () => {
     expect(pinned.light.intensity, 'light pin survives derive').toBeCloseTo(7, 6);
     expect(pinned.material.exposure, 'material pin survives derive').toBeCloseTo(0.5, 6);
 
-    await page.waitForTimeout(1500);
+    await waitForFrames(page, 1.2);
     const stillPinned = await hook<PublishedStateShape>(page, 'publishedState');
     expect(stillPinned.camera.distance).toBeCloseTo(9, 6);
     expect(stillPinned.light.intensity).toBeCloseTo(7, 6);
@@ -391,7 +417,7 @@ test.describe('Phase-2 integration integrity', () => {
     // Release: the director resumes driving both fields.
     await hook(page, 'unpinCamera');
     await hook(page, 'unpinLight');
-    await page.waitForTimeout(2000);
+    await waitForFrames(page, 1.5);
     const resumed = await hook<PublishedStateShape>(page, 'publishedState');
     expect(Math.abs(resumed.camera.distance - 9), 'camera resumes after unpin').toBeGreaterThan(1e-3);
     expect(Math.abs(resumed.light.intensity - 7), 'light resumes after unpin').toBeGreaterThan(1e-3);
@@ -400,10 +426,10 @@ test.describe('Phase-2 integration integrity', () => {
     // frames after re-enable must not jump (the time origin was cleared), so the camera/light stay at
     // the Phase-1 state rather than snapping to a stale target.
     await hook(page, 'setAutoSeed', [false]);
-    await page.waitForTimeout(6000);
+    await waitForFrames(page, 4);
     const offState = await hook<PublishedStateShape>(page, 'publishedState');
     await hook(page, 'setAutoSeed', [true]);
-    await page.waitForTimeout(200);
+    await waitForFrames(page, 0.2);
     const onAgain = await hook<PublishedStateShape>(page, 'publishedState');
     console.info(
       `[MAJOR 7] re-enable: distance ${offState.camera.distance.toFixed(4)} -> ${onAgain.camera.distance.toFixed(4)}, ` +

@@ -110,11 +110,22 @@ test.describe('presentation purity and startup', () => {
     test.skip(!probe.ok, `WebGL2 did not start: ${probe.reason}`);
     if (!probe.ok) return;
 
-    await page.waitForTimeout(5000);
-    const clock = await hook<{ steps: number; performanceSeconds: number }>(page, 'clock');
+    // Poll for the loop rather than a single fixed-interval read: the loop delivering steps is the
+    // thing under test, so wait for it to have delivered at least one step instead of assuming 5 s of
+    // wall time guarantees it (a reload mid-test previously made this a single undefined read).
+    let clock!: { steps: number; performanceSeconds: number };
+    await expect
+      .poll(
+        async () => {
+          clock = await hook<{ steps: number; performanceSeconds: number }>(page, 'clock');
+          return clock?.steps ?? 0;
+        },
+        { timeout: 15_000, intervals: [250] },
+      )
+      .toBeGreaterThan(0);
     const snapshot = await hook<LabSnapshotShape>(page, 'labSnapshot');
     console.info(
-      `[smoke] after 5 s: steps=${clock.steps} performanceSeconds=${clock.performanceSeconds.toFixed(2)} ` +
+      `[smoke] loop running: steps=${clock.steps} performanceSeconds=${clock.performanceSeconds.toFixed(2)} ` +
         `scene=${snapshot.scene} renderer=${snapshot.rendererInfo}`,
     );
 

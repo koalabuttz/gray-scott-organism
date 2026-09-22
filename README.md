@@ -51,6 +51,9 @@ Press the backquote key (`~`) to show or hide the laboratory.
 |---|---|
 | `F`, `k`, `Du`, `Dv` sliders | Parameter override: takes precedence over the curator's trajectory but never pauses chemistry. |
 | `release parameters` | Blends from the override back onto the current base parameters over 15 seconds. |
+| viability warning | Appears live while a parameter choice would kill the field — when the current effective `F`/`k` maps to a dying/non-viable regime, or a living field's occupancy has collapsed — and names the calibrated viable band. It is shown while you are still choosing, not after the screen goes black. The collapse test arms on any living occupancy, down to the sparsest documented regime (≈0.009), and is exempt during `dormancy`/`nucleation` so an intentional rebirth is never flagged. |
+| `restore viable defaults` | One-click recovery: sets the calibrated `F` .03 / `k` .062 and reseeds the field, so a field that has already died can grow back. |
+| `allow dangerous values` | Off by default. Viability is a coupled property of the `(F, k)` pair, so this is not two independent clamps: every proposed pair is projected onto the evidence-backed viable set (a pair that would die has `k` moved to the nearest living anchor at that `F` — e.g. `.014/.045` → `.014/.054`), the `F`/`k` sliders span the living band `F [.014, .055] × k [.045, .062]`, and switching danger off sanitizes the live override immediately. On: the full plan envelope is selectable and the field can be killed. |
 | `pause` | Suspends transport; resuming continues from the preserved state with no catch-up burst. |
 | `speed` | 0.25×–6× (12× on the exploration grid). The presentation default is 3×. |
 | `restart (new seed)` | New root seed, cleared field, new arc. |

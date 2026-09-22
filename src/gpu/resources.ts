@@ -23,6 +23,24 @@ export class ResourceTracker {
   snapshot(): GLResourceCounts {
     return { ...this.counts };
   }
+
+  /**
+   * Zero every count. Used by the §11.3 context-restore rebuild: when a WebGL context is lost the
+   * driver has already freed every object it owned, and deleting those stale handles in the restored
+   * context is an `INVALID_OPERATION` (and a console warning), so the dead instances are dropped and
+   * the tracker is re-based to zero before the replacements are constructed.
+   */
+  reset(): void {
+    this.counts = {
+      textures: 0,
+      framebuffers: 0,
+      renderbuffers: 0,
+      programs: 0,
+      shaders: 0,
+      vertexArrays: 0,
+      buffers: 0,
+    };
+  }
 }
 
 export class ShaderError extends Error {

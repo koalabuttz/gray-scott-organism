@@ -13,6 +13,8 @@ export interface SliderSpec {
   value: number;
   /** Formats the numeric readout (values are often ~0.0001). */
   format?: (value: number) => string;
+  /** Optional `data-testid` for browser verification (the range input carries it). */
+  testId?: string;
   onInput(value: number): void;
 }
 
@@ -46,12 +48,20 @@ export function createSlider(parent: HTMLElement, spec: SliderSpec): SliderHandl
   input.step = String(spec.step);
   input.value = String(spec.value);
   input.dataset.role = 'lab-control';
+  if (spec.testId) input.dataset.testid = spec.testId;
 
   const value = document.createElement('span');
   value.className = 'value';
+  if (spec.testId) value.dataset.testid = `${spec.testId}-value`;
   const format = spec.format ?? ((v: number) => v.toFixed(4));
-  value.textContent = format(spec.value);
-  let current = spec.value;
+  // Read the value back out of the DOM *after* assigning it: a native range input clamps to
+  // [min, max] (and snaps to `step`), so this is the value the control actually displays. Seeding the
+  // internal model from `spec.value` instead let an out-of-range caller value make the readout, the
+  // internal model and the native range disagree (review fix MAJOR). Read-back keeps all three equal.
+  const nativeValue = (): number => Number(input.value);
+  input.value = String(spec.value);
+  value.textContent = format(nativeValue());
+  let current = nativeValue();
 
   input.addEventListener('input', () => {
     const numeric = Number(input.value);
@@ -69,9 +79,10 @@ export function createSlider(parent: HTMLElement, spec: SliderSpec): SliderHandl
       return current;
     },
     setValue(next: number): void {
-      current = next;
       input.value = String(next);
-      value.textContent = format(next);
+      // Sync through the DOM so the internal model can never be outside the native range it displays.
+      current = nativeValue();
+      value.textContent = format(current);
     },
   };
 }

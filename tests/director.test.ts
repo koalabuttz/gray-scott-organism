@@ -237,6 +237,48 @@ describe('§9.3 bounded light azimuth (MAJOR 6)', () => {
     expect(Math.abs(previous - LIGHTING.azimuthRadians)).toBeLessThanOrEqual((DIRECTOR_POLICY.azimuthTargetMaxDegrees + 0.5) * DEG);
   });
 
+  it('§9.3: no 60 s window exceeds 25°/min of travel, and the azimuth then holds with no residual drift', () => {
+    const director = new VisualDirector();
+    const frameDt = 1 / 60;
+    let previous = director.targets.light.azimuthRadians;
+    let windowTravelDegrees = 0;
+    let windowSeconds = 0;
+    let maxWindowTravelDegrees = 0;
+    let reachedExactAt = -1;
+    let exactAzimuth = previous;
+    let driftAfterReached = 0;
+    const totalSeconds = 20 * 60;
+    for (let i = 1; i <= totalSeconds * 60; i += 1) {
+      const realSeconds = i * frameDt;
+      director.derive(makeInput({ realSeconds, intention: 'expand' }));
+      const azimuth = director.targets.light.azimuthRadians;
+      windowTravelDegrees += Math.abs(azimuth - previous) / DEG;
+      previous = azimuth;
+      windowSeconds += frameDt;
+      if (windowSeconds >= 60) {
+        maxWindowTravelDegrees = Math.max(maxWindowTravelDegrees, windowTravelDegrees);
+        windowTravelDegrees = 0;
+        windowSeconds = 0;
+      }
+      // The hold is the snap-to-target: travel is rate-limited until the remaining delta is inside
+      // `azimuthHoldEpsilonRadians` (the snap is applied to the *pre-move* delta, so the light may
+      // land within tolerance a frame before landing exactly on the target — a single bounded step,
+      // not drift). From the first frame the azimuth equals the target it must never move again.
+      if (reachedExactAt < 0 && azimuth === director.azimuthTargetRadians) {
+        reachedExactAt = realSeconds;
+        exactAzimuth = azimuth;
+      } else if (reachedExactAt >= 0) {
+        driftAfterReached = Math.max(driftAfterReached, Math.abs(azimuth - exactAzimuth));
+      }
+    }
+    // The plan's §9.3 bound is stated per minute, so it is asserted per minute rather than per frame.
+    expect(maxWindowTravelDegrees, 'no 60 s window exceeds the 25°/min travel clamp').toBeLessThanOrEqual(
+      DIRECTOR_POLICY.azimuthTravelDegPerMinute + 1e-6,
+    );
+    expect(reachedExactAt, 'the light reaches its bounded target within the run').toBeGreaterThan(1);
+    expect(driftAfterReached, 'zero residual azimuth drift once the target is reached').toBe(0);
+  });
+
   it('the per-arc target is seeded from performanceSeed and arc', () => {
     const a = new VisualDirector();
     const b = new VisualDirector();

@@ -45,17 +45,77 @@ export async function openArtwork(page: Page): Promise<LaunchProbe> {
   return probe;
 }
 
-/** Call a method on the in-page verification hook and return its JSON value. */
+/**
+ * Wait until the in-page verification hook is installed. Used by the retry path in `hook`: after a
+ * navigation the execution context is destroyed and the hook has to be re-established before an
+ * evaluate can succeed.
+ */
+async function waitForHook(page: Page, timeout = 60_000): Promise<void> {
+  await page.waitForFunction(
+    () => Boolean((window as unknown as { __artwork?: unknown }).__artwork),
+    undefined,
+    { timeout },
+  );
+}
+
+/**
+ * Playwright/`evaluate` failure messages produced when the page's JS execution context is torn down
+ * mid-call: a full page reload, a renderer restart, or a frame detach. They are transient — the page
+ * comes back — so `hook` retries and re-waits for the hook rather than surfacing a confusing failure.
+ *
+ * This is defense in depth. The *root* cause of the observed reloads was the dev server's HMR full
+ * reload on a source-file write; `playwright.config.ts` now starts the test server with
+ * `VITE_TEST=1`, which disables HMR (`vite.config.ts`), so a quiet run should never navigate.
+ */
+const TRANSIENT_CONTEXT_PATTERNS: RegExp[] = [
+  /Execution context was destroyed/i,
+  /Cannot find context with specified id/i,
+  /Target (page|closed)/i,
+  /Frame was detached/i,
+  // Raised by the guard below when `window.__artwork` is momentarily absent — e.g. a reload is in
+  // flight and the fresh page has not reached `installTestHook()` yet.
+  /verification hook is not installed/i,
+];
+
+function isTransientContextError(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error);
+  return TRANSIENT_CONTEXT_PATTERNS.some((pattern) => pattern.test(message));
+}
+
+/**
+ * Call a method on the in-page verification hook and return its JSON value.
+ *
+ * The evaluate is retried across a bounded number of transient execution-context errors (each retry
+ * first waits for the hook to be installed again), so a stray reload cannot turn into a spurious
+ * failure. Non-transient errors — including a genuinely missing hook method — are rethrown at once.
+ */
 export async function hook<T>(page: Page, method: string, args: unknown[] = []): Promise<T> {
-  return (await page.evaluate(
-    ({ method: name, args: parameters }) => {
-      const scope = window as unknown as { __artwork: Record<string, (...a: unknown[]) => unknown> };
-      const fn = scope.__artwork[name];
-      if (typeof fn !== 'function') throw new Error(`hook method ${name} is missing`);
-      return fn.apply(scope.__artwork, parameters ?? []) as unknown;
-    },
-    { method, args },
-  )) as T;
+  const evaluate = (): Promise<unknown> =>
+    page.evaluate(
+      ({ method: name, args: parameters }) => {
+        const scope = window as unknown as { __artwork?: Record<string, (...a: unknown[]) => unknown> };
+        // A missing hook is transient (a reload is mid-flight); a missing *method* is a real error.
+        if (!scope.__artwork) throw new Error('verification hook is not installed');
+        const fn = scope.__artwork[name];
+        if (typeof fn !== 'function') throw new Error(`hook method ${name} is missing`);
+        return fn.apply(scope.__artwork, parameters ?? []) as unknown;
+      },
+      { method, args },
+    );
+
+  let lastError: unknown;
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    try {
+      return (await evaluate()) as T;
+    } catch (error) {
+      lastError = error;
+      if (!isTransientContextError(error)) throw error;
+      await page.waitForLoadState('load').catch(() => undefined);
+      await waitForHook(page).catch(() => undefined);
+      await page.waitForTimeout(200);
+    }
+  }
+  throw lastError;
 }
 
 export function sleep(milliseconds: number): Promise<void> {
