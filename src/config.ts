@@ -101,8 +101,15 @@ export const GENESIS = {
 export const SURFACE = {
   /** Domain width in world units (plan: 2). */
   domainWidth: 2.0,
-  /** Relief amplitude in world units; plan bound is .001–.008, calibrated to .006. */
-  reliefAmplitude: 0.006,
+  /**
+   * Relief amplitude in world units; the plan bounds it to `.001–.008`. Round B calibrated `.006`;
+   * round 2 (§12.4, deviation 60) raised it to `.007` as part of the thickness-stratification pass —
+   * with the normalized height remap below, `.007` lifts the lit-pixel luminance spread from
+   * 2.655 to 3.640 (+37 %) while keeping the brightest pixel at 252/255, i.e. off the clipping
+   * ceiling. `.0075` reaches 254 and `.008` saturates at 255 (0.02 % of pixels at or above 250), so
+   * `.008` was measured and rejected for loss of headroom.
+   */
+  reliefAmplitude: 0.007,
   reliefAmplitudeRange: [0.001, 0.008] as const,
   /** Smoothed V contributes ~80% of height, smoothed boundary magnitude ~20%. */
   smoothedVWeight: 0.8,
@@ -193,7 +200,7 @@ export const BLOOM = {
  */
 export const REFINEMENT = {
   /** #2 neutral Beer–Lambert optical depth per unit support thickness (0 = off). */
-  interiorDarkening: 0.45,
+  interiorDarkening: 0.65,
   /** #1 extra optical depth on the blue channel per unit thickness (0 = off); green gets half. */
   absorptionChroma: 0.14,
   /** #1 the chromatic term only appears above this thickness window (the deep-support gate). */
@@ -204,6 +211,45 @@ export const REFINEMENT = {
    * (0 = off).
    */
   roughnessVariation: 0.35,
+  /**
+   * **Round 2 (#1) height response to thickness — ACCEPTED.** `0` keeps the Round-B saturating remap
+   * `1 − exp(−V/softenedVScale)`, which plateaus every moderate-to-deep V near the same height — the
+   * measured cause of "thin edges and thick cores sit at the same relief". A positive value switches
+   * the height to a **normalized** thickness `clamp(max(V,0)/heightThicknessRef, 0, 1) ^
+   * heightThicknessPower`, so a thick core keeps rising above a thin filament. `heightThicknessRef`
+   * is the V that maps to full height: at 0.36 (just under the mature field's own max V ≈ 0.38) the
+   * map uses almost the whole §5.2 relief budget (measured `reliefUse` 0.585 → 0.781) without
+   * clamping the body. Measured on the mature field (`artifacts/phase4-refinement/round2/`): the
+   * height field's own `max/p50` across the organism rises 1.244 → 1.653 (**+33 %**) and the lit-pixel
+   * luminance spread `p90/p50` rises 2.655 → 3.111 (+17 %) with **no** highlight clipping. Reference
+   * 0.42/1.0 was measured weaker (+4 % lit) and 0.55 compresses the body (it *lowers* the height).
+   */
+  heightThicknessRef: 0.36,
+  /**
+   * Round-2 (#1) exponent on the normalized thickness — ACCEPTED at 1.3. >1 pushes thin filaments
+   * down and leaves thick cores up, which is exactly the thin/thick contrast the operator asked for
+   * (measured: `hSpread` 1.487 at 1.0 → **1.653** at 1.3, for the same lit spread). <1 was not
+   * useful here (it lifts thin regions, i.e. reduces the contrast).
+   */
+  heightThicknessPower: 1.3,
+  /**
+   * **Round 2 (#3) frontier band — REJECTED (kept at 0).** Every tested gain on top of the accepted
+   * combination *lowered* the stratification metric (0.05 → 2.813, 0.12 → 2.659, 0.25 → 2.920
+   * against the accepted 3.640) while flooding the frame with added light (mean 8.93 → 11.9/15.3/19.7,
+   * 1.3–2.2×) and desaturating it (saturation 0.042 → 0.019/0.015/0.014). The term keys on `|∇V|²`
+   * gated to thin material; the evidence is in `round2/changes.json` and the rejected capture
+   * `after-frontier-band-rejected.png`. Left as a knob with a documented off state.
+   */
+  frontBoost: 0.0,
+  /** Round-2 (#3) the frontier band only engages where *thinness* exceeds this (1 − normalized thickness). */
+  frontThinGate: 0.65,
+  /**
+   * **Round 2 (#4) thin-gloss — REJECTED (kept at 0).** Making thin regions glossier reduces the lit
+   * spread (accepted 3.640 → 3.400 at 0.10 and 3.167 at 0.25) and raises clipping: a smoother surface
+   * throws a narrower specular lobe, so *fewer* thin pixels catch the grazing light. The measured
+   * opposite of the intended cue. Kept as an off knob for the record.
+   */
+  glossThin: 0.0,
 } as const;
 
 /**

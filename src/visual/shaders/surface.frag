@@ -6,11 +6,15 @@
  *          A = support-gated boundary emission activity.
  *
  * Height:
- *   shape = 0.8 * (1 - exp(-smoothedV / scale))     saturating remap of smoothed V
- *         + 0.2 * boundaryMagnitude                  revealed edges
+ *   t     = heightThicknessRef > 0
+ *             ? clamp(V / heightThicknessRef, 0, 1) ^ heightThicknessPower   (round 2: no plateau)
+ *             : 1 - exp(-smoothedV / scale)                                  (round-B saturating)
+ *   shape = 0.8 * t + 0.2 * boundaryMagnitude      revealed edges
  *   height = reliefAmplitude * shape * support
  * with reliefAmplitude starting at 0.004 world units on a 2-unit domain — millimetres, not
  * mountains — and support ramping both height and radiance to zero outside the organism.
+ * Both thickness maps are clamped to [0,1], so `shape <= 1` and the height can never exceed the
+ * §5.2 relief bound however the knobs are set.
  *
  * Emission:
  *   residual = |Dv * L(V) + U*V^2 - (F + k) * V|    the V-equation's local imbalance
@@ -28,6 +32,9 @@ uniform float uReliefAmplitude;
 uniform float uSmoothedVWeight;
 uniform float uBoundaryWeight;
 uniform float uSoftenedVScale;
+/** Round-2 #1: thickness V that maps to full height (0 = keep the saturating remap), and its power. */
+uniform float uThicknessRef;
+uniform float uThicknessPower;
 uniform float uDv;
 uniform float uF;
 uniform float uK;
@@ -49,7 +56,9 @@ void main() {
   float boundary = smoothed.z;
   float support = smoothed.w;
 
-  float softenedV = 1.0 - exp(-max(smoothedV, 0.0) / uSoftenedVScale);
+  float softenedV = uThicknessRef > 0.0
+    ? pow(clamp(max(smoothedV, 0.0) / uThicknessRef, 0.0, 1.0), max(uThicknessPower, 1e-3))
+    : 1.0 - exp(-max(smoothedV, 0.0) / uSoftenedVScale);
   float shape = uSmoothedVWeight * softenedV + uBoundaryWeight * boundary;
   float height = uReliefAmplitude * shape * support;
 

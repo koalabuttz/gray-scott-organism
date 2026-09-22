@@ -37,6 +37,12 @@ uniform vec2 uChromaGate;
 uniform float uRoughnessVariation;
 /** §5.3 documented roughness band the local (= varied) roughness is clamped into. */
 uniform vec2 uRoughnessBand;
+// Round-2 (#1/#3/#4): the normalized thickness the height uses, plus the frontier band and thin-gloss.
+uniform float uHeightThicknessRef;
+uniform float uHeightThicknessPower;
+uniform float uFrontBoost;
+uniform float uFrontThinGate;
+uniform float uGlossThin;
 
 in vec2 vUv;
 in vec3 vWorldPosition;
@@ -73,11 +79,19 @@ void main() {
   float thickness = 1.0 - exp(-max(smoothed.x, 0.0) / max(uThicknessScale, 1e-4));
   float boundaryActivity = clamp(smoothed.z * 2.0, 0.0, 1.0);
 
-  // §12.4-B #4: the actively reshaping front (high |∇V|) keeps the calibrated roughness; calmer
-  // material is slightly smoother. The result is clamped into the §5.3 documented band, because the
-  // unclamped variation (0.36 × (1 − 0.35) = 0.234) would fall below the plan's floor of 0.24.
+  // Round 2: the *same* normalized thickness the §5.2 height is built from (so the frontier band and
+  // the thin-gloss sit exactly where the relief is shallow). Falls back to the round-B saturating
+  // measure when round 2 is off.
+  float heightThickness = uHeightThicknessRef > 0.0
+    ? pow(clamp(max(smoothed.x, 0.0) / uHeightThicknessRef, 0.0, 1.0), max(uHeightThicknessPower, 1e-3))
+    : thickness;
+  float thinness = clamp(1.0 - heightThickness, 0.0, 1.0);
+
+  // §12.4-B #4 + round-2 #4: the actively reshaping front (high |∇V|) keeps the calibrated
+  // roughness, calmer material is smoother, and *thin* material is glossier still — thin regions are
+  // the active frontier, so the specular difference deepens the depth read. Clamped into the §5.3 band.
   float localRoughness = clamp(
-    uRoughness * (1.0 - uRoughnessVariation * (1.0 - boundaryActivity)),
+    uRoughness * (1.0 - uRoughnessVariation * (1.0 - boundaryActivity)) * (1.0 - uGlossThin * thinness),
     uRoughnessBand.x,
     uRoughnessBand.y
   );
@@ -122,6 +136,17 @@ void main() {
   float chromaGate = smoothstep(uChromaGate.x, uChromaGate.y, thickness);
   vec3 chromatic = exp(-uAbsorptionChroma * chromaGate * thickness * vec3(0.0, 0.5, 1.0));
   radiance *= neutral * chromatic;
+
+  // Round-2 #3: boundary-band emphasis — a faint lift exactly where the active frontier (|∇V|) is
+  // *thin*. The weight is `|∇V|` squared (already concentrated at fronts, and squaring sharpens that
+  // selectivity) gated to genuinely thin material, so the band cannot spread over the body: an
+  // ungated version flooded the frame (measured p50 29 → 117 and the lit spread collapsing 2.66 →
+  // 1.33). The tint is the material's own near-neutral specular tint rather than the (cool) light
+  // colour, so the band cannot reintroduce the cast round B removed. Zero config is an exact no-op,
+  // and the final `* gate` keeps black black.
+  float frontGate = smoothstep(uFrontThinGate, min(1.0, uFrontThinGate + 0.25), thinness);
+  float frontWeight = boundaryActivity * boundaryActivity * frontGate;
+  radiance += uSpecularTint * (uFrontBoost * frontWeight);
 
   outColor = vec4(radiance * gate, 1.0);
 }

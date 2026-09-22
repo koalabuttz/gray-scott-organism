@@ -184,6 +184,12 @@ export interface RefinementShape {
   chromaGateLow: number;
   chromaGateHigh: number;
   roughnessVariation: number;
+  /** Round 2: normalized thickness remap for the height (0 = round-B saturating remap). */
+  heightThicknessRef: number;
+  heightThicknessPower: number;
+  frontBoost: number;
+  frontThinGate: number;
+  glossThin: number;
 }
 
 /** §12.4-B lit-pixel colour statistics (`colorStats()`). */
@@ -206,6 +212,39 @@ export interface ImageDifferenceShape {
   maxDelta: number;
   meanDelta: number;
   meanDeltaOnChanged: number;
+}
+
+/** §12.4 round-2 lit-pixel luminance distribution (`litStats()`). */
+export interface LitLuminanceStatsShape {
+  width: number;
+  height: number;
+  litPixels: number;
+  litFraction: number;
+  mean: number;
+  stdev: number;
+  p10: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p90: number;
+  p99: number;
+  max: number;
+  spread: number;
+}
+
+/** §12.4 round-2 derived height-field distribution over the organism (`heightStats()`). */
+export interface HeightFieldStatsShape {
+  cells: number;
+  min: number;
+  max: number;
+  mean: number;
+  stdev: number;
+  p50: number;
+  p90: number;
+  p99: number;
+  spread: number;
+  p90OverP50: number;
+  reliefFraction: number;
 }
 
 export interface DiagnosticsShape {

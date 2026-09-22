@@ -21,7 +21,7 @@ import type { FieldView, WorldState } from '../core/types.ts';
 import { FULLSCREEN_VERTEX_SHADER, FullscreenQuad } from '../gpu/fullscreen.ts';
 import { Program, ResourceTracker, createColorTarget, deleteColorTarget } from '../gpu/resources.ts';
 import type { ColorTarget } from '../gpu/resources.ts';
-import { readCompositeRGBA8 } from '../gpu/readback.ts';
+import { readCompositeRGBA8, readColorTargetRGBA } from '../gpu/readback.ts';
 import { computeCameraView } from './camera.ts';
 import { lightDirection } from './lighting.ts';
 import { canvasToBlob } from './capture.ts';
@@ -67,6 +67,14 @@ export interface RefinementState {
   chromaGateLow: number;
   chromaGateHigh: number;
   roughnessVariation: number;
+  /** Round-2 #1: normalized thickness remap for the height (0 = round-B saturating remap). */
+  heightThicknessRef: number;
+  heightThicknessPower: number;
+  /** Round-2 #3: frontier-band emphasis and its thinness gate. */
+  frontBoost: number;
+  frontThinGate: number;
+  /** Round-2 #4: extra gloss on thin material. */
+  glossThin: number;
 }
 
 export class Renderer {
@@ -297,6 +305,8 @@ export class Renderer {
     this.surfaceProgram.u1f('uSmoothedVWeight', SURFACE.smoothedVWeight);
     this.surfaceProgram.u1f('uBoundaryWeight', SURFACE.boundaryWeight);
     this.surfaceProgram.u1f('uSoftenedVScale', SURFACE.softenedVScale);
+    this.surfaceProgram.u1f('uThicknessRef', this.refinement.heightThicknessRef);
+    this.surfaceProgram.u1f('uThicknessPower', this.refinement.heightThicknessPower);
     this.surfaceProgram.u1f('uDv', world.parameters.Dv);
     this.surfaceProgram.u1f('uF', world.parameters.F);
     this.surfaceProgram.u1f('uK', world.parameters.k);
@@ -351,6 +361,11 @@ export class Renderer {
     this.materialProgram.u2f('uChromaGate', this.refinement.chromaGateLow, this.refinement.chromaGateHigh);
     this.materialProgram.u1f('uRoughnessVariation', this.refinement.roughnessVariation);
     this.materialProgram.u2f('uRoughnessBand', MATERIAL.roughnessRange[0], MATERIAL.roughnessRange[1]);
+    this.materialProgram.u1f('uHeightThicknessRef', this.refinement.heightThicknessRef);
+    this.materialProgram.u1f('uHeightThicknessPower', this.refinement.heightThicknessPower);
+    this.materialProgram.u1f('uFrontBoost', this.refinement.frontBoost);
+    this.materialProgram.u1f('uFrontThinGate', this.refinement.frontThinGate);
+    this.materialProgram.u1f('uGlossThin', this.refinement.glossThin);
     this.materialProgram.texture('uSmoothed', 3, this.blurTargets[1].texture);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, scene.framebuffer);
@@ -457,6 +472,24 @@ export class Renderer {
   readComposite(out?: Uint8Array): Uint8Array {
     this.composeToScreen();
     return readCompositeRGBA8(this.gl, this.canvasWidth, this.canvasHeight, out);
+  }
+
+  /**
+   * §12.4 round-2: read the derived surface field (R = height, G = boundary, B = support, A =
+   * activity) for verification. Verification only — no readback exists on the render path.
+   */
+  readSurfaceField(out?: Float32Array): Float32Array {
+    return readColorTargetRGBA(
+      this.gl,
+      this.surfaceTarget.framebuffer,
+      this.surfaceTarget.width,
+      this.surfaceTarget.height,
+      out,
+    );
+  }
+
+  get surfaceDimensions(): { width: number; height: number } {
+    return { width: this.surfaceTarget.width, height: this.surfaceTarget.height };
   }
 
   /**

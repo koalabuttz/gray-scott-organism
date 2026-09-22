@@ -2631,7 +2631,52 @@ deviations must be recorded here. Each entry states what differs, why, and what 
     terms darken the overhead mean by ≈18.6 %, so the piece reads deeper and more volumetric than the
     approved still; if the operator prefers the brighter approved look, `REFINEMENT.interiorDarkening`
     and `absorptionChroma` are independent knobs that can be lowered or zeroed without touching
-    anything else. `npx tsc --noEmit` clean; `npm test` 369 passed (364 + the 5 new cases in
-    `tests/material-response.test.ts`); `npm run test:browser` 79 passed / 13 gated skips / 0
-    unexpected (the extra gated skip is the new `REFINE=1` measurement spec).
+    anything else. *(At the round-B run:* `npx tsc --noEmit` clean; `npm test` 369 passed (364 + the 5
+    new cases in `tests/material-response.test.ts`); `npm run test:browser` 79 passed / 13 gated skips /
+    0 unexpected.)*
+
+    **Round 2 — thickness stratification.** Operator at `FinalFullArcReview`: *"It's hard to tell —
+    there's not a lot of thickness variation."* A second, isolated pass on the same mature field
+    (`artifacts/phase4-refinement/round2/`; the same `REFINE=1` harness, a second test). The root cause
+    was confirmed by measurement rather than assumed: the §5.2 height's saturating remap
+    `1 − exp(−V/0.25)` held the whole body inside a 0.00083–0.00434 band — only **58.5 %** of the relief
+    budget — with a height `max/p50` spread of just **1.244**, so the grazing light had almost no
+    height *gradient* to reveal.
+
+    **Accepted.** (i) **#1 height response to thickness.** The height now uses a normalized thickness
+    `clamp(V/heightThicknessRef, 0, 1) ^ heightThicknessPower` at `heightThicknessRef` **0.36** (just
+    under the field's own max V ≈ 0.38) and power **1.3**, replacing the saturating remap; `ref` 0
+    keeps the old map, so it is a single toggle. `SURFACE.reliefAmplitude` rose **0.006 → 0.007**.
+    (ii) **#2 interior darkening 0.45 → 0.65.** Measured against the shipped round-B render (lit-pixel
+    spread p90/p50 **2.655**; height `min/p90/max` 0.00083 / 0.00383 / 0.00434, `max/p50` 1.244, budget
+    use 0.585): the remap alone moves the height spread to **1.653 (+33 %)** and the lit spread to
+    3.111 (+17 %); the accepted combination reaches **lit spread 3.640 (+37 %)** and height **0.00063 /
+    0.00465 / 0.00610** — budget use **0.781**, cores **41 % higher**, filaments **24 % lower**,
+    `max/min` 5.2 → 9.7 — with `p50` exactly 0, **no pixel at the 255 ceiling** (max 252) and the
+    palette unchanged (saturation 0.0396 → 0.0418, R−B −1.16 → −1.16). The grazing presentation view
+    moves 2.405 → 2.933 (+22 %) while its black floor *drops* (p50 2 → 1).
+
+    **Rejected, with evidence.** Relief 0.008 (+52 % lit spread) saturates a pixel at 255 with 0.023 %
+    of the frame at ≥ 250 — rejected to keep headroom as the field's peak evolves (0.0075 also reaches
+    254, so 0.007 ships). **#3 frontier-band emphasis** (`|∇V|²` gated to thin material, tinted with the
+    material's own neutral specular tint) *lowers* the metric at every tested gain (0.05 → 2.813,
+    0.12 → 2.659, 0.25 → 2.920 against 3.640) while flooding the frame (mean 8.93 → 11.9 / 15.3 / 19.7)
+    and desaturating it (0.0418 → 0.019 / 0.015 / 0.014); kept as a documented off knob. **#4
+    thin-gloss roughness coupling** also lowers the spread (3.400 at 0.10, 3.167 at 0.25) and raises
+    clipping — a smoother surface throws a narrower specular lobe, so *fewer* thin pixels catch the
+    grazing light, the measured opposite of the intended cue; kept as an off knob. The first
+    frontier-band attempt (ungated, light-coloured, over a wide thinness window) was worse still —
+    p50 29 → 117 with the lit spread collapsing to 1.325 — which is why the shipped form is quadratic
+    in `|∇V|` behind a 0.65 thinness gate.
+
+    *(Cost.)* The heavier relief and the normalized remap visibly brighten the organism's own
+    catch-light (lit-pixel p90 77 → 91, lit mean 36.3 → 38.5) while the frame mean barely moves
+    (8.79 → 8.93) — the change lands on the structure, not on the darkness. Round B's evidence is
+    unaffected: the round-B test now **pins its own material and relief**, and a re-run reproduces all
+    28 of its samples and every one of its PNGs byte-for-byte (the only change to
+    `artifacts/phase4-refinement/changes.json` is that each sample's echoed `refinement` object gains
+    the new round-2 knobs). `npx tsc --noEmit` clean; `npm test` **375 passed** (the shader's pinned
+    TypeScript mirror `src/visual/material-response.ts` grew the round-2 height remap and the gloss
+    factor, +2 cases in `tests/material-response.test.ts`); `npm run test:browser` 79 passed / 16 gated
+    skips / 0 unexpected (the extra gated skip is the round-2 test; HEAD's default run has 15).
 

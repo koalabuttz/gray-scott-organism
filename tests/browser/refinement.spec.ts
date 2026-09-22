@@ -24,14 +24,16 @@
  * Writes `artifacts/phase4-refinement/`.
  */
 import { expect, test } from '@playwright/test';
-import { BLOOM, REFINEMENT } from '../../src/config.ts';
+import { BLOOM, REFINEMENT, SURFACE } from '../../src/config.ts';
 import { hook, openArtwork } from '../support/browser.ts';
 import { writeJson, writePng } from '../support/evidence.ts';
 import type {
   ColorStatsShape,
   FieldStatsShape,
+  HeightFieldStatsShape,
   ImageDifferenceShape,
   ImageStatsShape,
+  LitLuminanceStatsShape,
   RefinementShape,
 } from '../support/types.ts';
 
@@ -40,17 +42,44 @@ const STEPS = 16_000;
 /** The arc-tuned mature point (README-gate.md / `artifacts/phase1-tune.txt`). */
 const PARAMS = { F: 0.029, k: 0.057, Du: 0.16, Dv: 0.08 };
 const OUT = 'phase4-refinement';
+/**
+ * §12.4 round 2 writes its own before/after set.
+ */
+const ROUND2_OUT = `${OUT}/round2`;
+/** The relief the shipped round-B render used — the operator's actual "before" in this round. */
+const BEFORE_RELIEF = 0.006;
+/** The relief round 2 ships; it must equal the config value (asserted in the spec). */
+const SHIPPED_RELIEF = SURFACE.reliefAmplitude;
 
-/** All-off baseline: the pre-refinement material. */
+/**
+ * The shipped round-B material, frozen as literal constants rather than read from `REFINEMENT`, so
+ * round-B evidence stays byte-reproducible after round 2 retunes a shared knob (`interiorDarkening`)
+ * and adds new ones. Round 2 uses this as the operator's actual "before".
+ */
+const ROUND_B: RefinementShape = {
+  interiorDarkening: 0.45,
+  absorptionChroma: 0.14,
+  chromaGateLow: 0.32,
+  chromaGateHigh: 0.78,
+  roughnessVariation: 0.35,
+  heightThicknessRef: 0,
+  heightThicknessPower: 1,
+  frontBoost: 0,
+  frontThinGate: 0.65,
+  glossThin: 0,
+};
+/** All-off baseline: the pre-refinement material (round-B terms *and* the round-2 knobs at zero). */
 const OFF: RefinementShape = {
+  ...ROUND_B,
   interiorDarkening: 0,
   absorptionChroma: 0,
-  chromaGateLow: REFINEMENT.chromaGateLow,
-  chromaGateHigh: REFINEMENT.chromaGateHigh,
   roughnessVariation: 0,
 };
-/** The shipped material (all accepted refinements). */
-const AFTER: RefinementShape = { ...REFINEMENT };
+/**
+ * The round-B accepted material. Frozen (not `{...REFINEMENT}`) so this test's evidence cannot be
+ * perturbed by round 2, and with the relief pinned to the round-B value in `capture`.
+ */
+const AFTER: RefinementShape = { ...ROUND_B };
 
 interface BloomParams {
   gain: number;
@@ -116,7 +145,7 @@ test.describe('§12.4-B visual refinement', () => {
       verbose = true,
     ): Promise<Sample> => {
       await hook(page, 'setRefinement', [refinement]);
-      await hook(page, 'setMaterial', [{ bloomGain: bloom.gain }]);
+      await hook(page, 'setMaterial', [{ bloomGain: bloom.gain, relief: BEFORE_RELIEF }]);
       await hook(page, 'setBloomParams', [{ threshold: bloom.threshold, knee: bloom.knee, kneePerTap: bloom.kneePerTap }]);
       await hook(page, 'renderOnce');
       const image = await hook<ImageStatsShape>(page, 'compositeStats');
@@ -154,7 +183,7 @@ test.describe('§12.4-B visual refinement', () => {
     await hook(page, 'stashComposite');
     await capture('toggle-exercise', 'every toggle exercised at its accepted setting', AFTER, SHIPPED_BLOOM, null, true);
     await hook(page, 'setRefinement', [OFF]);
-    await hook(page, 'setMaterial', [{ bloomGain: LEGACY_BLOOM.gain }]);
+    await hook(page, 'setMaterial', [{ bloomGain: LEGACY_BLOOM.gain, relief: BEFORE_RELIEF }]);
     await hook(page, 'setBloomParams', [{ threshold: LEGACY_BLOOM.threshold, knee: LEGACY_BLOOM.knee, kneePerTap: LEGACY_BLOOM.kneePerTap }]);
     await hook(page, 'renderOnce');
     const identity = await hook<ImageDifferenceShape>(page, 'diffAgainstStash');
@@ -162,9 +191,9 @@ test.describe('§12.4-B visual refinement', () => {
     expect(identity.maxDelta, 'the all-off config round-trips bit-for-bit after the toggles').toBe(0);
 
     // --- material refinements, one at a time (bloom off, so only the material differs) -----------
-    await capture('after-chroma', '#1 thickness-driven neutralization only', { ...OFF, absorptionChroma: REFINEMENT.absorptionChroma }, NO_BLOOM, 'after-thickness-color.png');
-    await capture('after-darkening', '#2 interior darkening only (isolated)', { ...OFF, interiorDarkening: REFINEMENT.interiorDarkening }, NO_BLOOM, 'after-interior-darkening.png');
-    await capture('after-roughness', '#4 boundary-keyed roughness variation only', { ...OFF, roughnessVariation: REFINEMENT.roughnessVariation }, NO_BLOOM, 'after-roughness-variation.png');
+    await capture('after-chroma', '#1 thickness-driven neutralization only', { ...OFF, absorptionChroma: ROUND_B.absorptionChroma }, NO_BLOOM, 'after-thickness-color.png');
+    await capture('after-darkening', '#2 interior darkening only (isolated)', { ...OFF, interiorDarkening: ROUND_B.interiorDarkening }, NO_BLOOM, 'after-interior-darkening.png');
+    await capture('after-roughness', '#4 boundary-keyed roughness variation only', { ...OFF, roughnessVariation: ROUND_B.roughnessVariation }, NO_BLOOM, 'after-roughness-variation.png');
     await capture('after-material', 'all accepted material refinements', AFTER, NO_BLOOM, null);
 
     // --- #3 bloom: the defect, the rejected order, and the working point -------------------------
@@ -196,7 +225,7 @@ test.describe('§12.4-B visual refinement', () => {
     // interior-darkening strength sweep: #1 and #4 stay at their accepted settings, so these are
     // **combined** numbers and are reported separately from the isolated `after-darkening` sample.
     console.info('[refine] --- #2 interior darkening strength sweep (combined: #1 and #4 on)');
-    for (const interiorDarkening of [0.25, REFINEMENT.interiorDarkening, 0.65]) {
+    for (const interiorDarkening of [0.25, ROUND_B.interiorDarkening, 0.65]) {
       await capture(`darkening-${interiorDarkening}`, `#2 interior darkening ${interiorDarkening} (combined, #1 and #4 on)`, { ...AFTER, interiorDarkening }, NO_BLOOM, null);
     }
 
@@ -205,7 +234,7 @@ test.describe('§12.4-B visual refinement', () => {
       { type: 'camera', value: { mode: 'horizon', elevationRadians: 0.21, distance: 1.75, focusUV: [0.5, 0.5], transitionSeconds: 0 } },
     ]);
     await hook(page, 'setRefinement', [OFF]);
-    await hook(page, 'setMaterial', [{ bloomGain: LEGACY_BLOOM.gain }]);
+    await hook(page, 'setMaterial', [{ bloomGain: LEGACY_BLOOM.gain, relief: BEFORE_RELIEF }]);
     await hook(page, 'setBloomParams', [{ threshold: LEGACY_BLOOM.threshold, knee: LEGACY_BLOOM.knee, kneePerTap: LEGACY_BLOOM.kneePerTap }]);
     await hook(page, 'renderOnce');
     await hook(page, 'stashComposite');
@@ -299,5 +328,178 @@ test.describe('§12.4-B visual refinement', () => {
     expect(shipped.bloomContribution.changedFraction, '#3 bloom is effective').toBeGreaterThan(0.0002);
     expect(shipped.bloomContribution.changedFraction, '#3 bloom stays restrained (no global haze)').toBeLessThan(0.05);
     expect(shipped.image.percentiles[0], '#3 does not lift black').toBe(0);
+  });
+
+  /**
+   * §12.4 round 2 — thickness stratification.
+   *
+   * Operator feedback at `FinalFullArcReview`: *"It's hard to tell — there's not a lot of thickness
+   * variation."* The diagnosis is measurable: the §5.2 height is
+   * `relief × (0.8·(1 − exp(−V/0.25)) + 0.2·|∇V|)`, and that saturating remap maps every
+   * moderate-to-deep V into nearly the same height, so a thick core and a thin filament sit at almost
+   * the same relief — and the grazing light, which responds to height *gradients*, has nothing to
+   * show. This test measures each lever against the stratification proxy (`litStats().spread` =
+   * p90/p50 within lit pixels) and the height field's own distribution, and keeps the combination
+   * that lifts stratification without breaking a guard.
+   */
+  test('round 2: thickness stratification sweep on the mature field', async ({ page }) => {
+    test.setTimeout(30 * 60_000);
+    await page.setViewportSize({ width: 1920, height: 1080 });
+    const probe = await openArtwork(page);
+    expect(probe.ok, probe.reason).toBe(true);
+    if (!probe.ok) return;
+
+    await hook(page, 'setAutoSeed', [false]);
+    await hook(page, 'setPaused', [true]);
+    await hook(page, 'reset');
+    await hook(page, 'setParameters', [PARAMS]);
+    await hook(page, 'seed', [{ center: [0.44, 0.53], radiusCells: 6, mode: 'replace' }]);
+    await hook(page, 'simulate', [STEPS]);
+    await hook(page, 'renderOnce');
+    const field = await hook<FieldStatsShape>(page, 'fieldStats', [0.1]);
+    console.info(
+      `[round2] mature field: occupied=${field.occupiedFraction.toFixed(4)} meanV=${field.meanV.toFixed(4)} maxV=${field.maxV.toFixed(4)}`,
+    );
+
+    /** The shipped round-B material, i.e. the operator's "before". Frozen, not read from config. */
+    const BASE: RefinementShape = ROUND_B;
+    /** The round-2 accepted combination (set to the measured optimum in the config). */
+    const FINAL: RefinementShape = { ...REFINEMENT };
+    const FINAL_RELIEF = SHIPPED_RELIEF;
+
+    interface Row {
+      name: string;
+      label: string;
+      relief: number;
+      refinement: RefinementShape;
+      png: string | null;
+      image: ImageStatsShape;
+      color: ColorStatsShape;
+      lit: LitLuminanceStatsShape;
+      height: HeightFieldStatsShape;
+      bloom: ImageDifferenceShape;
+    }
+    const rows: Row[] = [];
+
+    const measure = async (
+      name: string,
+      label: string,
+      refinement: RefinementShape,
+      relief: number,
+      pngName: string | null = null,
+    ): Promise<Row> => {
+      await hook(page, 'setRefinement', [refinement]);
+      await hook(page, 'setMaterial', [{ relief, bloomGain: BLOOM.gain }]);
+      await hook(page, 'setBloomParams', [{ threshold: BLOOM.threshold, knee: BLOOM.knee, kneePerTap: true }]);
+      await hook(page, 'renderOnce');
+      const image = await hook<ImageStatsShape>(page, 'compositeStats');
+      const color = await hook<ColorStatsShape>(page, 'colorStats');
+      const lit = await hook<LitLuminanceStatsShape>(page, 'litStats');
+      const height = await hook<HeightFieldStatsShape>(page, 'heightStats');
+      const bloom = await hook<ImageDifferenceShape>(page, 'bloomContribution');
+      let png: string | null = null;
+      if (pngName) {
+        png = `${ROUND2_OUT}/${pngName}`;
+        writePng(png, await hook<string>(page, 'capturePngBase64'));
+      }
+      const row: Row = { name, label, relief, refinement, png, image, color, lit, height, bloom };
+      rows.push(row);
+      console.info(
+        `[round2] ${name.padEnd(26)} lit spread=${lit.spread.toFixed(3)} (p50=${lit.p50} p90=${lit.p90} mean=${lit.mean.toFixed(1)} sd=${lit.stdev.toFixed(1)}) | ` +
+          `height min=${height.min.toFixed(5)} p90=${height.p90.toFixed(5)} max=${height.max.toFixed(5)} spread=${height.spread.toFixed(2)} reliefUse=${height.reliefFraction.toFixed(3)} | ` +
+          `img p50=${image.percentiles[0]} max=${image.max} clip=${(image.clippedFraction * 100).toFixed(4)}% sat=${color.meanSaturation.toFixed(4)} R-B=${color.warmMinusCool.toFixed(2)}`,
+      );
+      return row;
+    };
+
+    // The operator's "before": the shipped round-B render at its calibrated relief.
+    await measure('before', 'shipped round-B render (saturating height remap, relief 0.006)', BASE, BEFORE_RELIEF, 'before-overhead.png');
+
+    console.info('[round2] --- lever #1a: normalized thickness remap alone (round-B material)');
+    for (const ref of [0.36, 0.38, 0.42]) {
+      for (const power of [1.0, 1.3]) {
+        await measure(`remap-r${ref}-p${power}`, `remap ref ${ref} power ${power}`, { ...BASE, heightThicknessRef: ref, heightThicknessPower: power }, BEFORE_RELIEF);
+      }
+    }
+    const REMAP_ONLY: RefinementShape = {
+      ...BASE,
+      heightThicknessRef: FINAL.heightThicknessRef,
+      heightThicknessPower: FINAL.heightThicknessPower,
+    };
+    await measure('remap-accepted', 'accepted remap alone', REMAP_ONLY, BEFORE_RELIEF, 'after-height-remap.png');
+
+    console.info('[round2] --- lever #1b: relief alone (saturating remap, round-B material)');
+    for (const relief of [0.007, 0.008]) {
+      await measure(`relief-only-${relief}`, `relief ${relief} alone`, BASE, relief);
+    }
+
+    console.info('[round2] --- lever #2: interior darkening alone (round-B material, relief 0.006)');
+    for (const interiorDarkening of [0.45, 0.55, 0.65]) {
+      await measure(`dark-${interiorDarkening}`, `interior darkening ${interiorDarkening} alone`, { ...BASE, interiorDarkening }, BEFORE_RELIEF);
+    }
+
+    console.info('[round2] --- the accepted combination: relief refinement at the accepted remap');
+    for (const relief of [0.006, 0.0065, 0.007, 0.0075]) {
+      await measure(`final-relief-${relief}`, `accepted combination at relief ${relief}`, FINAL, relief);
+    }
+
+    console.info('[round2] --- the accepted combination (remap + darkening + relief)');
+    const final = await measure('after', 'round-2 accepted combination', FINAL, FINAL_RELIEF, 'after-all-overhead.png');
+    await measure('after-relief-0.008', 'accepted combination at the §5.2 relief ceiling', FINAL, 0.008);
+
+    console.info('[round2] --- lever #3 (REJECTED): frontier band on top of the accepted combination');
+    for (const frontBoost of [0.05, 0.12, 0.25]) {
+      await measure(`front-${frontBoost}`, `frontier band ${frontBoost} on the accepted combination`, { ...FINAL, frontBoost }, FINAL_RELIEF, frontBoost === 0.25 ? 'after-frontier-band-rejected.png' : null);
+    }
+
+    console.info('[round2] --- lever #4 (REJECTED): thin-gloss on top of the accepted combination');
+    for (const glossThin of [0.1, 0.25]) {
+      await measure(`gloss-${glossThin}`, `thin-gloss ${glossThin} on the accepted combination`, { ...FINAL, glossThin }, FINAL_RELIEF);
+    }
+
+    // Grazing view: the operator's actual presentation angle for judging structure.
+    await hook(page, 'dispatch', [
+      { type: 'camera', value: { mode: 'horizon', elevationRadians: 0.21, distance: 1.75, focusUV: [0.5, 0.5], transitionSeconds: 0 } },
+    ]);
+    await measure('before-grazing', 'shipped round-B render, grazing view', BASE, BEFORE_RELIEF, 'before-grazing.png');
+    await measure('after-grazing', 'round-2 accepted combination, grazing view', FINAL, FINAL_RELIEF, 'after-all-grazing.png');
+
+    writeJson(`${ROUND2_OUT}/changes.json`, {
+      createdAt: new Date().toISOString(),
+      field: { steps: STEPS, parameters: PARAMS, occupiedFraction: field.occupiedFraction, meanV: field.meanV, maxV: field.maxV },
+      config: { refinement: REFINEMENT, bloom: BLOOM, beforeRelief: BEFORE_RELIEF, shippedRelief: SHIPPED_RELIEF, reliefRange: SURFACE.reliefAmplitudeRange },
+      rows,
+    });
+
+    // --- guards ---------------------------------------------------------------------------------
+    const before = rows.find((r) => r.name === 'before')!;
+    for (const r of rows) {
+      const grazing = r.name.includes('grazing');
+      // The grazing close view legitimately has a small nonzero p50 (gate README: p50 = 2 at the
+      // 12° / 1.75-unit override); the overhead presentation view must stay exactly black.
+      if (grazing) expect(r.image.percentiles[0], `${r.name}: grazing p50 stays at the black floor`).toBeLessThanOrEqual(2);
+      else expect(r.image.percentiles[0], `${r.name}: p50 exactly black`).toBe(0);
+      expect(r.image.clippedFraction, `${r.name}: no highlight clipping`).toBeLessThanOrEqual(0.001);
+      expect(r.color.meanSaturation, `${r.name}: palette near-neutral`).toBeLessThanOrEqual(0.08);
+      expect(Math.abs(r.color.warmMinusCool), `${r.name}: warmth subtle`).toBeLessThanOrEqual(8);
+      expect(r.relief, `${r.name}: relief inside the §5.2 bound`).toBeLessThanOrEqual(SURFACE.reliefAmplitudeRange[1]);
+      expect(r.relief, `${r.name}: relief inside the §5.2 bound`).toBeGreaterThanOrEqual(SURFACE.reliefAmplitudeRange[0]);
+      expect(r.height.reliefFraction, `${r.name}: height never exceeds the relief budget`).toBeLessThanOrEqual(1.0001);
+    }
+    // The point of round 2: the accepted render is measurably more stratified than the shipped one.
+    expect(final.lit.spread, 'round 2 raises lit-pixel stratification (p90/p50)').toBeGreaterThan(before.lit.spread);
+    expect(final.height.spread, 'round 2 raises the height field spread').toBeGreaterThan(before.height.spread);
+
+    // #3 and #4 are rejected on evidence, not taste: neither beats the accepted combination, and the
+    // frontier band only "wins" the metric by flooding the whole frame with added light.
+    const front025 = rows.find((r) => r.name === 'front-0.25')!;
+    const gloss025 = rows.find((r) => r.name === 'gloss-0.25')!;
+    const reliefCeiling = rows.find((r) => r.name === 'after-relief-0.008')!;
+    expect(front025.lit.spread, '#3 rejected: the frontier band does not beat the accepted combination').toBeLessThan(final.lit.spread);
+    expect(front025.image.mean / final.image.mean, '#3 rejected: it floods the frame with light').toBeGreaterThan(1.3);
+    expect(Math.abs(front025.color.warmMinusCool), '#3 rejected: and it shifts the palette').toBeLessThan(Math.abs(final.color.warmMinusCool) + 1);
+    expect(gloss025.lit.spread, '#4 rejected: thin-gloss does not beat the accepted combination').toBeLessThan(final.lit.spread);
+    expect(reliefCeiling.image.max, '#1 rejected at 0.008: the relief ceiling clips').toBe(255);
+    expect(final.image.max, 'the shipped relief keeps every pixel off the hard ceiling').toBeLessThan(255);
   });
 });

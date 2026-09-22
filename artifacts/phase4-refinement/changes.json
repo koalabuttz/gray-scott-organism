@@ -1,5 +1,5 @@
 {
-  "createdAt": "2026-09-22T03:43:03.658Z",
+  "createdAt": "2026-09-22T15:25:42.213Z",
   "field": {
     "steps": 16000,
     "parameters": {
@@ -15,11 +15,16 @@
   },
   "config": {
     "refinement": {
-      "interiorDarkening": 0.45,
+      "interiorDarkening": 0.65,
       "absorptionChroma": 0.14,
       "chromaGateLow": 0.32,
       "chromaGateHigh": 0.78,
-      "roughnessVariation": 0.35
+      "roughnessVariation": 0.35,
+      "heightThicknessRef": 0.36,
+      "heightThicknessPower": 1.3,
+      "frontBoost": 0,
+      "frontThinGate": 0.65,
+      "glossThin": 0
     },
     "bloom": {
       "levels": 3,
@@ -91,7 +96,12 @@
         "absorptionChroma": 0,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0
+        "roughnessVariation": 0,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.04,
@@ -166,7 +176,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -241,7 +256,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0
+        "roughnessVariation": 0,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -321,7 +341,12 @@
         "absorptionChroma": 0,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0
+        "roughnessVariation": 0,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -401,7 +426,12 @@
         "absorptionChroma": 0,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -481,7 +511,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -561,7 +596,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.04,
@@ -641,7 +681,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -721,7 +766,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -801,7 +851,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -881,7 +936,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -961,7 +1021,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -1041,7 +1106,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.04,
@@ -1121,7 +1191,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -1201,7 +1276,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.3,
@@ -1281,7 +1361,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.04,
@@ -1361,7 +1446,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -1441,7 +1531,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.3,
@@ -1521,7 +1616,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.04,
@@ -1601,7 +1701,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -1681,7 +1786,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.3,
@@ -1761,7 +1871,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.04,
@@ -1841,7 +1956,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,
@@ -1921,7 +2041,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.3,
@@ -2001,7 +2126,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -2081,7 +2211,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -2161,7 +2296,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0,
@@ -2241,7 +2381,12 @@
         "absorptionChroma": 0.14,
         "chromaGateLow": 0.32,
         "chromaGateHigh": 0.78,
-        "roughnessVariation": 0.35
+        "roughnessVariation": 0.35,
+        "heightThicknessRef": 0,
+        "heightThicknessPower": 1,
+        "frontBoost": 0,
+        "frontThinGate": 0.65,
+        "glossThin": 0
       },
       "bloom": {
         "gain": 0.12,

@@ -1,5 +1,13 @@
 # Phase-4 round-B visual/artistic refinement — before/after evidence
 
+> **Superseded in part by round 2.** The operator's `FinalFullArcReview` feedback ("It's hard to tell —
+> there's not a lot of thickness variation") produced a second pass that retunes `interiorDarkening`
+> (0.45 → 0.65), raises `SURFACE.reliefAmplitude` (0.006 → 0.007) and replaces the height's saturating
+> remap with a normalized thickness. See [`round2/README.md`](round2/README.md) for the current config
+> and the thickness-stratification measurements. **The evidence below is unaffected and byte-for-byte
+> reproducible**: the round-B test pins its own material and relief, so this directory's PNGs and
+> statistics are unchanged by round 2.
+
 Plan §12.4 ("Tune: pacing, silence, transitions, colour, bloom, material response… Remove anything
 that reads as a technology demonstration"). These are refinements of the **approved** Phase-1 image
 (the operator's "fine for now"), not a redesign: every change is a separately toggleable config knob,

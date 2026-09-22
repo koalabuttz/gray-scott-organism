@@ -51,8 +51,8 @@ import { capabilityReportMarkdown, createContext } from './gpu/context.ts';
 import type { CapabilityReport } from './gpu/context.ts';
 import { ResourceTracker, createColorTarget, deleteColorTarget } from './gpu/resources.ts';
 import type { ColorTarget } from './gpu/resources.ts';
-import { imageStats, imageColorStats, imageDifference } from './gpu/readback.ts';
-import type { ImageStats, ImageColorStats, ImageDifference } from './gpu/readback.ts';
+import { imageStats, imageColorStats, imageDifference, imageLitStats, heightFieldStats } from './gpu/readback.ts';
+import type { ImageStats, ImageColorStats, ImageDifference, LitLuminanceStats, HeightFieldStats } from './gpu/readback.ts';
 import { FrameTimeRing } from './lab/diagnostics.ts';
 import { Lab } from './lab/lab.ts';
 import type { CaptureResult, LabApi, LabSnapshot } from './lab/lab.ts';
@@ -170,6 +170,10 @@ export interface ArtworkTestHook {
   stashComposite(): void;
   /** §12.4-B: pixelwise difference of the current composite against the stashed snapshot. */
   diffAgainstStash(): ImageDifference;
+  /** §12.4 round-2: lit-pixel luminance distribution (mean, stdev, percentiles, p90/p50 spread). */
+  litStats(): LitLuminanceStats;
+  /** §12.4 round-2: the derived height field's min/max/percentiles across the organism. */
+  heightStats(): HeightFieldStats;
   /** §12.4-B #3: override the bloom threshold/knee/knee order (measurement/tuning). */
   setBloomParams(value: Partial<{ threshold: number; knee: number; kneePerTap: boolean }>): void;
   /** §12.4-B #3: the bloom parameters the last bloom pass used. */
@@ -2580,6 +2584,21 @@ export class App {
         const base = (window as unknown as { __refineBase?: Uint8Array }).__refineBase;
         if (!base) throw new Error('diffAgainstStash called before stashComposite');
         return imageDifference(this.renderer.readComposite(), base);
+      },
+      litStats: () => {
+        const pixels = this.renderer.readComposite();
+        const { width, height } = this.canvas;
+        return imageLitStats(pixels, width, height);
+      },
+      /**
+       * §12.4 round-2: the derived height field's own distribution across the organism. The surface
+       * target is read back (verification only) and the stats are computed in-page, because a 768²
+       * RGBA16F field is ~9 MB of JSON that has no business crossing the page boundary.
+       */
+      heightStats: () => {
+        const data = this.renderer.readSurfaceField();
+        const { width, height } = this.renderer.surfaceDimensions;
+        return heightFieldStats(data, width, height, 0.5, this.material.relief);
       },
       setBloomParams: (value) => {
         this.renderer.setBloomParams(value);

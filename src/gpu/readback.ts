@@ -41,6 +41,184 @@ export function readCompositeRGBA8(
   return buffer;
 }
 
+/** Decode an IEEE-754 binary16 (as stored by an RGBA16F attachment) to a JS number. */
+function halfToFloat(h: number): number {
+  const sign = h & 0x8000 ? -1 : 1;
+  const exponent = (h >> 10) & 0x1f;
+  const mantissa = h & 0x3ff;
+  if (exponent === 0) return sign * mantissa * 2 ** -24;
+  if (exponent === 0x1f) return mantissa === 0 ? sign * Number.POSITIVE_INFINITY : Number.NaN;
+  return sign * (1 + mantissa / 1024) * 2 ** (exponent - 15);
+}
+
+/**
+ * Read a colour target as RGBA floats for verification. The read format is taken from the driver's
+ * own `IMPLEMENTATION_COLOR_READ_TYPE` for the bound attachment, so a float attachment served as
+ * `HALF_FLOAT` (the common case for RGBA16F) is decoded rather than silently returning zeros from a
+ * rejected `FLOAT` read.
+ */
+export function readColorTargetRGBA(
+  gl: WebGL2RenderingContext,
+  framebuffer: WebGLFramebuffer,
+  width: number,
+  height: number,
+  out?: Float32Array,
+): Float32Array {
+  const count = width * height * 4;
+  const previous = gl.getParameter(gl.FRAMEBUFFER_BINDING) as WebGLFramebuffer | null;
+  gl.bindFramebuffer(gl.FRAMEBUFFER, framebuffer);
+  const readType = gl.getParameter(gl.IMPLEMENTATION_COLOR_READ_TYPE) as number;
+  const result = out ?? new Float32Array(count);
+  if (readType === gl.FLOAT) {
+    gl.readPixels(0, 0, width, height, gl.RGBA, gl.FLOAT, result);
+  } else {
+    const half = new Uint16Array(count);
+    gl.readPixels(0, 0, width, height, gl.RGBA, gl.HALF_FLOAT, half);
+    for (let i = 0; i < count; i += 1) result[i] = halfToFloat(half[i]!);
+  }
+  gl.bindFramebuffer(gl.FRAMEBUFFER, previous);
+  return result;
+}
+
+/**
+ * §12.4 round-2 luminance statistics over the **lit** pixels only.
+ *
+ * `imageStats`' percentiles are over the whole frame, which is dominated by the black background, so
+ * they cannot see how stratified the *organism* is. This reports the lit-pixel distribution directly;
+ * `spread` is the thickness-variation proxy the round-2 sweep is judged on: `p90 / p50` within lit
+ * pixels — how far the bright rims/catch-light stand above the typical lit pixel.
+ */
+export interface LitLuminanceStats {
+  width: number;
+  height: number;
+  litPixels: number;
+  litFraction: number;
+  mean: number;
+  stdev: number;
+  p10: number;
+  p25: number;
+  p50: number;
+  p75: number;
+  p90: number;
+  p99: number;
+  max: number;
+  /** `p90 / max(p50, 1)` over lit pixels. */
+  spread: number;
+}
+
+export function imageLitStats(pixels: Uint8Array, width: number, height: number): LitLuminanceStats {
+  const count = width * height;
+  const histogram = new Uint32Array(256);
+  let lit = 0;
+  let sum = 0;
+  let sumSq = 0;
+  for (let i = 0; i < count; i += 1) {
+    const luma = Math.max(pixels[i * 4]!, pixels[i * 4 + 1]!, pixels[i * 4 + 2]!);
+    if (luma <= 2) continue;
+    lit += 1;
+    sum += luma;
+    sumSq += luma * luma;
+    histogram[luma]! += 1;
+  }
+  const at = (p: number): number => {
+    if (lit === 0) return 0;
+    const target = (p / 100) * lit;
+    let running = 0;
+    for (let value = 0; value < 256; value += 1) {
+      running += histogram[value]!;
+      if (running >= target) return value;
+    }
+    return 255;
+  };
+  const mean = lit > 0 ? sum / lit : 0;
+  const variance = lit > 0 ? Math.max(0, sumSq / lit - mean * mean) : 0;
+  const p50 = at(50);
+  const p90 = at(90);
+  return {
+    width,
+    height,
+    litPixels: lit,
+    litFraction: count > 0 ? lit / count : 0,
+    mean,
+    stdev: Math.sqrt(variance),
+    p10: at(10),
+    p25: at(25),
+    p50,
+    p75: at(75),
+    p90,
+    p99: at(99),
+    max: lit > 0 ? at(100) : 0,
+    spread: p90 / Math.max(p50, 1),
+  };
+}
+
+/**
+ * §12.4 round-2 statistics over the derived **height field** (surface target R), restricted to the
+ * organism (support above `supportThreshold`). This is the direct view of lever #1: does a thick core
+ * actually stand above a thin filament, and by how much. `spread` = `p90 / max(min, eps)` — how far
+ * the deepest relief sits above the shallowest part of the body.
+ */
+export interface HeightFieldStats {
+  /** Organism cells counted (support above the threshold). */
+  cells: number;
+  min: number;
+  max: number;
+  mean: number;
+  stdev: number;
+  p50: number;
+  p90: number;
+  p99: number;
+  /** `max / max(p50, eps)`. */
+  spread: number;
+  /** `p90 / max(p50, eps)`. */
+  p90OverP50: number;
+  /** `(max - min) / reliefAmplitude` — the fraction of the relief budget actually used. */
+  reliefFraction: number;
+}
+
+export function heightFieldStats(
+  data: Float32Array,
+  width: number,
+  height: number,
+  supportThreshold = 0.5,
+  reliefAmplitude = 0.006,
+): HeightFieldStats {
+  const count = width * height;
+  const values: number[] = [];
+  let sum = 0;
+  for (let i = 0; i < count; i += 1) {
+    if (data[i * 4 + 2]! < supportThreshold) continue;
+    const h = data[i * 4]!;
+    values.push(h);
+    sum += h;
+  }
+  if (values.length === 0) {
+    return { cells: 0, min: 0, max: 0, mean: 0, stdev: 0, p50: 0, p90: 0, p99: 0, spread: 0, p90OverP50: 0, reliefFraction: 0 };
+  }
+  values.sort((a, b) => a - b);
+  const at = (p: number): number => values[Math.min(values.length - 1, Math.max(0, Math.round((p / 100) * (values.length - 1))))]!;
+  const mean = sum / values.length;
+  let sumSq = 0;
+  for (const v of values) sumSq += (v - mean) * (v - mean);
+  const min = values[0]!;
+  const max = values[values.length - 1]!;
+  const p50 = at(50);
+  const p90 = at(90);
+  return {
+    cells: values.length,
+    min,
+    max,
+    mean,
+    stdev: Math.sqrt(sumSq / values.length),
+    p50,
+    p90,
+    p99: at(99),
+    spread: max / Math.max(p50, 1e-9),
+    p90OverP50: p90 / Math.max(p50, 1e-9),
+    reliefFraction: reliefAmplitude > 0 ? (max - min) / reliefAmplitude : 0,
+  };
+}
+
 export interface ImageStats {
   width: number;
   height: number;

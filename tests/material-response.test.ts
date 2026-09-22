@@ -7,8 +7,8 @@
  * 0.36 with the shipped variation 0.35, which is 0.234 unclamped and therefore needs the clamp.
  */
 import { describe, expect, it } from 'vitest';
-import { MATERIAL, REFINEMENT } from '../src/config.ts';
-import { boundaryActivity, localRoughness } from '../src/visual/material-response.ts';
+import { MATERIAL, REFINEMENT, SURFACE } from '../src/config.ts';
+import { boundaryActivity, heightShape, heightThickness, localRoughness } from '../src/visual/material-response.ts';
 
 const BAND = MATERIAL.roughnessRange;
 
@@ -54,5 +54,53 @@ describe('§12.4-B #4 local roughness', () => {
 
   it('clamps a base roughness above the band rather than exceeding it', () => {
     expect(localRoughness(0.5, 0.35, 1, BAND)).toBe(BAND[1]);
+  });
+
+  it('round-2 thin-gloss (rejected, shipped at 0) only reduces roughness and stays in the band', () => {
+    // Identity at gloss 0 — the shipped value.
+    expect(localRoughness(MATERIAL.roughness, 0.35, 1, BAND, 0, 1)).toBe(MATERIAL.roughness);
+    for (let gloss = 0; gloss <= 0.5; gloss += 0.05) {
+      for (let thinness = 0; thinness <= 1; thinness += 0.1) {
+        const plain = localRoughness(MATERIAL.roughness, 0.35, 1, BAND, 0, thinness);
+        const glossed = localRoughness(MATERIAL.roughness, 0.35, 1, BAND, gloss, thinness);
+        expect(glossed, `gloss ${gloss}, thinness ${thinness}`).toBeLessThanOrEqual(plain);
+        expect(glossed, `gloss ${gloss}, thinness ${thinness}`).toBeGreaterThanOrEqual(BAND[0]);
+        expect(glossed, `gloss ${gloss}, thinness ${thinness}`).toBeLessThanOrEqual(BAND[1]);
+      }
+    }
+  });
+});
+
+describe('§12.4 round-2 #1 height thickness', () => {
+  it('the normalized remap is monotonic, lands in [0, 1] and uses more of the range than the saturating one', () => {
+    const ref = 0.36;
+    const power = 1.3;
+    // Both branches are bounded, so `shape <= 1` and the §5.2 relief budget can never be exceeded.
+    for (let v = -0.2; v <= 0.6; v += 0.01) {
+      const normalized = heightThickness(v, ref, power);
+      const saturating = heightThickness(v, 0, 1);
+      expect(normalized).toBeGreaterThanOrEqual(0);
+      expect(normalized).toBeLessThanOrEqual(1);
+      expect(saturating).toBeGreaterThanOrEqual(0);
+      expect(saturating).toBeLessThanOrEqual(1);
+      expect(heightShape(normalized, 0.5)).toBeLessThanOrEqual(1);
+      expect(heightShape(saturating, 0.5)).toBeLessThanOrEqual(1);
+    }
+    // Monotonic non-decreasing on both branches.
+    for (const [r, p] of [[0, 1], [ref, power]] as const) {
+      let previous = -1;
+      for (let v = 0; v <= 0.8; v += 0.01) {
+        const t = heightThickness(v, r, p);
+        expect(t).toBeGreaterThanOrEqual(previous);
+        previous = t;
+      }
+    }
+    // The measured claim: over the mature field's own V range (0.05 … 0.38) the normalized remap
+    // spans more shape than the saturating one — that is the stratification gain.
+    const span = (r: number, p: number): number =>
+      heightThickness(0.38, r, p) - heightThickness(0.05, r, p);
+    expect(span(ref, power)).toBeGreaterThan(span(0, 1));
+    // `ref = 0` is exactly the round-B branch: the toggle really is off.
+    expect(heightThickness(0.2, 0, 1)).toBe(1 - Math.exp(-0.2 / SURFACE.softenedVScale));
   });
 });
