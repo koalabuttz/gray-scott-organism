@@ -177,6 +177,37 @@ export interface FieldStatsShape {
   saturatedCells: number;
 }
 
+/** §12.4-B refinement knobs as they cross the page boundary (`refinement()`). */
+export interface RefinementShape {
+  interiorDarkening: number;
+  absorptionChroma: number;
+  chromaGateLow: number;
+  chromaGateHigh: number;
+  roughnessVariation: number;
+}
+
+/** §12.4-B lit-pixel colour statistics (`colorStats()`). */
+export interface ColorStatsShape {
+  width: number;
+  height: number;
+  litPixels: number;
+  litFraction: number;
+  meanLitRGB: [number, number, number];
+  warmMinusCool: number;
+  meanSaturation: number;
+  warmFraction: number;
+  maxWarmth: number;
+  hueHistogram: number[];
+}
+
+/** §12.4-B pixelwise difference between two composites (`bloomContribution()`/`diffAgainstStash()`). */
+export interface ImageDifferenceShape {
+  changedFraction: number;
+  maxDelta: number;
+  meanDelta: number;
+  meanDeltaOnChanged: number;
+}
+
 export interface DiagnosticsShape {
   frameTimesMs: number[];
   simulationMsAvg: number;

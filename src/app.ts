@@ -51,8 +51,8 @@ import { capabilityReportMarkdown, createContext } from './gpu/context.ts';
 import type { CapabilityReport } from './gpu/context.ts';
 import { ResourceTracker, createColorTarget, deleteColorTarget } from './gpu/resources.ts';
 import type { ColorTarget } from './gpu/resources.ts';
-import { imageStats } from './gpu/readback.ts';
-import type { ImageStats } from './gpu/readback.ts';
+import { imageStats, imageColorStats, imageDifference } from './gpu/readback.ts';
+import type { ImageStats, ImageColorStats, ImageDifference } from './gpu/readback.ts';
 import { FrameTimeRing } from './lab/diagnostics.ts';
 import { Lab } from './lab/lab.ts';
 import type { CaptureResult, LabApi, LabSnapshot } from './lab/lab.ts';
@@ -64,6 +64,7 @@ import type { ClippingReport } from './simulation/simulation.ts';
 import { pickRecordingMimeType, blobToBase64, startCanvasRecording } from './visual/capture.ts';
 import type { CanvasRecording } from './visual/capture.ts';
 import { Renderer } from './visual/renderer.ts';
+import type { RefinementState } from './visual/renderer.ts';
 import { AudioSystem, type BusName } from './audio/audio.ts';
 import { renderOfflineScenario, type OfflineMeasurements, type OfflineScenarioName } from './audio/offline.ts';
 
@@ -157,6 +158,22 @@ export interface ArtworkTestHook {
   };
   /** Exposure and bloom gain the composite pass last used (gate provenance). */
   appliedToneState(): { exposure: number; bloomGain: number };
+  /** §12.4-B: the refinement knobs the last material pass used (before/after provenance). */
+  refinement(): RefinementState;
+  /** §12.4-B: override the refinement knobs (before/after measurement; zero disables a term). */
+  setRefinement(value: Partial<RefinementState>): void;
+  /** §12.4-B: lit-pixel colour statistics (mean RGB, warmth, hue histogram) of the composite. */
+  colorStats(): ImageColorStats;
+  /** §12.4-B: the isolated additive contribution of bloom (latest gain vs the same frame at gain 0). */
+  bloomContribution(): ImageDifference;
+  /** §12.4-B: snapshot the current composite so a later variant can be diffed against it. */
+  stashComposite(): void;
+  /** §12.4-B: pixelwise difference of the current composite against the stashed snapshot. */
+  diffAgainstStash(): ImageDifference;
+  /** §12.4-B #3: override the bloom threshold/knee/knee order (measurement/tuning). */
+  setBloomParams(value: Partial<{ threshold: number; knee: number; kneePerTap: boolean }>): void;
+  /** §12.4-B #3: the bloom parameters the last bloom pass used. */
+  bloomParams(): { threshold: number; knee: number; kneePerTap: boolean };
   /** Apply an explicit, fully specified genesis command (gate provenance). */
   applyGenesis(command: GenesisCommand): void;
   /** Translational symmetry score of the V field at the given period fraction. */
@@ -2525,6 +2542,49 @@ export class App {
         camera: { ...this.worldState.camera },
       }),
       appliedToneState: () => this.renderer.appliedToneState(),
+      refinement: () => this.renderer.appliedRefinement(),
+      setRefinement: (value) => {
+        this.renderer.setRefinement(value);
+      },
+      colorStats: () => {
+        const pixels = this.renderer.readComposite();
+        const { width, height } = this.canvas;
+        return imageColorStats(pixels, width, height);
+      },
+      /**
+       * §12.4-B: render the current frame at the live bloom gain and again with the gain forced to
+       * zero, then diff the two composites. The bloom *textures* are identical (the gain is applied
+       * only in the composite), so this isolates the additive bloom term exactly — which is how the
+       * "restrained bloom, no global haze" claim is checked rather than asserted.
+       */
+      bloomContribution: () => {
+        this.publish();
+        const world = this.worldState;
+        const field = this.simulation.fieldWithPrevious();
+        const offWorld = { ...world, material: { ...world.material, bloomGain: 0 } };
+        this.renderer.render(field, offWorld);
+        const off = this.renderer.readComposite();
+        this.renderer.render(field, world);
+        const on = this.renderer.readComposite();
+        return imageDifference(on, off);
+      },
+      /**
+       * §12.4-B: keep the current composite in the page so each later variant can be attributed to its
+       * own change. Held in the page (not shipped to Node) because a 1080p RGBA8 frame is ~8 MB of
+       * JSON; only the small difference summary crosses the boundary.
+       */
+      stashComposite: () => {
+        (window as unknown as { __refineBase?: Uint8Array }).__refineBase = this.renderer.readComposite();
+      },
+      diffAgainstStash: () => {
+        const base = (window as unknown as { __refineBase?: Uint8Array }).__refineBase;
+        if (!base) throw new Error('diffAgainstStash called before stashComposite');
+        return imageDifference(this.renderer.readComposite(), base);
+      },
+      setBloomParams: (value) => {
+        this.renderer.setBloomParams(value);
+      },
+      bloomParams: () => this.renderer.appliedBloomParams(),
       applyGenesis: (command) => {
         this.seedField(command);
       },

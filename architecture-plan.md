@@ -2532,3 +2532,106 @@ deviations must be recorded here. Each entry states what differs, why, and what 
       (observed once in the full suite; 20/20 clean in isolation). It now waits for frame-loop progress
       (`waitForFrames`) before capturing the baseline.
 
+60. **Round-B (Phase 4) visual/artistic refinement — the §12.4 tuning pass.**
+
+    The operator approved the Phase-1 image ("fine for now"), so this is a refinement of the approved
+    material, not a redesign: each change is a separately toggleable config knob (`src/config.ts`
+    `REFINEMENT`, plus the `BLOOM` recalibration), measured before/after on **one mature field**
+    (single seed at `[0.44, 0.53]` r6; `F/k = 0.029/0.057`, `Du/Dv = 0.16/0.08`; 16 000 delivered
+    steps; 768²/1080p) and captured to `artifacts/phase4-refinement/` (`README.md` + PNG pairs +
+    `changes.json`; reproduce with `REFINE=1 npx playwright test --project=headless-gpu
+    refinement.spec.ts`). Every term answers the plan's §12.4 question — *what aspect of the
+    mathematical system does this make perceptible?* — and is keyed on a field quantity the renderer
+    already computes, never on screen position or a decorative ramp.
+
+    **Baseline (the approved render).** mean luminance 10.768/255, p50 0, p99 137, max 246, lit 24.9 %,
+    clipped 0.0000 %, lit-pixel mean RGB **[40.44, 41.66, 42.87]** (R−B = −2.44 — a *cool blue* cast),
+    mean HSV saturation 0.0751, all hue mass in the 180–270° bins.
+
+    - **(a) #1 thickness-driven neutralization — ACCEPTED** (`absorptionChroma` 0.14, gated by
+      `chromaGate` 0.32→0.78 in `material.frag`). A per-channel Beer–Lambert transmittance keyed on the
+      support **thickness** — the same blurred, saturating `1 − exp(−smoothedV/softenedVScale)` measure
+      the §5.2 height field is built from, *not* a raw-V ramp — with blue absorbed twice as fast as
+      green and not at all in red, so the material warms as it thickens. Its measured effect is a
+      **reduction of the frame's cool cast toward neutral**, not a colour event: R−B −2.44 → −1.23
+      (toward zero), mean RGB → [41.12, 41.76, 42.36], mean HSV saturation 0.0751 → **0.0385** (lower,
+      i.e. *more* neutral), 15.2 % of pixels touched at a peak Δ of 5/255. Lit-pixel `warmFraction`
+      (`R−B ≥ 2`) is **exactly 0**, and the warm hue bins are negligible — bin 0 (0–30°, red/amber)
+      199 px, bins 0–2 (0–90°) 699 px, bins 0+2+4 735 px out of 506 797 lit → 0.039 % / 0.138 % /
+      0.145 %. **Correction (reviewer round B):** an earlier draft claimed a "precious amber moment" at
+      ≈0.5 % of lit pixels; that was overstated — the ≈0.5 % counted hue-classified pixels rather than
+      all lit pixels, and no warmth metric supported it. The claim and the figure are dropped and the
+      refinement is labelled for what the data shows: the palette becomes measurably **more** neutral,
+      moving the cool base toward the brief's "near-neutral cool-white". p50 stays 0.
+    - **(b) #2 interior darkening for volume — ACCEPTED** (`interiorDarkening` 0.45). A *neutral*
+      optical depth on the same thickness, so thick material is darker and structure reads as volume
+      under a skin rather than a flat shaded relief. The **hue distribution is unchanged** (it darkens
+      without shifting colour) and the term only attenuates, so p50 stays 0. **Correction (reviewer
+      round B):** the earlier entry mixed an **isolated** sample with a **combined** sweep; they are two
+      different series and are now reported separately. *Isolated (#2 only):* 0 → 0.45 = 10.768 →
+      **9.052** (p95 58 → 48, p99 137 → 124, peak 246 → 244, 26.9 % of pixels at a peak Δ of 20/255).
+      *Combined sweep (#1 and #4 also at their accepted settings):* 0.25 → 9.466, 0.45 → **8.761**,
+      0.65 → 8.102. The two 0.45 means legitimately differ (9.052 vs 8.761) because the combined series
+      includes the neutralization and the roughness variation, which darken the frame on their own.
+      0.45 was chosen as a plainly visible middle without the large global dimming of 0.65.
+    - **(c) #3 bloom gain — ACCEPTED, by fixing the threshold instead** (`BLOOM.threshold` 1.0 → 0.6,
+      `BLOOM.gain` 0.04 → 0.12 = the plan's own cap; `bloom-down.frag` now applies the knee to each
+      source tap *before* the 13-tap reduction). The queued finding was that bloom was imperceptible
+      (byte-identical statistics at gain 0 vs 0.12); the cause was not the gain but the **order** — the
+      knee acted on an already-reduced half-resolution level whose overhead maximum is ≈0.3, so the
+      plan's "soft knee at linear luminance 1.0" could never be crossed. Reproduced in the artifact:
+      the approved config (`legacy-bloom`: gain .04, threshold 1.0, post-average knee) is
+      **byte-identical** to gain 0 (changed 0.000 %, maxΔ 0). Applying the knee per tap makes the
+      threshold mean what the plan says (real linear luminance); the working point was then measured
+      with a threshold × gain grid. `threshold 0.6, gain 0.12` changes 3.31 % of the overhead frame at a
+      peak Δ of 12/255 and moves the frame mean by +0.024/255 (0.3 %) — a glow on the hottest rims, not
+      a haze (grazing view, where the lit rims are the intense features: peak Δ 50/255 over 4.06 %).
+      **Rejected:** the same threshold with the *post-average* order (0.99 % coverage — it
+      under-triggers, because the reduced level rarely reaches 0.6), and the post-average order tuned to
+      a matching amplitude — threshold 0.4 — which covers **35.3 %** of the frame (a haze;
+      `after-bloom-post-average-rejected.png`). The gain stays inside the plan's stated `.12` cap; only
+      the threshold moved, and only because it was unreachable as built.
+    - **(d) #4 material-response polish — ACCEPTED** (`roughnessVariation` 0.35). Local micro-roughness
+      is keyed on the blurred **boundary magnitude** (`|∇V|`, the actively reshaping front): active
+      fronts keep the calibrated roughness and calmer material is slightly smoother. Measured: 5.1 % of
+      pixels changed at a peak Δ of 11/255 and a mean Δ of 0.05/255 — a change in the specular shading,
+      not a new visual element. A pure Fresnel re-tune was **considered and rejected**: it would have
+      had no mathematical referent, which §12.4 forbids. **Correction (reviewer round B):** the local
+      roughness is now **clamped into the plan's §5.3 band [0.24, 0.36]** (`material.frag`,
+      `uRoughnessBand = MATERIAL.roughnessRange`). The clamp is load-bearing: at the calibrated base
+      0.36 with the shipped variation 0.35 the unclamped value at zero boundary activity is
+      `0.36 × (1 − 0.35) = 0.234`, *below* the 0.24 floor — so the earlier "stays inside the band
+      because it only reduces roughness" was wrong; reducing roughness is exactly what left the band.
+      With the clamp, boundary activity 0 → 0.24 and activity 1 → 0.36. The shader arithmetic is
+      mirrored in `src/visual/material-response.ts` and asserted by `tests/material-response.test.ts`
+      (both endpoints plus an activity × variation sweep).
+    - **(e) #5 camera/light — no change.** The §9.3 azimuth hold added in round A is untouched and
+      `tests/director.test.ts` (25°/min clamp, bounded band, and the zero-residual hold) still passes —
+      no regression.
+
+    **Combined after (the pair `FinalFullArcReview` judges).** Overhead: mean 8.785, p50 0, p99 123,
+    max 244, lit 23.7 %, clipped 0.0000 %, R−B −1.16, saturation 0.0396. Grazing: mean 19.258 (from
+    24.000), p50 2, p99 145, max 249, clipped 0.0000 %.
+
+    **Constraint checks (asserted in the spec, not assumed).** For every overhead variant: p50 exactly
+    0; clipped 0.0000 %; saturation ≤ 0.08 and `|R−B| ≤ 8`; the neutralization *lowers* saturation and
+    never produces `R−B ≥ 2`. **Correction (reviewer round B):** the all-zero identity is asserted as a
+    **round trip**, not a self-diff — the spec stashes the all-off frame, exercises *every* toggle at
+    its accepted setting (the material block and the shipped bloom threshold/gain/knee order, recorded
+    as the `toggle-exercise` sample), restores all-off, re-renders and requires a byte-identical
+    composite (`changedFraction` 0, `maxDelta` 0). The shipped bloom changes > 0.02 % and < 5 % of
+    pixels and never lifts black. `artifacts/phase1-gate/` is untouched (SHA-256 of every file
+    unchanged, `phase1-gate-hashes.txt`) and the AC.6 unseeded black test still passes (`max` 0, every
+    channel mean 0).
+
+    **Cost / caveats.** `BLOOM` and the new `REFINEMENT` block are calibration values, so they change
+    the mature-field statistics the Phase-1 gate recorded (mean 10.76 → 8.79, R−B −2.44 → −1.16): the
+    frozen gate captures stay accurate as a record of their run but are no longer reproducible from the
+    current config — the expected cost of a tuning pass on an approved image. Together the material
+    terms darken the overhead mean by ≈18.6 %, so the piece reads deeper and more volumetric than the
+    approved still; if the operator prefers the brighter approved look, `REFINEMENT.interiorDarkening`
+    and `absorptionChroma` are independent knobs that can be lowered or zeroed without touching
+    anything else. `npx tsc --noEmit` clean; `npm test` 369 passed (364 + the 5 new cases in
+    `tests/material-response.test.ts`); `npm run test:browser` 79 passed / 13 gated skips / 0
+    unexpected (the extra gated skip is the new `REFINE=1` measurement spec).
+

@@ -1,0 +1,14 @@
+0d2eb4ad0ed7f7136b61d31d92a7eced2c443f0f5be9ffbce7e16b42f1db5446  artifacts/phase1-gate/01-near-invisible.png
+08c3599640ca110d52e18589b5962906bf698c2de11742037cca684b869e2afc  artifacts/phase1-gate/02-mature-wet-material.png
+5aa1e0bf2fee65ec3981d3b4cca54a9749849eaf1b5b03d75b53643f7bb09dea  artifacts/phase1-gate/03-grazing-edge-close.png
+920fafe10422a944485e96863f5d672008f2b16db1f6968dca10fd1c3a026d4d  artifacts/phase1-gate/04-real-time-clip.webm
+466b909bf996946c6d0eded4744b1ada077dc594211c03f66a465dc484c502d0  artifacts/phase1-gate/candidates/coral-0.0545-0.062.png
+171f37293baeee38466058b43736d9b32a5a389531573e3761ce6f3f898a5397  artifacts/phase1-gate/candidates/dense-0.022-0.054.png
+1f65627c8b0456926b548d7c6b7150b38b6eb56a7e1530d8cc3e35143dca8dd8  artifacts/phase1-gate/candidates/labyrinth-fine-0.029-0.059.png
+b084e5c5c7a7e2b280343a6cb6be7ec8bfbd87c11a438e4ec299c0410ad715eb  artifacts/phase1-gate/candidates/labyrinth-fine-0.029-0.060.png
+7a5175f59992a07616d58b06a310b2a3909c43df6d406a736ef54995563a09ed  artifacts/phase1-gate/candidates/mitosis-0.0367-0.0649.png
+be7a9aa7e7dbc9e1a0606af780936c5944ab473820010436b72257731f79440d  artifacts/phase1-gate/candidates/nucleation-0.026-0.060.png
+4356790c4f5107fab4221cd2997e1fb833921b111b01091715ae45db4ed066fe  artifacts/phase1-gate/candidates/worms-0.030-0.062.png
+b21ba66fd969d3630aa013d5bb1016c41ecc8c6a4dbf1671d20d8ba4c9e92bf9  artifacts/phase1-gate/captures.json
+2a6bd4c033892fdb4a7623ec7a77e9e15a2269688bec67e26f64df21cba394e3  artifacts/phase1-gate/controls/lattice-4x4-rejected.png
+48531cbfee2f1e90f62b2660e153439aea420596a5a4106ee7c1befc1f1b7636  artifacts/phase1-gate/README-gate.md

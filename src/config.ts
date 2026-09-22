@@ -143,13 +143,67 @@ export const ENVELOPE = {
   zeroRadius: 1.0,
 } as const;
 
-/** §5.4 bloom: soft knee at linear luminance 1.0, three levels, gain .04 cap .12. */
+/**
+ * §5.4 bloom: three levels, a soft knee around linear luminance, gain inside the plan's `.12` cap.
+ *
+ * §12.4-B #3 recalibration. The plan's "soft knee at linear luminance 1.0" was **unreachable as
+ * built**: the knee was applied *after* the 13-tap reduction, so it acted on a half-resolution
+ * average whose overhead maximum is ≈0.3 — the mature overhead frame was byte-identical at gain 0
+ * and 0.12 (deviation 60). `bloom-down.frag` now applies the knee to each source tap *before*
+ * averaging, i.e. to real linear luminance, and the working point was measured on the mature field
+ * (`artifacts/phase4-refinement/changes.json`, the threshold × gain grid). `threshold 0.6` with the
+ * `gain` at the plan's own `cap` 0.12 changes ≈3% of pixels with a peak delta of ≈11/255 and **no
+ * measurable change in frame mean** — a glow on the hottest rims, not a haze. Only the threshold
+ * moved; the gain stays inside the plan's stated `.12` cap.
+ */
 export const BLOOM = {
   levels: 3,
-  threshold: 1.0,
+  threshold: 0.6,
   knee: 0.5,
-  gain: 0.04,
+  gain: 0.12,
   gainCap: 0.12,
+} as const;
+
+/**
+ * §12.4 (Phase 4 round B) **visual/artistic refinement** — the tuning pass, not a redesign.
+ *
+ * Every entry is a calibration knob with an explicit off state (0) so a before/after capture can be
+ * attributed to exactly one change, and every term is keyed on a *mathematical* field quantity that
+ * the renderer already computes rather than on screen position or a decorative ramp:
+ *
+ *  - `interiorDarkening` (#2) and `absorptionChroma` (#1) are Beer–Lambert transmittance through the
+ *    support **thickness** — the same blurred, saturating `1 − exp(−smoothedV / softenedVScale)`
+ *    measure the §5.2 height field is built from (`surface.frag`'s `softenedV`), *not* a raw-V ramp.
+ *    `interiorDarkening` is a neutral optical depth: thicker material is darker, so structure reads
+ *    as volume under a skin rather than a flat shaded relief. `absorptionChroma` is a **thickness-
+ *    driven neutralization**, not a colour event: it absorbs blue slightly faster than green (and not
+ *    red at all) where the support is genuinely thick, which *removes* the frame's cool cast toward
+ *    the brief's near-neutral cool-white base. Measured (deviation 60): mean HSV saturation
+ *    0.0751 → 0.0385 and R−B −2.44 → −1.23, with `warmFraction` (`R−B ≥ 2`) exactly 0 — no perceptible
+ *    amber. No rainbow ramps, no saturation.
+ *  - `roughnessVariation` (#4) keys local micro-roughness on the blurred **boundary magnitude**
+ *    (`|∇V|`, the actively reshaping front), so the polish of the surface follows the chemistry.
+ *    It varies *downward* from the calibrated top, keeping the local roughness inside the plan's
+ *    documented §5.3 [0.24, 0.36] band.
+ *
+ * With the block zeroed the shader terms are exact identities (`× exp(−0) = × 1`), so the renderer
+ * is bit-identical to its pre-refinement output and true black stays exactly black. The accepted
+ * values were chosen by `tests/browser/refinement.spec.ts` (see `artifacts/phase4-refinement/` and
+ * deviation 60); a rejected or off value is left at 0 with a note there.
+ */
+export const REFINEMENT = {
+  /** #2 neutral Beer–Lambert optical depth per unit support thickness (0 = off). */
+  interiorDarkening: 0.45,
+  /** #1 extra optical depth on the blue channel per unit thickness (0 = off); green gets half. */
+  absorptionChroma: 0.14,
+  /** #1 the chromatic term only appears above this thickness window (the deep-support gate). */
+  chromaGateLow: 0.32,
+  chromaGateHigh: 0.78,
+  /**
+   * #4 roughness reduction on calm (low-|∇V|) material, clamped into the §5.3 [0.24, 0.36] band
+   * (0 = off).
+   */
+  roughnessVariation: 0.35,
 } as const;
 
 /**

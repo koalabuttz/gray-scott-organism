@@ -9,29 +9,29 @@
     {
       "canvas": "1280x720",
       "scene": "1280x720",
-      "deliveredFps": 60.00393468424154,
-      "deliveredSimulationStepsPerSecond": 119.99999999999974,
+      "deliveredFps": 60,
+      "deliveredSimulationStepsPerSecond": 119.99999999999976,
       "frameMsPercentiles": {
         "p50": 16.69999999999891,
-        "p95": 16.700000000000728,
+        "p95": 16.799999999999272,
         "p99": 16.80000000000109
       },
-      "simulationMsAvg": 0.17022357702909952,
-      "renderMsAvg": 0.1030225586220672,
+      "simulationMsAvg": 0.13986257119852624,
+      "renderMsAvg": 0.09219082859602645,
       "overload": false
     },
     {
       "canvas": "1920x1080",
       "scene": "1920x1080",
-      "deliveredFps": 59.998032851381915,
-      "deliveredSimulationStepsPerSecond": 120.00000000000294,
+      "deliveredFps": 60.0039346842415,
+      "deliveredSimulationStepsPerSecond": 120.00000000000324,
       "frameMsPercentiles": {
         "p50": 16.700000000000728,
         "p95": 16.700000000000728,
         "p99": 16.799999999999272
       },
-      "simulationMsAvg": 0.13200278766924972,
-      "renderMsAvg": 0.11565009873965709,
+      "simulationMsAvg": 0.13763458093719144,
+      "renderMsAvg": 0.1190841874436487,
       "overload": false
     }
   ],
@@ -41,18 +41,18 @@
       "scene": "1920x1080",
       "count": 120,
       "stepsPerFrame": 2,
-      "totalMs": 1045.8999999761581,
-      "msPerFrame": 8.71583333313465,
-      "impliedFps": 114.73372215578495
+      "totalMs": 1107.1000000238419,
+      "msPerFrame": 9.225833333532016,
+      "impliedFps": 108.3912925638296
     },
     "at720": {
       "canvas": "1280x720",
       "scene": "1280x720",
       "count": 120,
       "stepsPerFrame": 2,
-      "totalMs": 917.5,
-      "msPerFrame": 7.645833333333333,
-      "impliedFps": 130.79019073569484
+      "totalMs": 885,
+      "msPerFrame": 7.375,
+      "impliedFps": 135.59322033898306
     }
   }
 }

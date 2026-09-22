@@ -112,3 +112,121 @@ export function imageStats(pixels: Uint8Array, width: number, height: number): I
     channelMean: [channelSum[0] / count, channelSum[1] / count, channelSum[2] / count],
   };
 }
+
+/**
+ * §12.4-B colour statistics over the *lit* pixels of a composite frame, so a refinement can be shown
+ * to have shifted hue **without** raising saturation or the neutral floor. "Lit" is the same luma>2
+ * test `imageStats` uses; hue/saturation are measured in the sRGB-encoded output, which is what an
+ * operator actually sees. A perfectly neutral frame reports `meanSaturation` 0, `warmMinusCool` 0
+ * and an all-zero `hueHistogram` — that is the control the palette-restraint claim is checked against.
+ */
+export interface ImageColorStats {
+  width: number;
+  height: number;
+  litPixels: number;
+  litFraction: number;
+  /** Mean R, G, B over lit pixels, 0..255. */
+  meanLitRGB: [number, number, number];
+  /** Mean (R − B) over lit pixels, 0..255: positive is warmer, 0 is neutral. */
+  warmMinusCool: number;
+  /** Mean HSV saturation over lit pixels (0 = perfectly neutral). */
+  meanSaturation: number;
+  /** Fraction of lit pixels with R − B ≥ 2 (a just-noticeable warm cast). */
+  warmFraction: number;
+  /** Largest R − B over lit pixels (0..255). */
+  maxWarmth: number;
+  /** 12-bin hue histogram (30° each) over lit pixels with saturation ≥ 0.05. */
+  hueHistogram: number[];
+}
+
+export function imageColorStats(pixels: Uint8Array, width: number, height: number): ImageColorStats {
+  const count = width * height;
+  const hueHistogram = new Array<number>(12).fill(0);
+  let lit = 0;
+  let sumR = 0;
+  let sumG = 0;
+  let sumB = 0;
+  let sumWarmth = 0;
+  let sumSaturation = 0;
+  let warm = 0;
+  let maxWarmth = 0;
+  for (let i = 0; i < count; i += 1) {
+    const r = pixels[i * 4]!;
+    const g = pixels[i * 4 + 1]!;
+    const b = pixels[i * 4 + 2]!;
+    if (Math.max(r, g, b) <= 2) continue;
+    lit += 1;
+    sumR += r;
+    sumG += g;
+    sumB += b;
+    const warmth = r - b;
+    sumWarmth += warmth;
+    if (warmth > maxWarmth) maxWarmth = warmth;
+    if (warmth >= 2) warm += 1;
+    const max = Math.max(r, g, b);
+    const min = Math.min(r, g, b);
+    const saturation = max > 0 ? (max - min) / max : 0;
+    sumSaturation += saturation;
+    if (saturation >= 0.05) {
+      const delta = max - min;
+      let hue: number;
+      if (max === r) hue = 60 * (((g - b) / delta) % 6);
+      else if (max === g) hue = 60 * ((b - r) / delta + 2);
+      else hue = 60 * ((r - g) / delta + 4);
+      if (hue < 0) hue += 360;
+      hueHistogram[Math.min(11, Math.floor(hue / 30))]! += 1;
+    }
+  }
+  return {
+    width,
+    height,
+    litPixels: lit,
+    litFraction: count > 0 ? lit / count : 0,
+    meanLitRGB: lit > 0 ? [sumR / lit, sumG / lit, sumB / lit] : [0, 0, 0],
+    warmMinusCool: lit > 0 ? sumWarmth / lit : 0,
+    meanSaturation: lit > 0 ? sumSaturation / lit : 0,
+    warmFraction: lit > 0 ? warm / lit : 0,
+    maxWarmth: maxWarmth,
+    hueHistogram,
+  };
+}
+
+/** Pixelwise difference between two RGBA8 frames of identical size. */
+export interface ImageDifference {
+  /** Fraction of pixels whose largest per-channel |difference| exceeds `threshold`. */
+  changedFraction: number;
+  /** Largest per-channel |difference| (0..255). */
+  maxDelta: number;
+  /** Mean per-channel |difference| over every pixel (0..255). */
+  meanDelta: number;
+  /** Mean per-channel |difference| over the pixels that changed (0..255). */
+  meanDeltaOnChanged: number;
+}
+
+export function imageDifference(a: Uint8Array, b: Uint8Array, threshold = 0): ImageDifference {
+  if (a.length !== b.length) throw new Error('imageDifference: size mismatch');
+  const pixels = a.length / 4;
+  let changed = 0;
+  let maxDelta = 0;
+  let sumDelta = 0;
+  let sumDeltaChanged = 0;
+  for (let i = 0; i < pixels; i += 1) {
+    let pixelDelta = 0;
+    for (let c = 0; c < 3; c += 1) {
+      const d = Math.abs(a[i * 4 + c]! - b[i * 4 + c]!);
+      sumDelta += d;
+      if (d > pixelDelta) pixelDelta = d;
+    }
+    if (pixelDelta > maxDelta) maxDelta = pixelDelta;
+    if (pixelDelta > threshold) {
+      changed += 1;
+      sumDeltaChanged += pixelDelta;
+    }
+  }
+  return {
+    changedFraction: pixels > 0 ? changed / pixels : 0,
+    maxDelta,
+    meanDelta: pixels > 0 ? sumDelta / (pixels * 3) : 0,
+    meanDeltaOnChanged: changed > 0 ? sumDeltaChanged / changed : 0,
+  };
+}

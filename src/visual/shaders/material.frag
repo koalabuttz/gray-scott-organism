@@ -16,6 +16,7 @@ precision highp int;
 
 uniform sampler2D uNormals;   // xyz = world-space normal, A = support
 uniform sampler2D uSurface;   // R = height, G = boundary, B = support, A = activity
+uniform sampler2D uSmoothed;  // RGBA16F blurred extraction: x = smoothed V, z = boundary magnitude
 uniform vec3 uCameraPosition;
 uniform vec3 uLightDirection; // direction toward the light
 uniform vec3 uLightColor;
@@ -28,6 +29,14 @@ uniform float uRoughness;
 uniform float uF0;
 uniform float uDiffuseAlbedo;
 uniform float uEnvelopeFullStrengthRadius;
+// §12.4-B refinement (config `REFINEMENT`); every term is an exact identity when its value is 0.
+uniform float uThicknessScale;
+uniform float uInteriorDarkening;
+uniform float uAbsorptionChroma;
+uniform vec2 uChromaGate;
+uniform float uRoughnessVariation;
+/** §5.3 documented roughness band the local (= varied) roughness is clamped into. */
+uniform vec2 uRoughnessBand;
 
 in vec2 vUv;
 in vec3 vWorldPosition;
@@ -58,6 +67,21 @@ void main() {
     return;
   }
 
+  // §12.4-B: support thickness — the same blurred, saturating measure the §5.2 height field uses
+  // (`surface.frag`'s `softenedV`), so absorption is driven by physical depth, not a raw-V ramp.
+  vec4 smoothed = texture(uSmoothed, vUv);
+  float thickness = 1.0 - exp(-max(smoothed.x, 0.0) / max(uThicknessScale, 1e-4));
+  float boundaryActivity = clamp(smoothed.z * 2.0, 0.0, 1.0);
+
+  // §12.4-B #4: the actively reshaping front (high |∇V|) keeps the calibrated roughness; calmer
+  // material is slightly smoother. The result is clamped into the §5.3 documented band, because the
+  // unclamped variation (0.36 × (1 − 0.35) = 0.234) would fall below the plan's floor of 0.24.
+  float localRoughness = clamp(
+    uRoughness * (1.0 - uRoughnessVariation * (1.0 - boundaryActivity)),
+    uRoughnessBand.x,
+    uRoughnessBand.y
+  );
+
   vec3 N = normalize(normalSample.xyz);
   vec3 V = normalize(uCameraPosition - vWorldPosition);
   vec3 L = normalize(uLightDirection);
@@ -68,7 +92,7 @@ void main() {
   float NdotH = max(dot(N, H), 0.0);
   float VdotH = max(dot(V, H), 0.0);
 
-  float alpha = uRoughness * uRoughness;
+  float alpha = localRoughness * localRoughness;
   float a2 = alpha * alpha;
   float denominator = (NdotH * NdotH) * (a2 - 1.0) + 1.0;
   float D = a2 / (PI * denominator * denominator);
@@ -83,11 +107,21 @@ void main() {
   vec3 radiance = (diffuse + specular) * uLightColor * uLightIntensity * NdotL;
 
   // Faint horizon reflection: an environment term, never a colourful HDRI.
-  float envFresnel = fresnelSchlickRoughness(NdotV, uF0, uRoughness);
+  float envFresnel = fresnelSchlickRoughness(NdotV, uF0, localRoughness);
   radiance += uLightColor * (uEnvironment * envFresnel);
 
   // Weak subsurface approximation: the reaction's own activity near boundaries.
   radiance += uEmissionTint * (uEmissionGain * surface.a);
+
+  // §12.4-B #1/#2: Beer–Lambert transmittance through the support thickness. The neutral depth
+  // darkens genuinely thick interiors (volume under a skin); the gated chromatic term removes the
+  // frame's cool cast where the support is deep (blue absorbed faster than green, none in red).
+  // Both are exact identities at zero config, and both only attenuate, so a zero-support pixel stays
+  // exactly black.
+  float neutral = exp(-uInteriorDarkening * thickness);
+  float chromaGate = smoothstep(uChromaGate.x, uChromaGate.y, thickness);
+  vec3 chromatic = exp(-uAbsorptionChroma * chromaGate * thickness * vec3(0.0, 0.5, 1.0));
+  radiance *= neutral * chromatic;
 
   outColor = vec4(radiance * gate, 1.0);
 }

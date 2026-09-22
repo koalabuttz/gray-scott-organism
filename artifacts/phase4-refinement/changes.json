@@ -1,0 +1,2317 @@
+{
+  "createdAt": "2026-09-22T03:43:03.658Z",
+  "field": {
+    "steps": 16000,
+    "parameters": {
+      "F": 0.029,
+      "k": 0.057,
+      "Du": 0.16,
+      "Dv": 0.08
+    },
+    "occupiedFraction": 0.6311086018880209,
+    "meanV": 0.16144885094953823,
+    "edgeDensity": 0.04440127797942079,
+    "activity": 0.013888722876949052
+  },
+  "config": {
+    "refinement": {
+      "interiorDarkening": 0.45,
+      "absorptionChroma": 0.14,
+      "chromaGateLow": 0.32,
+      "chromaGateHigh": 0.78,
+      "roughnessVariation": 0.35
+    },
+    "bloom": {
+      "levels": 3,
+      "threshold": 0.6,
+      "knee": 0.5,
+      "gain": 0.12,
+      "gainCap": 0.12
+    }
+  },
+  "bloomLegacy": {
+    "gain": 0.04,
+    "threshold": 1,
+    "knee": 0.5,
+    "kneePerTap": false
+  },
+  "overheadCamera": {
+    "mode": "overhead",
+    "focusUV": [
+      0.5,
+      0.5
+    ],
+    "yawRadians": 0,
+    "elevationRadians": 1.4660765716752369,
+    "distance": 4.456423259484272,
+    "verticalFovRadians": 0.4886921905584123,
+    "transitionSeconds": 30
+  },
+  "grazingBefore": {
+    "width": 1920,
+    "height": 1080,
+    "min": 0,
+    "max": 251,
+    "mean": 24.000026523919754,
+    "nonBlackFraction": 0.4728592785493827,
+    "anyNonZeroFraction": 0.5219478202160494,
+    "aboveThresholdFraction": 0.27793065200617284,
+    "clippedFraction": 0.00000771604938271605,
+    "percentiles": [
+      2,
+      105,
+      161
+    ],
+    "channelMean": [
+      22.729068287037038,
+      23.374198495370372,
+      24.000026523919754
+    ]
+  },
+  "notes": {
+    "label": "thickness-driven neutralization",
+    "refinement1": {
+      "description": "#1 (absorptionChroma) is a thickness-driven NEUTRALIZATION, not a perceptible amber moment. It removes the frame's cool blue cast: R-B -2.44 -> -1.23 and mean HSV saturation 0.0751 -> 0.0385 (lower, i.e. *more* neutral).",
+      "amberEvidence": "No amber claim: lit-pixel warmFraction (R-B >= 2) is exactly 0, and the warm hue bins are negligible — bin 0 (0-30 deg, red/amber) 199 px, bins 0-2 (0-90 deg) 699 px, bins 0+2+4 735 px, out of 506797 lit pixels (0.039% / 0.138% / 0.145%). The earlier \"precious amber\" wording and the ~0.5% figure were overstated and are dropped."
+    },
+    "refinement2": {
+      "isolatedTable": "only #2 on: 0 -> 0.45 = 10.768 -> 9.052 (p95 58 -> 48, peak delta 20)",
+      "combinedTable": "with #1 and #4 on: 0.25 -> 9.466, 0.45 -> 8.761, 0.65 -> 8.102",
+      "caveat": "The isolated and combined 0.45 means differ (9.052 vs 8.761); the two tables must not be read as one series."
+    },
+    "refinement4": "local roughness is clamped into the plan §5.3 band [0.24, 0.36] (material.frag uRoughnessBand = MATERIAL.roughnessRange). Unclamped, zero boundary activity gives 0.36 x (1 - 0.35) = 0.234, below the 0.24 floor; with the clamp, activity 0 -> 0.24 and activity 1 -> 0.36. Asserted by tests/material-response.test.ts.",
+    "identityCheck": "the all-off round trip stashes the all-off frame, exercises every toggle at its accepted setting (`toggle-exercise` above), restores all-off, re-renders and requires a byte-identical composite (changed 0, maxDelta 0)."
+  },
+  "samples": [
+    {
+      "name": "before-all",
+      "label": "approved Phase-1 render (refinements off, legacy bloom)",
+      "refinement": {
+        "interiorDarkening": 0,
+        "absorptionChroma": 0,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0
+      },
+      "bloom": {
+        "gain": 0.04,
+        "threshold": 1,
+        "knee": 0.5,
+        "kneePerTap": false
+      },
+      "png": "phase4-refinement/before-overhead.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 246,
+        "mean": 10.768098958333333,
+        "nonBlackFraction": 0.24875626929012346,
+        "anyNonZeroFraction": 0.2812504822530864,
+        "aboveThresholdFraction": 0.13786458333333335,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          58,
+          137
+        ],
+        "channelMean": [
+          10.155702160493828,
+          10.46397907021605,
+          10.768098476080247
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 515821,
+        "litFraction": 0.24875626929012346,
+        "meanLitRGB": [
+          40.438617272270804,
+          41.664974865311805,
+          42.875947276283824
+        ],
+        "warmMinusCool": -2.43733000401302,
+        "meanSaturation": 0.07512938032955052,
+        "warmFraction": 0,
+        "maxWarmth": 0,
+        "hueHistogram": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          132068,
+          226872,
+          55333,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": null,
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "toggle-exercise",
+      "label": "every toggle exercised at its accepted setting",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.784982156635802,
+        "nonBlackFraction": 0.23934076003086419,
+        "anyNonZeroFraction": 0.27237220293209874,
+        "aboveThresholdFraction": 0.09780623070987654,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.498043981481482,
+          8.645050154320987,
+          8.781911168981482
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 496297,
+        "litFraction": 0.23934076003086419,
+        "meanLitRGB": [
+          35.080391378549535,
+          35.680187468390905,
+          36.23931637708872
+        ],
+        "warmMinusCool": -1.1589249985391812,
+        "meanSaturation": 0.039619544334917184,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          237,
+          0,
+          572,
+          0,
+          45,
+          0,
+          53559,
+          70211,
+          36905,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": null,
+      "bloomContribution": {
+        "changedFraction": 0.03310474537037037,
+        "maxDelta": 12,
+        "meanDelta": 0.023362750771604938,
+        "meanDeltaOnChanged": 1.137706494187571
+      }
+    },
+    {
+      "name": "after-chroma",
+      "label": "#1 thickness-driven neutralization only",
+      "refinement": {
+        "interiorDarkening": 0,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/after-thickness-color.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 246,
+        "mean": 10.4667472029321,
+        "nonBlackFraction": 0.2444044174382716,
+        "anyNonZeroFraction": 0.28056712962962965,
+        "aboveThresholdFraction": 0.13417679398148147,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          56,
+          136
+        ],
+        "channelMean": [
+          10.155702160493828,
+          10.314964313271606,
+          10.462418499228395
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 506797,
+        "litFraction": 0.2444044174382716,
+        "meanLitRGB": [
+          41.123053214600716,
+          41.763836407871395,
+          42.35747449175903
+        ],
+        "warmMinusCool": -1.2344212771583098,
+        "meanSaturation": 0.03845989200827876,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          199,
+          0,
+          500,
+          0,
+          36,
+          0,
+          51944,
+          72098,
+          34601,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.15176842206790123,
+        "maxDelta": 5,
+        "meanDelta": 0.1515649112654321,
+        "meanDeltaOnChanged": 2.0433482572678714
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "after-darkening",
+      "label": "#2 interior darkening only (isolated)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/after-interior-darkening.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 9.051793981481481,
+        "nonBlackFraction": 0.23990644290123456,
+        "anyNonZeroFraction": 0.2709399112654321,
+        "aboveThresholdFraction": 0.11228250385802468,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          48,
+          124
+        ],
+        "channelMean": [
+          8.518116319444445,
+          8.788111979166667,
+          9.051793499228395
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 497470,
+        "litFraction": 0.23990644290123456,
+        "meanLitRGB": [
+          35.09860695117293,
+          36.20591794480069,
+          37.28891993487044
+        ],
+        "warmMinusCool": -2.1903129836975093,
+        "meanSaturation": 0.07378857786293448,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          1,
+          0,
+          0,
+          0,
+          0,
+          0,
+          113096,
+          235865,
+          53296,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.26858314043209874,
+        "maxDelta": 20,
+        "meanDelta": 1.6765859696502057,
+        "meanDeltaOnChanged": 6.562813547027116
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "after-roughness",
+      "label": "#4 boundary-keyed roughness variation only",
+      "refinement": {
+        "interiorDarkening": 0,
+        "absorptionChroma": 0,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/after-roughness-variation.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 246,
+        "mean": 10.714361979166666,
+        "nonBlackFraction": 0.2480835262345679,
+        "anyNonZeroFraction": 0.28082899305555553,
+        "aboveThresholdFraction": 0.13716386959876542,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          57,
+          137
+        ],
+        "channelMean": [
+          10.104488811728395,
+          10.411601080246914,
+          10.71436149691358
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 514426,
+        "litFraction": 0.2480835262345679,
+        "meanLitRGB": [
+          40.33934715585915,
+          41.56427941044971,
+          42.77287695411974
+        ],
+        "warmMinusCool": -2.4335297982605857,
+        "meanSaturation": 0.07532665300997314,
+        "warmFraction": 0,
+        "maxWarmth": 0,
+        "hueHistogram": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          131905,
+          225881,
+          55009,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.050813078703703704,
+        "maxDelta": 11,
+        "meanDelta": 0.052442772633744854,
+        "meanDeltaOnChanged": 1.4073040639295409
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "after-material",
+      "label": "all accepted material refinements",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761353202160494,
+        "nonBlackFraction": 0.23839457947530865,
+        "anyNonZeroFraction": 0.2695389660493827,
+        "aboveThresholdFraction": 0.0971899112654321,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475060281635802,
+          8.621735146604939,
+          8.758121624228394
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494335,
+        "litFraction": 0.23839457947530865,
+        "meanLitRGB": [
+          35.13134412898136,
+          35.73123084547928,
+          36.28977717539725
+        ],
+        "warmMinusCool": -1.158433046415892,
+        "meanSaturation": 0.03936486164541645,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          564,
+          0,
+          43,
+          0,
+          53329,
+          70037,
+          36449,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2706066743827161,
+        "maxDelta": 24,
+        "meanDelta": 1.8442875514403292,
+        "meanDeltaOnChanged": 7.524046121219682
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "legacy-bloom",
+      "label": "#3 the approved bloom config (gain .04, threshold 1.0, post-average knee)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.04,
+        "threshold": 1,
+        "knee": 0.5,
+        "kneePerTap": false
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761353202160494,
+        "nonBlackFraction": 0.23839457947530865,
+        "anyNonZeroFraction": 0.2695389660493827,
+        "aboveThresholdFraction": 0.0971899112654321,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475060281635802,
+          8.621735146604939,
+          8.758121624228394
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494335,
+        "litFraction": 0.23839457947530865,
+        "meanLitRGB": [
+          35.13134412898136,
+          35.73123084547928,
+          36.28977717539725
+        ],
+        "warmMinusCool": -1.158433046415892,
+        "meanSaturation": 0.03936486164541645,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          564,
+          0,
+          43,
+          0,
+          53329,
+          70037,
+          36449,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2706066743827161,
+        "maxDelta": 24,
+        "meanDelta": 1.8442875514403292,
+        "meanDeltaOnChanged": 7.524046121219682
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "post-average-knee",
+      "label": "#3 threshold 0.6 after the reduction (under-triggers)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": false
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.766133294753086,
+        "nonBlackFraction": 0.23845052083333335,
+        "anyNonZeroFraction": 0.2702763310185185,
+        "aboveThresholdFraction": 0.09732156635802469,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.479753086419754,
+          8.626513792438272,
+          8.76297694830247
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494451,
+        "litFraction": 0.23845052083333335,
+        "meanLitRGB": [
+          35.13914017769203,
+          35.73938165763645,
+          36.29829447205082
+        ],
+        "warmMinusCool": -1.1591542943587938,
+        "meanSaturation": 0.03934260365698017,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          267,
+          0,
+          561,
+          0,
+          44,
+          0,
+          53334,
+          70014,
+          36471,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2697685185185185,
+        "maxDelta": 24,
+        "meanDelta": 1.8398003472222222,
+        "meanDeltaOnChanged": 7.52995395000286
+      },
+      "bloomContribution": {
+        "changedFraction": 0.009918981481481482,
+        "maxDelta": 4,
+        "meanDelta": 0.004775591563786008,
+        "meanDeltaOnChanged": 1.0160929599377675
+      }
+    },
+    {
+      "name": "post-average-haze",
+      "label": "#3 REJECTED: threshold 0.4 after the reduction (broad haze)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.4,
+        "knee": 0.5,
+        "kneePerTap": false
+      },
+      "png": "phase4-refinement/after-bloom-post-average-rejected.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 10.230056905864197,
+        "nonBlackFraction": 0.3319193672839506,
+        "anyNonZeroFraction": 0.3450342399691358,
+        "aboveThresholdFraction": 0.12602671682098765,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          51,
+          126
+        ],
+        "channelMean": [
+          9.886254822530864,
+          10.063213734567901,
+          10.229567901234567
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 688268,
+        "litFraction": 0.3319193672839506,
+        "meanLitRGB": [
+          29.68336897836308,
+          30.215102256679085,
+          30.71505866900684
+        ],
+        "warmMinusCool": -1.031689690643761,
+        "meanSaturation": 0.04410762711427369,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          2,
+          0,
+          8,
+          0,
+          3,
+          0,
+          86201,
+          75935,
+          68180,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.34985001929012344,
+        "maxDelta": 19,
+        "meanDelta": 1.5031938014403292,
+        "meanDeltaOnChanged": 4.840741389125907
+      },
+      "bloomContribution": {
+        "changedFraction": 0.3533863811728395,
+        "maxDelta": 18,
+        "meanDelta": 1.4413731352880659,
+        "meanDeltaOnChanged": 4.2843096582612565
+      }
+    },
+    {
+      "name": "bloom-off",
+      "label": "#3 bloom off (isolation pair)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/before-bloom.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761353202160494,
+        "nonBlackFraction": 0.23839457947530865,
+        "anyNonZeroFraction": 0.2695389660493827,
+        "aboveThresholdFraction": 0.0971899112654321,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475060281635802,
+          8.621735146604939,
+          8.758121624228394
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494335,
+        "litFraction": 0.23839457947530865,
+        "meanLitRGB": [
+          35.13134412898136,
+          35.73123084547928,
+          36.28977717539725
+        ],
+        "warmMinusCool": -1.158433046415892,
+        "meanSaturation": 0.03936486164541645,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          564,
+          0,
+          43,
+          0,
+          53329,
+          70037,
+          36449,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2706066743827161,
+        "maxDelta": 24,
+        "meanDelta": 1.8442875514403292,
+        "meanDeltaOnChanged": 7.524046121219682
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "bloom-shipped",
+      "label": "#3 shipped bloom (isolation pair)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/after-bloom.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.784982156635802,
+        "nonBlackFraction": 0.23934076003086419,
+        "anyNonZeroFraction": 0.27237220293209874,
+        "aboveThresholdFraction": 0.09780623070987654,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.498043981481482,
+          8.645050154320987,
+          8.781911168981482
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 496297,
+        "litFraction": 0.23934076003086419,
+        "meanLitRGB": [
+          35.080391378549535,
+          35.680187468390905,
+          36.23931637708872
+        ],
+        "warmMinusCool": -1.1589249985391812,
+        "meanSaturation": 0.039619544334917184,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          237,
+          0,
+          572,
+          0,
+          45,
+          0,
+          53559,
+          70211,
+          36905,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2691777584876543,
+        "maxDelta": 24,
+        "meanDelta": 1.8257527970679013,
+        "meanDeltaOnChanged": 7.4929582006818745
+      },
+      "bloomContribution": {
+        "changedFraction": 0.03310474537037037,
+        "maxDelta": 12,
+        "meanDelta": 0.023362750771604938,
+        "meanDeltaOnChanged": 1.137706494187571
+      }
+    },
+    {
+      "name": "after-all",
+      "label": "all accepted refinements (material + bloom)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/after-all-overhead.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.784982156635802,
+        "nonBlackFraction": 0.23934076003086419,
+        "anyNonZeroFraction": 0.27237220293209874,
+        "aboveThresholdFraction": 0.09780623070987654,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.498043981481482,
+          8.645050154320987,
+          8.781911168981482
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 496297,
+        "litFraction": 0.23934076003086419,
+        "meanLitRGB": [
+          35.080391378549535,
+          35.680187468390905,
+          36.23931637708872
+        ],
+        "warmMinusCool": -1.1589249985391812,
+        "meanSaturation": 0.039619544334917184,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          237,
+          0,
+          572,
+          0,
+          45,
+          0,
+          53559,
+          70211,
+          36905,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2691777584876543,
+        "maxDelta": 24,
+        "meanDelta": 1.8257527970679013,
+        "meanDeltaOnChanged": 7.4929582006818745
+      },
+      "bloomContribution": {
+        "changedFraction": 0.03310474537037037,
+        "maxDelta": 12,
+        "meanDelta": 0.023362750771604938,
+        "meanDeltaOnChanged": 1.137706494187571
+      }
+    },
+    {
+      "name": "bloom-t0.45-g0.04",
+      "label": "#3 threshold 0.45 gain 0.04",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.04,
+        "threshold": 0.45,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.932147955246913,
+        "nonBlackFraction": 0.24480902777777777,
+        "anyNonZeroFraction": 0.2858275462962963,
+        "aboveThresholdFraction": 0.10173562885802469,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          47,
+          123
+        ],
+        "channelMean": [
+          8.640573398919754,
+          8.789989872685185,
+          8.929664351851851
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 507636,
+        "litFraction": 0.24480902777777777,
+        "meanLitRGB": [
+          34.8285523485332,
+          35.42703630160194,
+          35.986722769858716
+        ],
+        "warmMinusCool": -1.1581704213255166,
+        "meanSaturation": 0.0410295497069549,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          130,
+          0,
+          402,
+          0,
+          63,
+          0,
+          56128,
+          70018,
+          39933,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2626128472222222,
+        "maxDelta": 23,
+        "meanDelta": 1.7056838348765433,
+        "meanDeltaOnChanged": 7.2201912023417325
+      },
+      "bloomContribution": {
+        "changedFraction": 0.23239293981481482,
+        "maxDelta": 8,
+        "meanDelta": 0.1684368569958848,
+        "meanDeltaOnChanged": 1.0540974081221857
+      }
+    },
+    {
+      "name": "bloom-t0.45-g0.12",
+      "label": "#3 threshold 0.45 gain 0.12",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.45,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 9.29580150462963,
+        "nonBlackFraction": 0.27816695601851854,
+        "anyNonZeroFraction": 0.3057918595679012,
+        "aboveThresholdFraction": 0.11025028935185185,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          48,
+          125
+        ],
+        "channelMean": [
+          8.989485918209876,
+          9.146983989197532,
+          9.29431857638889
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 576807,
+        "litFraction": 0.27816695601851854,
+        "meanLitRGB": [
+          32.009842113566584,
+          32.5698301164861,
+          33.09397597463276
+        ],
+        "warmMinusCool": -1.08413386106618,
+        "meanSaturation": 0.04291129078925645,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          47,
+          0,
+          177,
+          0,
+          57,
+          0,
+          65291,
+          71913,
+          47659,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.3076032021604938,
+        "maxDelta": 22,
+        "meanDelta": 1.55116110468107,
+        "meanDeltaOnChanged": 5.658494370114417
+      },
+      "bloomContribution": {
+        "changedFraction": 0.3282489390432099,
+        "maxDelta": 20,
+        "meanDelta": 0.5252904771090535,
+        "meanDeltaOnChanged": 1.8106461844952744
+      }
+    },
+    {
+      "name": "bloom-t0.45-g0.3",
+      "label": "#3 threshold 0.45 gain 0.3",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.3,
+        "threshold": 0.45,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 10.126430844907407,
+        "nonBlackFraction": 0.30952739197530865,
+        "anyNonZeroFraction": 0.3321368634259259,
+        "aboveThresholdFraction": 0.1244044174382716,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          51,
+          127
+        ],
+        "channelMean": [
+          9.784392361111111,
+          9.960570987654322,
+          10.125921585648149
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 641836,
+        "litFraction": 0.30952739197530865,
+        "meanLitRGB": [
+          31.41545192229791,
+          31.980639914246005,
+          32.51148580011093
+        ],
+        "warmMinusCool": -1.0960338778130239,
+        "meanSaturation": 0.04418784004988877,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          9,
+          0,
+          13,
+          0,
+          9,
+          0,
+          81760,
+          75481,
+          63882,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.34370949074074075,
+        "maxDelta": 42,
+        "meanDelta": 1.4513507908950618,
+        "meanDeltaOnChanged": 4.770217028942804
+      },
+      "bloomContribution": {
+        "changedFraction": 0.3496248070987654,
+        "maxDelta": 45,
+        "meanDelta": 1.338655960648148,
+        "meanDeltaOnChanged": 4.037645072567319
+      }
+    },
+    {
+      "name": "bloom-t0.6-g0.04",
+      "label": "#3 threshold 0.6 gain 0.04",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.04,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.7691015625,
+        "nonBlackFraction": 0.2384939236111111,
+        "anyNonZeroFraction": 0.2706114969135803,
+        "aboveThresholdFraction": 0.09740354938271605,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.482728587962963,
+          8.629475308641975,
+          8.765968364197532
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494541,
+        "litFraction": 0.2384939236111111,
+        "meanLitRGB": [
+          35.14333695285123,
+          35.7436188303902,
+          36.30267864545103
+        ],
+        "warmMinusCool": -1.1593416925998046,
+        "meanSaturation": 0.03935008798008939,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          247,
+          0,
+          582,
+          0,
+          42,
+          0,
+          53321,
+          69961,
+          36551,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2693291859567901,
+        "maxDelta": 24,
+        "meanDelta": 1.8370222479423868,
+        "meanDeltaOnChanged": 7.5317011679896
+      },
+      "bloomContribution": {
+        "changedFraction": 0.015944251543209876,
+        "maxDelta": 4,
+        "meanDelta": 0.007751736111111111,
+        "meanDeltaOnChanged": 1.017119351521384
+      }
+    },
+    {
+      "name": "bloom-t0.6-g0.12",
+      "label": "#3 threshold 0.6 gain 0.12",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.784982156635802,
+        "nonBlackFraction": 0.23934076003086419,
+        "anyNonZeroFraction": 0.27237220293209874,
+        "aboveThresholdFraction": 0.09780623070987654,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.498043981481482,
+          8.645050154320987,
+          8.781911168981482
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 496297,
+        "litFraction": 0.23934076003086419,
+        "meanLitRGB": [
+          35.080391378549535,
+          35.680187468390905,
+          36.23931637708872
+        ],
+        "warmMinusCool": -1.1589249985391812,
+        "meanSaturation": 0.039619544334917184,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          237,
+          0,
+          572,
+          0,
+          45,
+          0,
+          53559,
+          70211,
+          36905,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2691777584876543,
+        "maxDelta": 24,
+        "meanDelta": 1.8257527970679013,
+        "meanDeltaOnChanged": 7.4929582006818745
+      },
+      "bloomContribution": {
+        "changedFraction": 0.03310474537037037,
+        "maxDelta": 12,
+        "meanDelta": 0.023362750771604938,
+        "meanDeltaOnChanged": 1.137706494187571
+      }
+    },
+    {
+      "name": "bloom-t0.6-g0.3",
+      "label": "#3 threshold 0.6 gain 0.3",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.3,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.821729841820988,
+        "nonBlackFraction": 0.24205246913580247,
+        "anyNonZeroFraction": 0.27510368441358024,
+        "aboveThresholdFraction": 0.09853443287037036,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.532973090277778,
+          8.681092785493828,
+          8.818904803240741
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 501920,
+        "litFraction": 0.24205246913580247,
+        "meanLitRGB": [
+          34.840269365635955,
+          35.43869939432579,
+          35.996144803952824
+        ],
+        "warmMinusCool": -1.1558754383168632,
+        "meanSaturation": 0.04023531948882234,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          230,
+          0,
+          536,
+          0,
+          40,
+          0,
+          54778,
+          70149,
+          38023,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2710860339506173,
+        "maxDelta": 24,
+        "meanDelta": 1.8097026105967078,
+        "meanDeltaOnChanged": 7.379384263970227
+      },
+      "bloomContribution": {
+        "changedFraction": 0.05390335648148148,
+        "maxDelta": 26,
+        "meanDelta": 0.059351208847736626,
+        "meanDeltaOnChanged": 1.4672285146814108
+      }
+    },
+    {
+      "name": "bloom-t0.8-g0.04",
+      "label": "#3 threshold 0.8 gain 0.04",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.04,
+        "threshold": 0.8,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761974826388888,
+        "nonBlackFraction": 0.23840374228395061,
+        "anyNonZeroFraction": 0.269642650462963,
+        "aboveThresholdFraction": 0.09720534336419753,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475680941358025,
+          8.622332175925926,
+          8.758761574074073
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494354,
+        "litFraction": 0.23840374228395061,
+        "meanLitRGB": [
+          35.132134057780455,
+          35.73189050761196,
+          36.2905893347682
+        ],
+        "warmMinusCool": -1.1584552769877456,
+        "meanSaturation": 0.03936256020433822,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          261,
+          0,
+          563,
+          0,
+          42,
+          0,
+          53319,
+          69989,
+          36494,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.27047019675925926,
+        "maxDelta": 24,
+        "meanDelta": 1.8436821630658435,
+        "meanDeltaOnChanged": 7.525496258337835
+      },
+      "bloomContribution": {
+        "changedFraction": 0.0015422453703703705,
+        "maxDelta": 2,
+        "meanDelta": 0.000619212962962963,
+        "meanDeltaOnChanged": 1.0025015634771732
+      }
+    },
+    {
+      "name": "bloom-t0.8-g0.12",
+      "label": "#3 threshold 0.8 gain 0.12",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.8,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.763167438271605,
+        "nonBlackFraction": 0.23841965663580247,
+        "anyNonZeroFraction": 0.2698355516975309,
+        "aboveThresholdFraction": 0.0972313850308642,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.4768465470679,
+          8.623518036265432,
+          8.759978780864197
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494387,
+        "litFraction": 0.23841965663580247,
+        "meanLitRGB": [
+          35.133852629620115,
+          35.73362365919816,
+          36.292416669532166
+        ],
+        "warmMinusCool": -1.1585640399120527,
+        "meanSaturation": 0.039346501267259706,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          260,
+          0,
+          566,
+          0,
+          42,
+          0,
+          53330,
+          69962,
+          36499,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2703018904320988,
+        "maxDelta": 24,
+        "meanDelta": 1.8426102752057614,
+        "meanDeltaOnChanged": 7.526062537243665
+      },
+      "bloomContribution": {
+        "changedFraction": 0.0036342592592592594,
+        "maxDelta": 5,
+        "meanDelta": 0.0018087705761316872,
+        "meanDeltaOnChanged": 1.0313163481953291
+      }
+    },
+    {
+      "name": "bloom-t0.8-g0.3",
+      "label": "#3 threshold 0.8 gain 0.3",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.3,
+        "threshold": 0.8,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.765865162037038,
+        "nonBlackFraction": 0.23851707175925926,
+        "anyNonZeroFraction": 0.2701851851851852,
+        "aboveThresholdFraction": 0.09729938271604938,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.47949604552469,
+          8.62619888117284,
+          8.762701099537036
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494589,
+        "litFraction": 0.23851707175925926,
+        "meanLitRGB": [
+          35.12952977118375,
+          35.729207483385196,
+          36.28811801313818
+        ],
+        "warmMinusCool": -1.1585882419544309,
+        "meanSaturation": 0.03937170767822498,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          261,
+          0,
+          557,
+          0,
+          42,
+          0,
+          53355,
+          69938,
+          36577,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.27023051697530864,
+        "maxDelta": 24,
+        "meanDelta": 1.8406712962962963,
+        "meanDeltaOnChanged": 7.52053716427233
+      },
+      "bloomContribution": {
+        "changedFraction": 0.006853298611111111,
+        "maxDelta": 12,
+        "meanDelta": 0.004492991255144033,
+        "meanDeltaOnChanged": 1.1231440433467033
+      }
+    },
+    {
+      "name": "bloom-t1-g0.04",
+      "label": "#3 threshold 1 gain 0.04",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.04,
+        "threshold": 1,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761414930555556,
+        "nonBlackFraction": 0.23839699074074075,
+        "anyNonZeroFraction": 0.2695500578703704,
+        "aboveThresholdFraction": 0.09719184027777777,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475102719907408,
+          8.621779031635802,
+          8.758179012345678
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494340,
+        "litFraction": 0.23839699074074075,
+        "meanLitRGB": [
+          35.13115264797508,
+          35.73105150301412,
+          36.289616458308046
+        ],
+        "warmMinusCool": -1.1584638103329692,
+        "meanSaturation": 0.039368817374379056,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          564,
+          0,
+          43,
+          0,
+          53326,
+          70043,
+          36450,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2705984760802469,
+        "maxDelta": 24,
+        "meanDelta": 1.8442406121399177,
+        "meanDeltaOnChanged": 7.524081602101537
+      },
+      "bloomContribution": {
+        "changedFraction": 0.0001345486111111111,
+        "maxDelta": 1,
+        "meanDelta": 0.00004790380658436214,
+        "meanDeltaOnChanged": 1
+      }
+    },
+    {
+      "name": "bloom-t1-g0.12",
+      "label": "#3 threshold 1 gain 0.12",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 1,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761516203703703,
+        "nonBlackFraction": 0.23839747299382716,
+        "anyNonZeroFraction": 0.26957368827160494,
+        "aboveThresholdFraction": 0.09719376929012345,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475191936728395,
+          8.621870659722223,
+          8.758280767746914
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494341,
+        "litFraction": 0.23839747299382716,
+        "meanLitRGB": [
+          35.131405244557904,
+          35.731282657113205,
+          36.28985659696444
+        ],
+        "warmMinusCool": -1.1584513524065372,
+        "meanSaturation": 0.03936537419517565,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          563,
+          0,
+          43,
+          0,
+          53331,
+          70033,
+          36446,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.27058449074074076,
+        "maxDelta": 24,
+        "meanDelta": 1.8441509130658436,
+        "meanDeltaOnChanged": 7.524158593009246
+      },
+      "bloomContribution": {
+        "changedFraction": 0.0003597608024691358,
+        "maxDelta": 2,
+        "meanDelta": 0.00014210390946502058,
+        "meanDeltaOnChanged": 1.0013404825737264
+      }
+    },
+    {
+      "name": "bloom-t1-g0.3",
+      "label": "#3 threshold 1 gain 0.3",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.3,
+        "threshold": 1,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761730324074074,
+        "nonBlackFraction": 0.23839940200617285,
+        "anyNonZeroFraction": 0.26960792824074076,
+        "aboveThresholdFraction": 0.09720244984567901,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475416666666666,
+          8.622090084876543,
+          8.758506944444445
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494345,
+        "litFraction": 0.23839940200617285,
+        "meanLitRGB": [
+          35.131841123102284,
+          35.73165501825648,
+          36.29036806279016
+        ],
+        "warmMinusCool": -1.15852693968787,
+        "meanSaturation": 0.03936552525612552,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          562,
+          0,
+          42,
+          0,
+          53311,
+          70042,
+          36464,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2705324074074074,
+        "maxDelta": 24,
+        "meanDelta": 1.8439390432098766,
+        "meanDeltaOnChanged": 7.524778243632526
+      },
+      "bloomContribution": {
+        "changedFraction": 0.0007769097222222222,
+        "maxDelta": 4,
+        "meanDelta": 0.00036554783950617283,
+        "meanDeltaOnChanged": 1.0279329608938548
+      }
+    },
+    {
+      "name": "darkening-0.25",
+      "label": "#2 interior darkening 0.25 (combined, #1 and #4 on)",
+      "refinement": {
+        "interiorDarkening": 0.25,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 245,
+        "mean": 9.466100983796297,
+        "nonBlackFraction": 0.24074556327160493,
+        "anyNonZeroFraction": 0.2747636959876543,
+        "aboveThresholdFraction": 0.11936342592592593,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          50,
+          129
+        ],
+        "channelMean": [
+          9.169514371141975,
+          9.321111593364197,
+          9.46257426697531
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 499210,
+        "litFraction": 0.24074556327160493,
+        "meanLitRGB": [
+          37.65853849081549,
+          38.27519280463132,
+          38.851671641193086
+        ],
+        "warmMinusCool": -1.1931331503775966,
+        "meanSaturation": 0.0389317617973026,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          208,
+          0,
+          531,
+          0,
+          43,
+          0,
+          52229,
+          70560,
+          36271,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.26040171682098767,
+        "maxDelta": 20,
+        "meanDelta": 1.1448598251028808,
+        "meanDeltaOnChanged": 5.121205106219061
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "darkening-0.45",
+      "label": "#2 interior darkening 0.45 (combined, #1 and #4 on)",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 244,
+        "mean": 8.761353202160494,
+        "nonBlackFraction": 0.23839457947530865,
+        "anyNonZeroFraction": 0.2695389660493827,
+        "aboveThresholdFraction": 0.0971899112654321,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          46,
+          123
+        ],
+        "channelMean": [
+          8.475060281635802,
+          8.621735146604939,
+          8.758121624228394
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 494335,
+        "litFraction": 0.23839457947530865,
+        "meanLitRGB": [
+          35.13134412898136,
+          35.73123084547928,
+          36.28977717539725
+        ],
+        "warmMinusCool": -1.158433046415892,
+        "meanSaturation": 0.03936486164541645,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          262,
+          0,
+          564,
+          0,
+          43,
+          0,
+          53329,
+          70037,
+          36449,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2706066743827161,
+        "maxDelta": 24,
+        "meanDelta": 1.8442875514403292,
+        "meanDeltaOnChanged": 7.524046121219682
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "darkening-0.65",
+      "label": "#2 interior darkening 0.65 (combined, #1 and #4 on)",
+      "refinement": {
+        "interiorDarkening": 0.65,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": null,
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 243,
+        "mean": 8.101547067901235,
+        "nonBlackFraction": 0.2359963348765432,
+        "anyNonZeroFraction": 0.2624315200617284,
+        "aboveThresholdFraction": 0.07460551697530864,
+        "clippedFraction": 0,
+        "percentiles": [
+          0,
+          43,
+          117
+        ],
+        "channelMean": [
+          7.82368393132716,
+          7.966222511574074,
+          8.09871238425926
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 489362,
+        "litFraction": 0.2359963348765432,
+        "meanLitRGB": [
+          32.75731871293644,
+          33.33793796821167,
+          33.882103636980396
+        ],
+        "warmMinusCool": -1.1247849240439594,
+        "meanSaturation": 0.03987701425636714,
+        "warmFraction": 0,
+        "maxWarmth": 1,
+        "hueHistogram": [
+          257,
+          0,
+          664,
+          0,
+          47,
+          0,
+          54551,
+          68060,
+          38638,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.2822294560185185,
+        "maxDelta": 32,
+        "meanDelta": 2.4997202932098768,
+        "meanDeltaOnChanged": 9.55349084378647
+      },
+      "bloomContribution": {
+        "changedFraction": 0,
+        "maxDelta": 0,
+        "meanDelta": 0,
+        "meanDeltaOnChanged": 0
+      }
+    },
+    {
+      "name": "after-all-grazing",
+      "label": "all accepted refinements, grazing view",
+      "refinement": {
+        "interiorDarkening": 0.45,
+        "absorptionChroma": 0.14,
+        "chromaGateLow": 0.32,
+        "chromaGateHigh": 0.78,
+        "roughnessVariation": 0.35
+      },
+      "bloom": {
+        "gain": 0.12,
+        "threshold": 0.6,
+        "knee": 0.5,
+        "kneePerTap": true
+      },
+      "png": "phase4-refinement/after-all-grazing.png",
+      "image": {
+        "width": 1920,
+        "height": 1080,
+        "min": 0,
+        "max": 249,
+        "mean": 19.258318383487655,
+        "nonBlackFraction": 0.44873312114197533,
+        "anyNonZeroFraction": 0.5083738425925926,
+        "aboveThresholdFraction": 0.24589988425925927,
+        "clippedFraction": 0,
+        "percentiles": [
+          2,
+          85,
+          145
+        ],
+        "channelMean": [
+          18.792780671296295,
+          19.02586709104938,
+          19.23724392361111
+        ]
+      },
+      "color": {
+        "width": 1920,
+        "height": 1080,
+        "litPixels": 930493,
+        "litFraction": 0.44873312114197533,
+        "meanLitRGB": [
+          41.51613929390119,
+          42.02277287416456,
+          42.48266026719169
+        ],
+        "warmMinusCool": -0.966520973290503,
+        "meanSaturation": 0.03685493914429812,
+        "warmFraction": 0.00023213500800113487,
+        "maxWarmth": 2,
+        "hueHistogram": [
+          631,
+          0,
+          1081,
+          0,
+          58,
+          0,
+          85631,
+          96903,
+          62495,
+          0,
+          0,
+          0
+        ]
+      },
+      "deltaVsBefore": {
+        "changedFraction": 0.5039269868827161,
+        "maxDelta": 59,
+        "meanDelta": 4.363533629115226,
+        "meanDeltaOnChanged": 9.567448176599106
+      },
+      "bloomContribution": {
+        "changedFraction": 0.04063368055555556,
+        "maxDelta": 50,
+        "meanDelta": 0.04309172453703704,
+        "meanDeltaOnChanged": 1.496593795247929
+      }
+    }
+  ]
+}

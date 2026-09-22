@@ -16,7 +16,7 @@
  * The internal HDR scene is capped at a 1920x1080-equivalent pixel count (§11.1); the display
  * canvas may be larger. Simulation resolution is independent of both.
  */
-import { BLOOM, COMPOSITE, ENVELOPE, MATERIAL, SCENE, SURFACE } from '../config.ts';
+import { BLOOM, COMPOSITE, ENVELOPE, MATERIAL, REFINEMENT, SCENE, SURFACE } from '../config.ts';
 import type { FieldView, WorldState } from '../core/types.ts';
 import { FULLSCREEN_VERTEX_SHADER, FullscreenQuad } from '../gpu/fullscreen.ts';
 import { Program, ResourceTracker, createColorTarget, deleteColorTarget } from '../gpu/resources.ts';
@@ -51,6 +51,22 @@ export interface FrameStats {
   sceneWidth: number;
   sceneHeight: number;
   drawCalls: number;
+}
+
+/**
+ * §12.4-B refinement state (config `REFINEMENT`).
+ *
+ * Held on the renderer rather than in `WorldState` because it is a *material calibration* the
+ * director never drives (exactly like the material constants), and the laboratory/hook override
+ * exists so a before/after capture can attribute one change at a time. Every field maps 1:1 to a
+ * `REFINEMENT` entry and each is a no-op when zero.
+ */
+export interface RefinementState {
+  interiorDarkening: number;
+  absorptionChroma: number;
+  chromaGateLow: number;
+  chromaGateHigh: number;
+  roughnessVariation: number;
 }
 
 export class Renderer {
@@ -97,6 +113,18 @@ export class Renderer {
   private toneState: { exposure: number; bloomGain: number } = {
     exposure: COMPOSITE.exposure,
     bloomGain: BLOOM.gain,
+  };
+  /** §12.4-B refinement knobs; defaults from config, overridable for before/after measurement. */
+  private refinement: RefinementState = { ...REFINEMENT };
+  /**
+   * §12.4-B #3: the bloom threshold/knee. Seeded from config `BLOOM` and overridable because the
+   * working point had to be *measured* — at the §5.4 threshold of 1.0 the overhead scene (p99 ≈ 0.11
+   * linear, max ≈ 1.3) seeds almost no bloom, so the gain alone could never make it perceptible.
+   */
+  private bloomParams: { threshold: number; knee: number; kneePerTap: boolean } = {
+    threshold: BLOOM.threshold,
+    knee: BLOOM.knee,
+    kneePerTap: true,
   };
   private disposed = false;
 
@@ -315,6 +343,15 @@ export class Renderer {
     // The sheet displaces by the same height field the normals come from; unit 2 keeps the
     // height fetch independent of the fragment-stage normal/surface samplers.
     this.materialProgram.texture('uHeight', 2, this.surfaceTarget.texture);
+    // §12.4-B: the blurred extraction supplies the support *thickness* (x) and the boundary
+    // magnitude (z) that drive absorption and roughness variation.
+    this.materialProgram.u1f('uThicknessScale', SURFACE.softenedVScale);
+    this.materialProgram.u1f('uInteriorDarkening', this.refinement.interiorDarkening);
+    this.materialProgram.u1f('uAbsorptionChroma', this.refinement.absorptionChroma);
+    this.materialProgram.u2f('uChromaGate', this.refinement.chromaGateLow, this.refinement.chromaGateHigh);
+    this.materialProgram.u1f('uRoughnessVariation', this.refinement.roughnessVariation);
+    this.materialProgram.u2f('uRoughnessBand', MATERIAL.roughnessRange[0], MATERIAL.roughnessRange[1]);
+    this.materialProgram.texture('uSmoothed', 3, this.blurTargets[1].texture);
 
     gl.bindFramebuffer(gl.FRAMEBUFFER, scene.framebuffer);
     gl.viewport(0, 0, this.sceneWidth, this.sceneHeight);
@@ -339,8 +376,9 @@ export class Renderer {
       this.bloomDownProgram.use();
       this.bloomDownProgram.u2f('uTexelSize', 1 / sourceWidth, 1 / sourceHeight);
       this.bloomDownProgram.u1f('uApplyThreshold', level === 0 ? 1 : 0);
-      this.bloomDownProgram.u1f('uThreshold', BLOOM.threshold);
-      this.bloomDownProgram.u1f('uKnee', BLOOM.knee);
+      this.bloomDownProgram.u1f('uThreshold', this.bloomParams.threshold);
+      this.bloomDownProgram.u1f('uKnee', this.bloomParams.knee);
+      this.bloomDownProgram.u1f('uKneePerTap', this.bloomParams.kneePerTap ? 1 : 0);
       this.bloomDownProgram.texture('uSource', 0, source.texture);
       this.bindAndClear(this.bloomDownTargets[level]!, false);
       this.quad.draw();
@@ -393,6 +431,26 @@ export class Renderer {
   /** Exposure and bloom gain the last composite actually used (gate/verification provenance). */
   appliedToneState(): { exposure: number; bloomGain: number } {
     return { exposure: this.toneState.exposure, bloomGain: this.toneState.bloomGain };
+  }
+
+  /** §12.4-B: override the refinement knobs (measurement/tuning; zero disables an effect). */
+  setRefinement(value: Partial<RefinementState>): void {
+    this.refinement = { ...this.refinement, ...value };
+  }
+
+  /** The refinement knobs the last material pass used (before/after provenance). */
+  appliedRefinement(): RefinementState {
+    return { ...this.refinement };
+  }
+
+  /** §12.4-B #3: override the bloom threshold/knee/knee order (measurement/tuning). */
+  setBloomParams(value: Partial<{ threshold: number; knee: number; kneePerTap: boolean }>): void {
+    this.bloomParams = { ...this.bloomParams, ...value };
+  }
+
+  /** The bloom parameters the last bloom pass used (before/after provenance). */
+  appliedBloomParams(): { threshold: number; knee: number; kneePerTap: boolean } {
+    return { ...this.bloomParams };
   }
 
   /** Read the last composite as RGBA8 (test/verification path; no per-frame readback exists). */
