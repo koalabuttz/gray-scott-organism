@@ -1,0 +1,141 @@
+{
+  "source": "real WebGL2 artwork, single continuous manual-lab Gray–Scott run",
+  "grid": "default",
+  "viewport": "1280x720",
+  "parameters": {
+    "F": 0.029,
+    "k": 0.057,
+    "Du": 0.16,
+    "Dv": 0.08
+  },
+  "seedOptions": {
+    "center": [
+      0.44,
+      0.53
+    ],
+    "radiusCells": 6,
+    "mode": "replace"
+  },
+  "stepPoints": [
+    800,
+    1200,
+    1700,
+    2300,
+    3100,
+    4100,
+    5300,
+    6700,
+    8300,
+    10100,
+    12000,
+    14000,
+    16000
+  ],
+  "gifFrameCount": 13,
+  "records": [
+    {
+      "steps": 800,
+      "file": "frames/frame-000.png",
+      "occupiedFraction": 0.002499050564236111,
+      "meanV": 0.0006643406018594502,
+      "imageMean": 0.057603081597222223
+    },
+    {
+      "steps": 1200,
+      "file": "frames/frame-001.png",
+      "occupiedFraction": 0.005154079861111111,
+      "meanV": 0.0013401166279901058,
+      "imageMean": 0.11863932291666666
+    },
+    {
+      "steps": 1700,
+      "file": "frames/frame-002.png",
+      "occupiedFraction": 0.008597479926215278,
+      "meanV": 0.0022207728365176566,
+      "imageMean": 0.20943033854166668
+    },
+    {
+      "steps": 2300,
+      "file": "frames/frame-003.png",
+      "occupiedFraction": 0.015260484483506944,
+      "meanV": 0.0038389087294751997,
+      "imageMean": 0.36582899305555555
+    },
+    {
+      "steps": 3100,
+      "file": "frames/frame-004.png",
+      "occupiedFraction": 0.027086046006944444,
+      "meanV": 0.0069054629598315756,
+      "imageMean": 0.6842111545138889
+    },
+    {
+      "steps": 4100,
+      "file": "frames/frame-005.png",
+      "occupiedFraction": 0.04897901746961805,
+      "meanV": 0.012287874780420647,
+      "imageMean": 1.1706423611111112
+    },
+    {
+      "steps": 5300,
+      "file": "frames/frame-006.png",
+      "occupiedFraction": 0.08171929253472222,
+      "meanV": 0.02086342124858246,
+      "imageMean": 2.013996310763889
+    },
+    {
+      "steps": 6700,
+      "file": "frames/frame-007.png",
+      "occupiedFraction": 0.12988450792100695,
+      "meanV": 0.03323184041023436,
+      "imageMean": 3.2357042100694446
+    },
+    {
+      "steps": 8300,
+      "file": "frames/frame-008.png",
+      "occupiedFraction": 0.20089552137586805,
+      "meanV": 0.05124037461083917,
+      "imageMean": 4.959845920138889
+    },
+    {
+      "steps": 10100,
+      "file": "frames/frame-009.png",
+      "occupiedFraction": 0.2998063829210069,
+      "meanV": 0.07652404383635518,
+      "imageMean": 6.957641059027778
+    },
+    {
+      "steps": 12000,
+      "file": "frames/frame-010.png",
+      "occupiedFraction": 0.4245690239800347,
+      "meanV": 0.10859652497840132,
+      "imageMean": 8.43904296875
+    },
+    {
+      "steps": 14000,
+      "file": "frames/frame-011.png",
+      "occupiedFraction": 0.5664350721571181,
+      "meanV": 0.1447213258063564,
+      "imageMean": 8.857802734375
+    },
+    {
+      "steps": 16000,
+      "file": "frames/frame-012.png",
+      "occupiedFraction": 0.6311086018880209,
+      "meanV": 0.16144885094953823,
+      "imageMean": 8.917435980902777
+    }
+  ],
+  "grazingCamera": {
+    "mode": "horizon",
+    "focusUV": [
+      0.5,
+      0.5
+    ],
+    "yawRadians": 0,
+    "elevationRadians": 0.21,
+    "distance": 1.75,
+    "verticalFovRadians": 0.4886921905584123,
+    "transitionSeconds": 0
+  },
+  "note": "GIF frames sample simulation development at unequal step intervals and will be displayed at a fixed rate; not real-time footage."
+}
