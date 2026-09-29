@@ -5,11 +5,6 @@ mathematical organism emerges from darkness, grows, transforms, collapses,
 and begins again. It runs without visible controls.
 
 <p align="center">
-  <img src="artifacts/phase1-gate/02-mature-wet-material.png" width="49%" alt="The original mature organism from overhead — a luminous labyrinth in darkness" />
-  <img src="artifacts/phase1-gate/03-grazing-edge-close.png" width="49%" alt="The original grazing view revealing shallow relief" />
-</p>
-
-<p align="center">
   <img src="artifacts/fresh-growth-2026-09/02-growing-overhead.png" width="49%" alt="Fresh capture of the organism expanding into a branching labyrinth" />
   <img src="artifacts/fresh-growth-2026-09/04-mature-grazing-close.png" width="49%" alt="Fresh close view of the mature organism under grazing light" />
 </p>
