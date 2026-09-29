@@ -29,100 +29,141 @@
     10100,
     12000,
     14000,
-    16000
+    16000,
+    17000,
+    18000,
+    20000
   ],
-  "gifFrameCount": 13,
+  "gifFrameCount": 16,
+  "overheadCameraDistance": 4.2,
   "records": [
     {
       "steps": 800,
       "file": "frames/frame-000.png",
       "occupiedFraction": 0.002499050564236111,
       "meanV": 0.0006643406018594502,
-      "imageMean": 0.057603081597222223
+      "imageMean": 0.06661675347222222,
+      "cameraDistance": 4.2
     },
     {
       "steps": 1200,
       "file": "frames/frame-001.png",
       "occupiedFraction": 0.005154079861111111,
       "meanV": 0.0013401166279901058,
-      "imageMean": 0.11863932291666666
+      "imageMean": 0.1346875,
+      "cameraDistance": 4.2
     },
     {
       "steps": 1700,
       "file": "frames/frame-002.png",
       "occupiedFraction": 0.008597479926215278,
       "meanV": 0.0022207728365176566,
-      "imageMean": 0.20943033854166668
+      "imageMean": 0.237177734375,
+      "cameraDistance": 4.2
     },
     {
       "steps": 2300,
       "file": "frames/frame-003.png",
       "occupiedFraction": 0.015260484483506944,
       "meanV": 0.0038389087294751997,
-      "imageMean": 0.36582899305555555
+      "imageMean": 0.41309244791666666,
+      "cameraDistance": 4.2
     },
     {
       "steps": 3100,
       "file": "frames/frame-004.png",
       "occupiedFraction": 0.027086046006944444,
       "meanV": 0.0069054629598315756,
-      "imageMean": 0.6842111545138889
+      "imageMean": 0.7618315972222223,
+      "cameraDistance": 4.2
     },
     {
       "steps": 4100,
       "file": "frames/frame-005.png",
       "occupiedFraction": 0.04897901746961805,
       "meanV": 0.012287874780420647,
-      "imageMean": 1.1706423611111112
+      "imageMean": 1.3242013888888888,
+      "cameraDistance": 4.2
     },
     {
       "steps": 5300,
       "file": "frames/frame-006.png",
       "occupiedFraction": 0.08171929253472222,
       "meanV": 0.02086342124858246,
-      "imageMean": 2.013996310763889
+      "imageMean": 2.27658203125,
+      "cameraDistance": 4.2
     },
     {
       "steps": 6700,
       "file": "frames/frame-007.png",
       "occupiedFraction": 0.12988450792100695,
       "meanV": 0.03323184041023436,
-      "imageMean": 3.2357042100694446
+      "imageMean": 3.6397916666666665,
+      "cameraDistance": 4.2
     },
     {
       "steps": 8300,
       "file": "frames/frame-008.png",
       "occupiedFraction": 0.20089552137586805,
       "meanV": 0.05124037461083917,
-      "imageMean": 4.959845920138889
+      "imageMean": 5.565188802083333,
+      "cameraDistance": 4.2
     },
     {
       "steps": 10100,
       "file": "frames/frame-009.png",
       "occupiedFraction": 0.2998063829210069,
       "meanV": 0.07652404383635518,
-      "imageMean": 6.957641059027778
+      "imageMean": 7.828377821180555,
+      "cameraDistance": 4.2
     },
     {
       "steps": 12000,
       "file": "frames/frame-010.png",
       "occupiedFraction": 0.4245690239800347,
       "meanV": 0.10859652497840132,
-      "imageMean": 8.43904296875
+      "imageMean": 9.511004774305556,
+      "cameraDistance": 4.2
     },
     {
       "steps": 14000,
       "file": "frames/frame-011.png",
       "occupiedFraction": 0.5664350721571181,
       "meanV": 0.1447213258063564,
-      "imageMean": 8.857802734375
+      "imageMean": 9.997861328125,
+      "cameraDistance": 4.2
     },
     {
       "steps": 16000,
       "file": "frames/frame-012.png",
       "occupiedFraction": 0.6311086018880209,
       "meanV": 0.16144885094953823,
-      "imageMean": 8.917435980902777
+      "imageMean": 10.069522569444445,
+      "cameraDistance": 4.2
+    },
+    {
+      "steps": 17000,
+      "file": "frames/frame-013.png",
+      "occupiedFraction": 0.6389990912543403,
+      "meanV": 0.16360633447036615,
+      "imageMean": 10.087511935763889,
+      "cameraDistance": 4.2
+    },
+    {
+      "steps": 18000,
+      "file": "frames/frame-014.png",
+      "occupiedFraction": 0.6396823459201388,
+      "meanV": 0.16382546867014527,
+      "imageMean": 10.100485026041667,
+      "cameraDistance": 4.2
+    },
+    {
+      "steps": 20000,
+      "file": "frames/frame-015.png",
+      "occupiedFraction": 0.6400061713324653,
+      "meanV": 0.16401069494350887,
+      "imageMean": 10.137560763888889,
+      "cameraDistance": 4.2
     }
   ],
   "grazingCamera": {
@@ -137,5 +178,5 @@
     "verticalFovRadians": 0.4886921905584123,
     "transitionSeconds": 0
   },
-  "note": "GIF frames sample simulation development at unequal step intervals and will be displayed at a fixed rate; not real-time footage."
+  "note": "GIF frames sample development at unequal step intervals with identical tight overhead framing. The field plateaus near 20k steps; the entire fading circular rim remains visible within the tighter, constant overhead framing, not a claim of further chemical expansion. Displayed at a fixed rate; not real-time footage."
 }

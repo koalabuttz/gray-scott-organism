@@ -6,14 +6,18 @@ and begins again. It runs without visible controls.
 
 <p align="center">
   <img src="artifacts/fresh-growth-2026-09/02-growing-overhead.png" width="49%" alt="Fresh capture of the organism expanding into a branching labyrinth" />
-  <img src="artifacts/fresh-growth-2026-09/04-mature-grazing-close.png" width="49%" alt="Fresh close view of the mature organism under grazing light" />
+  <img src="artifacts/fresh-growth-2026-09/03-mature-overhead.png" width="49%" alt="Mature labyrinth filling the overhead view, with its circular fade visible" />
+</p>
+
+<p align="center">
+  <img src="artifacts/fresh-growth-2026-09/04-mature-grazing-close.png" width="80%" alt="Fresh close view of the mature organism under grazing light" />
 </p>
 
 <p align="center">
   <img src="artifacts/fresh-growth-2026-09/growth-stage.gif" width="80%" alt="Time-compressed sequence showing one Gray–Scott organism growing from a small seed into a mature labyrinth" />
 </p>
 
-*One seeded growth sequence, time-compressed from sampled simulation frames; [more stills and capture details](artifacts/fresh-growth-2026-09/README.md).*
+*One seeded growth sequence, time-compressed from sampled simulation frames. The overhead camera stays fixed; the mature rim fades into black within the frame. [More stills and capture details](artifacts/fresh-growth-2026-09/README.md).*
 
 ## Initial Prompts
 
